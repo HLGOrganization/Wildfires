@@ -92,6 +92,7 @@
   "attribute.name.wildfires.waterproof": "防水",
   "attribute.name.wildfires.rainproof": "防雨",
   "wildfires.jei.category.weaving": "织布",
+  "wildfires.jei.drying_times": "8:00",
   "wildfires.ponder.loom.header": "织布机",
   "wildfires.ponder.loom.text_1": "这是一个织布机",
   "wildfires.ponder.loom.text_2": "织布机的背后有一个线轴",
@@ -334,4 +335,7 @@
   ,"ui.wildfires.galaxy_hymn.delay": "最早追踪：%s 秒（末轮稳定后）"
   ,"death.attack.wildfires.galaxy_hymn": "%1$s 化作了散落的星光"
   ,"death.attack.wildfires.galaxy_hymn.player": "%1$s 被 %2$s 化作了散落的星光"
+  ,"block.wildfires.wild_brown_mushroom": "野生棕蘑菇"
+  ,"block.wildfires.wild_red_mushroom": "野生红蘑菇"
+  ,"block.wildfires.wild_fluorescyst_shroom": "野生荧泡菌"
 }

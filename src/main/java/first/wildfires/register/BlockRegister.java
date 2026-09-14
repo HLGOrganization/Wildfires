@@ -259,7 +259,6 @@ public class BlockRegister {
                             .strength(3.5F)
                             .requiresCorrectToolForDrops()
                             .noOcclusion()
-                            .randomTicks()
                             .lightLevel(state -> state.getValue(CharcoalForgeBlock.HEAT))
                             .blockEntity(TFCBlockEntities.CHARCOAL_FORGE)
                             .serverTicks(UnrestrictedCharcoalForgeBlock::serverTick)
@@ -284,40 +283,50 @@ public class BlockRegister {
     public static final RegistryObject<SlabBlock> GrassSlab = Register.register("grass_slab",
             () -> new SlabBlock(BlockBehaviour.Properties.copy(Blocks.GRASS_BLOCK)));
 
+    public static final RegistryObject<WildMushroomBlock> WildBrownMushroom = Register.register(
+            "wild_brown_mushroom", () -> new WildMushroomBlock(BlockBehaviour.Properties.copy(Blocks.BROWN_MUSHROOM)));
+
+    public static final RegistryObject<WildMushroomBlock> WildRedMushroom = Register.register(
+            "wild_red_mushroom", () -> new WildMushroomBlock(BlockBehaviour.Properties.copy(Blocks.RED_MUSHROOM)));
+
+    public static final RegistryObject<WildMushroomBlock> WildFluorescystShroom = Register.register(
+            "wild_fluorescyst_shroom", () -> new WildMushroomBlock(
+                    BlockBehaviour.Properties.copy(Blocks.BROWN_MUSHROOM).lightLevel(state -> 5)));
+
     // 水下涡轮
     public static final RegistryObject<Block> UnderwaterTurbine = Register.register("underwater_turbine",
             () -> {
                 BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                         .sound(SoundType.NETHERITE_BLOCK)
-                        .strength(20.0f)
+                        .strength(1.5f)
                         .requiresCorrectToolForDrops()
                         .noOcclusion();
                 VoxelShape north = Shapes.block();
                 VoxelShape south = Shapes.block();
                 VoxelShape west = Shapes.block();
                 VoxelShape east = Shapes.block();
-                return new CustomDirectionalBlock(properties, north, east, south, west);
+                return new WrenchableDirectionalBlock(properties, north, east, south, west);
             });
 
     // 潜艇核心
     public static final RegistryObject<Block> SubmarineCore = Register.register("submarine_core", () -> {
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                 .sound(SoundType.COPPER)
-                .strength(20.0f)
+                .strength(1.5f)
                 .requiresCorrectToolForDrops()
                 .noOcclusion();
         VoxelShape north = Shapes.block();
         VoxelShape south = Shapes.block();
         VoxelShape west = Shapes.block();
         VoxelShape east = Shapes.block();
-        return new CustomDirectionalBlock(properties, north, east, south, west);
+        return new WrenchableDirectionalBlock(properties, north, east, south, west);
     });
 
     // 简易气球
     public static final RegistryObject<Block> SimpleAirCushion = Register.register("simple_air_cushion", () -> {
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                 .sound(SoundType.WOOL)
-                .strength(5.0f)
+                .strength(1.5f)
                 .noOcclusion();
         VoxelShape north = Shapes.block();
         VoxelShape south = Shapes.block();
@@ -330,7 +339,7 @@ public class BlockRegister {
     public static final RegistryObject<Block> AirCushion = Register.register("air_cushion", () -> {
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                 .sound(SoundType.WOOL)
-                .strength(5.0f)
+                .strength(1.5f)
                 .noOcclusion();
         VoxelShape north = Shapes.block();
         VoxelShape south = Shapes.block();
@@ -343,7 +352,7 @@ public class BlockRegister {
     public static final RegistryObject<Block> DoubleWing = Register.register("double_wing", () -> {
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                 .sound(SoundType.SCAFFOLDING)
-                .strength(5.0f)
+                .strength(1.5f)
                 .requiresCorrectToolForDrops()
                 .noOcclusion();
 
@@ -351,21 +360,21 @@ public class BlockRegister {
         VoxelShape south = box(0, 3, -10, 16, 14, 10).optimize();
         VoxelShape west = box(6, 3, 0, 26, 14, 16).optimize();
         VoxelShape east = box(-10, 3, 0, 10, 14, 16).optimize();
-        return new CustomDirectionalBlock(properties, north, east, south, west);
+        return new WrenchableDirectionalBlock(properties, north, east, south, west);
     });
 
     // 飞艇侧板
     public static final RegistryObject<Block> AirshipSlats = Register.register("airship_slats", () -> {
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                 .sound(SoundType.SCAFFOLDING)
-                .strength(5.0f)
+                .strength(1.5f)
                 .requiresCorrectToolForDrops()
                 .noOcclusion();
         VoxelShape north = box(0, 4, 14, 16, 13, 16);
         VoxelShape south = box(0, 4, 0, 16, 13, 2);
         VoxelShape west = box(14, 4, 0, 16, 13, 16);
         VoxelShape east = box(0, 4, 0, 2, 13, 16);
-        return new CustomDirectionalBlock(properties, north, east, south, west);
+        return new WrenchableDirectionalBlock(properties, north, east, south, west);
     });
 
     // 人力飞机扇叶
@@ -373,10 +382,10 @@ public class BlockRegister {
             () -> {
                 BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                         .sound(SoundType.SCAFFOLDING)
-                        .strength(5.0f)
+                        .strength(1.5f)
                         .requiresCorrectToolForDrops()
                         .noOcclusion();
-                return new CustomShapeBlock(properties, box(0, 4, 0, 2, 13, 16));
+                return new WrenchableShapeBlock(properties, box(0, 4, 0, 2, 13, 16));
             });
 
 
@@ -384,14 +393,14 @@ public class BlockRegister {
     public static final RegistryObject<Block> BiplaneEngine = Register.register("biplane_engine", () -> {
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                 .sound(SoundType.NETHERITE_BLOCK)
-                .strength(20.0f)
+                .strength(1.5f)
                 .requiresCorrectToolForDrops()
                 .noOcclusion();
         VoxelShape north = box(0, 0, 0, 16, 16, 16);
         VoxelShape east = box(0, 0, 0, 16, 16, 16);
         VoxelShape south = box(0, 0, 0, 16, 16, 16);
         VoxelShape west = box(0, 0, 0, 16, 16, 16);
-        return new CustomDirectionalBlock(properties, north, east, south, west);
+        return new WrenchableDirectionalBlock(properties, north, east, south, west);
     });
 
     // 大型飞艇引擎
@@ -399,42 +408,42 @@ public class BlockRegister {
             () -> {
                 BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                         .sound(SoundType.NETHERITE_BLOCK)
-                        .strength(20.0f)
+                        .strength(1.5f)
                         .requiresCorrectToolForDrops()
                         .noOcclusion();
                 VoxelShape north = box(-1, 0, -2, 17, 18, 16);
                 VoxelShape south = box(-1, 0, -2, 17, 18, 16);
                 VoxelShape west = box(-1, 0, -2, 17, 18, 16);
                 VoxelShape east = box(-1, 0, -2, 17, 18, 16);
-                return new CustomDirectionalBlock(properties, north, east, south, west);
+                return new WrenchableDirectionalBlock(properties, north, east, south, west);
             });
 
     // 小型引擎
     public static final RegistryObject<Block> SmallEngine = Register.register("small_engine", () -> {
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                 .sound(SoundType.NETHERITE_BLOCK)
-                .strength(20.0f)
+                .strength(1.5f)
                 .requiresCorrectToolForDrops()
                 .noOcclusion();
         VoxelShape north = box(1, 0, 0, 15, 16, 16);
         VoxelShape south = box(1, 0, 0, 15, 16, 16);
         VoxelShape west = box(0, 0, 1, 16, 16, 15);
         VoxelShape east = box(0, 0, 1, 16, 16, 15);
-        return new CustomDirectionalBlock(properties, north, east, south, west);
+        return new WrenchableDirectionalBlock(properties, north, east, south, west);
     });
 
     // 小型侧引擎
     public static final RegistryObject<Block> SmallSideEngine = Register.register("small_side_engine", () -> {
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                 .sound(SoundType.NETHERITE_BLOCK)
-                .strength(20.0f)
+                .strength(1.5f)
                 .requiresCorrectToolForDrops()
                 .noOcclusion();
         VoxelShape north = box(2, 2, 0, 14, 14, 16);
         VoxelShape south = box(2, 2, 0, 14, 14, 16);
         VoxelShape west = box(0, 2, 2, 16, 14, 14);
         VoxelShape east = box(0, 2, 2, 16, 14, 14);
-        return new CustomDirectionalBlock(properties, north, east, south, west);
+        return new WrenchableDirectionalBlock(properties, north, east, south, west);
     });
 
     // 坚固小型引擎
@@ -442,28 +451,28 @@ public class BlockRegister {
             () -> {
                 BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                         .sound(SoundType.NETHERITE_BLOCK)
-                        .strength(20.0f)
+                        .strength(1.5f)
                         .requiresCorrectToolForDrops()
                         .noOcclusion();
                 VoxelShape north = box(1, 0, 0, 15, 16, 16);
                 VoxelShape south = box(1, 0, 0, 15, 16, 16);
                 VoxelShape west = box(0, 0, 1, 16, 16, 15);
                 VoxelShape east = box(0, 0, 1, 16, 16, 15);
-                return new CustomDirectionalBlock(properties, north, east, south, west);
+                return new WrenchableDirectionalBlock(properties, north, east, south, west);
             });
 
     // 大型螺旋桨
     public static final RegistryObject<Block> LargePropeller = Register.register("large_propeller", () -> {
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                 .sound(SoundType.NETHERITE_BLOCK)
-                .strength(20.0f)
+                .strength(1.5f)
                 .requiresCorrectToolForDrops()
                 .noOcclusion();
         VoxelShape north = box(5, 6, 12.5, 11, 12, 16.5);
         VoxelShape east = box(-0.5, 6, 5, 3.5, 12, 11); // 旋转90°（顺时针）
         VoxelShape south = box(5, 6, -0.5, 11, 12, 3.5); // 旋转180°
         VoxelShape west = box(12.5, 6, 5, 16.5, 12, 11); // 旋转-90°（逆时针）
-        return new CustomDirectionalBlock(properties, north, east, south, west);
+        return new WrenchableDirectionalBlock(properties, north, east, south, west);
     });
 
     // 大型双螺旋桨
@@ -471,14 +480,14 @@ public class BlockRegister {
             () -> {
                 BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                         .sound(SoundType.NETHERITE_BLOCK)
-                        .strength(20.0f)
+                        .strength(1.5f)
                         .requiresCorrectToolForDrops()
                         .noOcclusion();
                 VoxelShape north = box(5, 5, 12.5, 11, 11, 16.5);
                 VoxelShape east  = box(-0.5, 5, 5, 3.5, 11, 11);
                 VoxelShape south = box(5, 5, -0.5, 11, 11, 3.5);
                 VoxelShape west  = box(12.5, 5, 5, 16.5, 11, 11);
-                return new CustomDirectionalBlock(properties, north, east, south, west);
+                return new WrenchableDirectionalBlock(properties, north, east, south, west);
             });
 
     // 中型螺旋桨
@@ -492,21 +501,21 @@ public class BlockRegister {
         VoxelShape east  = box(-0.5, 5, 5, 3.5, 11, 11);
         VoxelShape south = box(5, 5, -0.5, 11, 11, 3.5);
         VoxelShape west  = box(12.5, 5, 5, 16.5, 11, 11);
-        return new CustomDirectionalBlock(properties, north, east, south, west);
+        return new WrenchableDirectionalBlock(properties, north, east, south, west);
     });
 
     // 小型螺旋桨
     public static final RegistryObject<Block> SmallPropeller = Register.register("small_propeller", () -> {
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                 .sound(SoundType.NETHERITE_BLOCK)
-                .strength(20.0f)
+                .strength(1.5f)
                 .requiresCorrectToolForDrops()
                 .noOcclusion();
         VoxelShape north = box(5, 5, 12.5, 11, 11, 16.5);
         VoxelShape east  = box(-0.5, 5, 5, 3.5, 11, 11);
         VoxelShape south = box(5, 5, -0.5, 11, 11, 3.5);
         VoxelShape west  = box(12.5, 5, 5, 16.5, 11, 11);
-        return new CustomDirectionalBlock(properties, north, east, south, west);
+        return new WrenchableDirectionalBlock(properties, north, east, south, west);
     });
 
     public static void register(IEventBus eventBus) {

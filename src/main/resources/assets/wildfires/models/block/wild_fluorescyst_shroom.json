@@ -1,0 +1,5 @@
+{
+  "parent": "block/cross",
+  "textures": { "cross": "wildfires:block/wild_fluorescyst_shroom" },
+  "render_type":"minecraft:cutout"
+}

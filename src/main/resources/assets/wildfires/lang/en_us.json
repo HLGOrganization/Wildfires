@@ -39,6 +39,7 @@
   "attribute.name.wildfires.waterproof": "Waterproof",
   "attribute.name.wildfires.rainproof": "Rainproof",
   "wildfires.jei.category.weaving": "Weaving",
+  "wildfires.jei.drying_times": "8:00",
   "wildfires.ponder.loom.header": "织布机",
   "wildfires.ponder.loom.text_1": "这是一个织布机",
   "wildfires.ponder.loom.text_2": "织布机的背后有一个线轴",
@@ -220,5 +221,8 @@
   "ui.wildfires.galaxy_hymn.tracking_damage": "Homing star damage: %s",
   "ui.wildfires.galaxy_hymn.delay": "Earliest tracking: %s s (after final volley settles)",
   "death.attack.wildfires.galaxy_hymn": "%1$s was scattered across the galaxy",
-  "death.attack.wildfires.galaxy_hymn.player": "%1$s was scattered across the galaxy by %2$s"
+  "death.attack.wildfires.galaxy_hymn.player": "%1$s was scattered across the galaxy by %2$s",
+  "block.wildfires.wild_brown_mushroom": "Wild Brown Mushroom",
+  "block.wildfires.wild_red_mushroom": "Wild Red Mushroom",
+  "block.wildfires.wild_fluorescyst_shroom": "Wild Fluorescyst Shroom"
 }

@@ -19,6 +19,17 @@
     "wildfires:station_jump_test_engine",
     "wildfires:antimatter_test_engine",
     "wildfires:daedalus_v1_test_engine",
-    "wildfires:daedalus_v2_test_engine"
+    "wildfires:daedalus_v2_test_engine",
+    "wildfires:small_engine",
+    "wildfires:rugged_small_engine",
+    "wildfires:small_side_engine",
+    "wildfires:large_airship_engine",
+    "wildfires:biplane_engine",
+    "wildfires:small_propeller",
+    "wildfires:medium_propeller",
+    "wildfires:large_propeller",
+    "wildfires:large_twin_propeller",
+    "wildfires:underwater_turbine",
+    "wildfires:submarine_core"
   ]
 }

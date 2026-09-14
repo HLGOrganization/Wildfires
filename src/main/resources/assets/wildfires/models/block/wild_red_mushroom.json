@@ -1,0 +1,5 @@
+{
+  "parent": "block/cross",
+  "textures": { "cross": "wildfires:block/wild_red_mushroom" },
+  "render_type":"minecraft:cutout"
+}

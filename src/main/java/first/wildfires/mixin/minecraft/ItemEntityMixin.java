@@ -1,6 +1,7 @@
 package first.wildfires.mixin.minecraft;
 
 import first.wildfires.api.customEvent.ItemEntityTickEvent;
+import first.wildfires.compat.create.FanItemHeatSync;
 import first.wildfires.utils.WildfiresUtil;
 import net.minecraft.world.entity.item.ItemEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,6 +30,7 @@ public class ItemEntityMixin {
         ItemEntity itemEntity = (ItemEntity) (Object) this;
         ItemEntityTickEvent.Post event = new ItemEntityTickEvent.Post(itemEntity);
         WildfiresUtil.post(event);
+        FanItemHeatSync.tick(itemEntity);
     }
 
 }

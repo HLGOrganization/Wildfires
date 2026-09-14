@@ -176,6 +176,13 @@ public class ItemRegister {
 
     public static final RegistryObject<Item> GrassSlab = Register.register("grass_slab", () -> new BlockItem(BlockRegister.GrassSlab.get(), new Item.Properties()));
 
+    public static final RegistryObject<Item> WildBrownMushroom = Register.register(
+            "wild_brown_mushroom", () -> new BlockItem(BlockRegister.WildBrownMushroom.get(), new Item.Properties()));
+    public static final RegistryObject<Item> WildRedMushroom = Register.register(
+            "wild_red_mushroom", () -> new BlockItem(BlockRegister.WildRedMushroom.get(), new Item.Properties()));
+    public static final RegistryObject<Item> WildFluorescystShroom = Register.register(
+            "wild_fluorescyst_shroom", () -> new BlockItem(BlockRegister.WildFluorescystShroom.get(), new Item.Properties()));
+
     public static final RegistryObject<Item> UnrestrictedCharcoalForge =
             Register.register("unrestricted_charcoal_forge", () -> new BlockItem(BlockRegister.UnrestrictedCharcoalForge.get(), new Item.Properties()));
 

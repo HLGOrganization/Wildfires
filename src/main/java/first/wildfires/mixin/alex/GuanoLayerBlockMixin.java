@@ -1,10 +1,10 @@
 package first.wildfires.mixin.alex;
 
 import com.github.alexmodguy.alexscaves.server.block.GuanoLayerBlock;
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import net.dries007.tfc.common.blocks.ISlowEntities;
+import net.dries007.tfc.config.TFCConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = GuanoLayerBlock.class, remap = false)
-public class GuanoLayerBlockMixin {
+@Mixin(GuanoLayerBlock.class)
+public class GuanoLayerBlockMixin implements ISlowEntities {
 
     @Inject(
             method = "getCollisionShape",
@@ -24,6 +24,16 @@ public class GuanoLayerBlockMixin {
     )
     private void getCollisionShape(BlockState state, BlockGetter level, BlockPos blockPos, CollisionContext context, CallbackInfoReturnable<VoxelShape> cir) {
         cir.setReturnValue(Shapes.empty());
+    }
+
+    /**
+     * Use the same movement modifier as TFC leaves. TFC applies this through
+     * Helpers.slowEntityInsideBlocks(), so the empty collision shape remains
+     * compatible with walking through the pile.
+     */
+    @Override
+    public float slowEntityFactor(BlockState state) {
+        return TFCConfig.SERVER.leavesMovementModifier.get().floatValue();
     }
 
 }

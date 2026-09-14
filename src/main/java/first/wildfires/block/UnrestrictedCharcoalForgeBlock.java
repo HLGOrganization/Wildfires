@@ -3,7 +3,6 @@ package first.wildfires.block;
 import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
 import net.dries007.tfc.common.blocks.ExtendedProperties;
 import net.dries007.tfc.common.blocks.devices.CharcoalForgeBlock;
-import net.dries007.tfc.util.Helpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -62,10 +61,8 @@ public class UnrestrictedCharcoalForgeBlock extends CharcoalForgeBlock {
         return state;
     }
 
+    /** This forge is hot, but intentionally never spreads fire to nearby blocks. */
     @Override
     public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        if (state.getValue(HEAT) > 0) {
-            Helpers.fireSpreaderTick(level, pos.above(), random, 3);
-        }
     }
 }

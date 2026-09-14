@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "wildfires:block/wild_brown_mushroom"
+  }
+}

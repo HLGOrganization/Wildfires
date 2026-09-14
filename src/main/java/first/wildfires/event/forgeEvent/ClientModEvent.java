@@ -73,4 +73,5 @@ public final class ClientModEvent {
         GalaxyHymnSpaceWindowShader.register(event);
         GalaxyHymnNebulaShader.register(event);
     }
+
 }

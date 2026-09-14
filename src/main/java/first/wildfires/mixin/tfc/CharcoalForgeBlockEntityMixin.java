@@ -1,10 +1,12 @@
 package first.wildfires.mixin.tfc;
 
+import first.wildfires.block.UnrestrictedCharcoalForgeBlock;
 import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
 import net.dries007.tfc.common.blocks.devices.CharcoalForgeBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.items.ItemStackHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,6 +20,17 @@ public abstract class CharcoalForgeBlockEntityMixin {
     private static final int WILDFIRES_MAX_TFC_HEAT_LEVEL = 7;
     private static final int WILDFIRES_OVERHEATED_HEAT_LEVEL = 8;
     private static final float WILDFIRES_OVERHEATED_TEMPERATURE = 2300.0F;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void wildfires$enableAllSidedAutomation(BlockPos pos, BlockState state, CallbackInfo ci) {
+        if (!(state.getBlock() instanceof UnrestrictedCharcoalForgeBlock)) {
+            return;
+        }
+
+        InventoryBlockEntityAccessor<ItemStackHandler> accessor =
+                (InventoryBlockEntityAccessor<ItemStackHandler>) (Object) this;
+        accessor.getSidedInventory().on(accessor.getInventory(), direction -> true);
+    }
 
     @ModifyVariable(
             method = "serverTick",

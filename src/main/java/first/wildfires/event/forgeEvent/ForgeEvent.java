@@ -47,6 +47,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.block.state.BlockState;
@@ -289,7 +290,12 @@ public class ForgeEvent {
 								if (blockState.isAir()) {
 									level.setBlockAndUpdate(pos, block.defaultBlockState());
 									pooped = true;
-								} else if (blockState.hasProperty(BlockStateProperties.LAYERS)) {
+								} else if (blockState.getBlock() instanceof SnowLayerBlock && !blockState.is(block)) {
+									// Snow layers also expose LAYERS, but animal droppings must replace
+									// the snow instead of being mistaken for another poop layer.
+									level.setBlockAndUpdate(pos, block.defaultBlockState());
+									pooped = true;
+								} else if (blockState.is(block) && blockState.hasProperty(BlockStateProperties.LAYERS)) {
 									int value = blockState.getValue(BlockStateProperties.LAYERS);
 									if (value < 8) {
 										level.setBlock(pos, blockState.setValue(BlockStateProperties.LAYERS, value + 1), 2);
