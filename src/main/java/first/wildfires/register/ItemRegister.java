@@ -8,6 +8,7 @@ import first.wildfires.item.DrainedPulpScoopItem;
 import first.wildfires.item.FilledPulpScoopItem;
 import first.wildfires.item.PlanetariumItem;
 import first.wildfires.item.PulpScoopItem;
+import first.wildfires.item.PlainBackpackItem;
 import net.dries007.tfc.util.Metal;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.SoundEvents;
@@ -375,6 +376,25 @@ public class ItemRegister {
                     new Item.Properties()//属性
             ));
 
+
+    // Undyed leather backpack variants, one per sa_combat family. Slot counts mirror the matching
+    // family so a leather pack is never a downgrade: satchel 15, small 18, duffel 30, hiking 36,
+    // military 42. Each model inherits the sa_combat prototype, so the pack renders exactly like
+    // that family until dedicated art replaces it.
+    public static final RegistryObject<PlainBackpackItem> SatchelLeather =
+            leather("satchel_leather", 15);
+    public static final RegistryObject<PlainBackpackItem> SmallBackpackLeather =
+            leather("small_backpack_leather", 18);
+    public static final RegistryObject<PlainBackpackItem> DuffelBagLeather =
+            leather("duffel_bag_leather", 30);
+    public static final RegistryObject<PlainBackpackItem> HikingBackpackLeather =
+            leather("hiking_backpack_leather", 36);
+    public static final RegistryObject<PlainBackpackItem> MilitaryBackpackLeather =
+            leather("military_backpack_leather", 42);
+
+    private static RegistryObject<PlainBackpackItem> leather(String name, int slots) {
+        return Register.register(name, () -> new PlainBackpackItem(new Item.Properties(), slots));
+    }
 
     public static void register(IEventBus eventBus) {
         Register.register(eventBus);

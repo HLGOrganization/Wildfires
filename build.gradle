@@ -153,6 +153,14 @@ repositories {
         name = "Local TerraFirmaEarth"
         dirs ".wildfires-cache/tfe-userdev-input"
     }
+    // Create ecosystem and createmetallurgy, pinned to the versions the modpack ships.
+    // createmetallurgy 1.0.1 has no matching public Maven artifact, and the Create 6.0.8
+    // coordinate carries a build suffix that cannot be resolved offline, so both are
+    // consumed as the modpack's own jars.
+    flatDir {
+        name = "Local Create ecosystem"
+        dirs ".wildfires-cache/local-mods"
+    }
     maven {
         // location of the maven that hosts JEI files since January 2023
         name = "Jared's maven"
@@ -179,11 +187,21 @@ dependencies {
     //curios
     implementation fg.deobf("curse.maven:curios-309927:6418456")
     //create
-    implementation(fg.deobf("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false })
-    implementation(fg.deobf("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}"))
-    compileOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-api-${minecraft_version}:${flywheel_version}"))
-    runtimeOnly(fg.deobf("dev.engine-room.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}"))
-    implementation(fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}"))
+    // Pinned to the Create ecosystem the modpack ships (jars under .wildfires-cache/local-mods).
+    // The published Create coordinate carries a build suffix (for example 6.0.6-150) that cannot
+    // be resolved without network access, so the modpack's own jar is consumed. flywheel and
+    // ponder are bundled inside Create at runtime, but their classes are still needed here: the
+    // compile classpath needs them, and dev runs do not unwrap Create's nested jars.
+    // catnip, used across the client code, ships inside Ponder.
+    implementation(fg.deobf("local.create:create-${minecraft_version}:${create_version}") { transitive = false })
+    implementation(fg.deobf("local.create:Ponder-Forge-${minecraft_version}:${ponder_version}"))
+    compileOnly(fg.deobf("local.create:flywheel-forge-${minecraft_version}:${flywheel_version}"))
+    runtimeOnly(fg.deobf("local.create:flywheel-forge-${minecraft_version}:${flywheel_version}"))
+    // Registrate ships inside the pinned Create jar (META-INF/jarjar). Declaring it as a runtime
+    // implementation as well puts two automatic modules exporting com.tterrag.registrate.providers
+    // on the module path, and ModLauncher fails with a ResolutionException before the game starts.
+    // The embedded copy is what runs, so this stays compile-only.
+    compileOnly(fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}"))
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
     implementation("io.github.llamalad7:mixinextras-forge:0.4.1")
     //tfc
@@ -219,7 +237,12 @@ dependencies {
     //kubejs-tfc
     implementation fg.deobf("curse.maven:kubejs-tfc-841001:6201323")
     //create-metallurgy
-    implementation fg.deobf("curse.maven:create-metallurgy-1007404:6741785")
+    implementation fg.deobf("local.create:createmetallurgy:${createmetallurgy_version}")
+    // Survivors Arsenal: satchels and backpacks are registered as BackpackItem, so the
+    // modpack's own sa_essentials jar is needed on the compile classpath to subclass it.
+    // sa_lib provides sa_core, which sa_essentials declares as a required dependency.
+    compileOnly fg.deobf("local.create:sa_essentials-forge-${minecraft_version}:${sa_essentials_version}")
+    compileOnly fg.deobf("local.create:sa_lib-forge-${minecraft_version}:${sa_core_version}")
     //citadel
     implementation fg.deobf("curse.maven:citadel-331936:6702068")
     //alexs-caves

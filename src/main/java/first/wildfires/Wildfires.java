@@ -8,6 +8,7 @@ import first.wildfires.celestial.LegacyCelestialModGuard;
 import first.wildfires.celestial.OverworldCelestialProvider;
 import first.wildfires.compats.irons_spellbooks.GalaxyHymnRegister;
 import first.wildfires.compat.create.CreateMechanicalArmCompat;
+import first.wildfires.compat.create.FanHeatConfig;
 import first.wildfires.compat.sophisticateditemactions.SophisticatedItemActionsConfig;
 import first.wildfires.jei.FoodTraitDisplayConfig;
 import first.wildfires.diagnostics.StartupDiagnostics;
@@ -40,6 +41,7 @@ public class Wildfires {
 		CelestialApi.register(net.minecraft.world.level.Level.OVERWORLD, OverworldCelestialProvider.INSTANCE);
 		CelestialApi.register(SpaceDimensions.ORBIT, StationCelestialProvider.INSTANCE);
 		ThermalConfig.register();
+		FanHeatConfig.register();
 		SophisticatedItemActionsConfig.register();
 		FoodTraitDisplayConfig.register();
 		CreateMechanicalArmCompat.register();

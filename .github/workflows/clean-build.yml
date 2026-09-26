@@ -37,5 +37,32 @@ jobs:
         shell: pwsh
         run: throw 'The fixed-hash TFE 2.0.1 release is absent from the private dependency cache; refusing to build against old or unverified source.'
 
+      - name: Restore pinned Create ecosystem local dependencies
+        id: create-cache
+        uses: actions/cache@v4
+        with:
+          path: .wildfires-cache/local-mods
+          key: create-ecosystem-${{ runner.os }}-6.0.8-1.0.1-6fbb910c
+
+      - name: Require pinned Create ecosystem cache
+        if: steps.create-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: throw 'The pinned Create 6.0.8 and createmetallurgy 1.0.1 jars are absent from the private dependency cache; refusing to build against unverified versions.'
+
+      - name: Verify pinned Create ecosystem hashes
+        shell: pwsh
+        run: |
+          $expected = @{
+            'create-1.20.1-6.0.8.jar'         = '6FBB910C367DBCE8E4FC7E5BF64B6EDD4DE980906ED00AF8E47E4AF843C0D9B0'
+            'createmetallurgy-1.0.1.jar'      = '1F0507F5C42E3C19A4D331BE86EADA7BA5264D39922969769ED9B11D09100258'
+            'flywheel-forge-1.20.1-1.0.5.jar' = '316CA250F19244956B5F0CD75329309EA65A77B4B8DA854389B6A9222E7F427C'
+            'Ponder-Forge-1.20.1-1.0.91.jar'  = '86E6B64372ABA6D9C56F2C35725EA26D8FEBF2C75EED9950566E7F2849443B34'
+          }
+          foreach ($item in $expected.GetEnumerator()) {
+            $path = Join-Path '.wildfires-cache/local-mods' $item.Key
+            if (-not (Test-Path $path)) { throw "Missing pinned dependency: $($item.Key)" }
+            $actual = (Get-FileHash $path -Algorithm SHA256).Hash
+            if ($actual -ne $item.Value) { throw "Hash mismatch for $($item.Key): expected $($item.Value) but got $actual" }
+          }
       - name: Build and verify pinned runtime
         run: .\gradlew.bat --no-daemon --console=plain build verifyTfeRuntime

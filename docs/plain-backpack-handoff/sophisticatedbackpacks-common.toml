@@ -1,0 +1,46 @@
+#Common Settings
+[common]
+        #Turns on/off loot added to various vanilla chest loot tables
+        chestLootEnabled = true
+
+[server.disallowedItems]
+        #Items that cannot be placed inside a Sophisticated Backpack.
+        #Deliberately excludes sophisticatedbackpacks:* so the Inception Upgrade keeps working.
+        disallowedItems = [
+            "sa_combat:leather_backpack",
+            "sa_combat:satchel_black",
+            "sa_combat:satchel_brown",
+            "sa_combat:satchel_green",
+            "sa_combat:satchel_white",
+            "sa_combat:small_backpack_black",
+            "sa_combat:small_backpack_blue",
+            "sa_combat:small_backpack_green",
+            "sa_combat:small_backpack_pink",
+            "sa_combat:hiking_backpack_black",
+            "sa_combat:hiking_backpack_blue",
+            "sa_combat:hiking_backpack_green",
+            "sa_combat:hiking_backpack_red",
+            "sa_combat:duffel_bag_black",
+            "sa_combat:duffel_bag_blue",
+            "sa_combat:duffel_bag_red",
+            "sa_combat:duffel_bag_yellow",
+            "sa_combat:military_backpack_blue",
+            "sa_combat:military_backpack_camo",
+            "sa_combat:military_backpack_desert",
+            "sa_combat:military_backpack_green",
+            "sns:straw_basket",
+            "sns:leather_sack",
+            "sns:burlap_sack",
+            "sns:ore_sack",
+            "sns:seed_pouch",
+            "sns:frame_pack",
+            "sns:lunchbox",
+            "sns:quiver",
+            "wildfires:satchel_plain",
+            "wildfires:small_backpack_plain",
+            "wildfires:duffel_bag_plain",
+            "wildfires:hiking_backpack_plain",
+            "wildfires:military_backpack_plain"
+        ]
+        #Determines if container items are able to fit in backpacks.
+        containerItemsDisallowed = true

@@ -33,8 +33,13 @@ The release and generated userdev input stay in ignored directories:
 .wildfires-cache/
 .wildfires-cache/tfe-release/Wildfire_TerraFirmaEarth-1.20.1-forge-2.0.1.jar
 .wildfires-cache/tfe-userdev-input/Wildfire_TerraFirmaEarth-1.20.1-forge-2.0.1-wildfires-userdev-1.jar
+.wildfires-cache/local-mods/create-1.20.1-6.0.8.jar
+.wildfires-cache/local-mods/createmetallurgy-1.0.1.jar
+.wildfires-cache/local-mods/flywheel-forge-1.20.1-1.0.5.jar
+.wildfires-cache/local-mods/Ponder-Forge-1.20.1-1.0.91.jar
 ```
 
+The Create ecosystem is pinned the same way. `createmetallurgy` 1.0.1 has no matching public Maven artifact, and the published Create coordinate carries a build suffix (such as `6.0.6-150`) that is not discoverable offline, so the modpack's own jars are consumed from `local-mods`. The CI workflow enforces their SHA-256 values. `flywheel` and `ponder` are bundled inside Create at runtime, but development runs do not unwrap Create's nested jars, so their classes are also needed on the compile classpath; `catnip` ships inside Ponder.
 The required release SHA-256 is `029AD1A7368B687BCD435B4321257BA8DD9E9D3B8533FC248BD43CEB5CE5A308`. Generate or refresh the local userdev input with:
 
 ```powershell

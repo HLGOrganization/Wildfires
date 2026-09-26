@@ -86,6 +86,7 @@
   "wildfires.loom.space_insufficient": "空间不足，无法放置织布机",
   "wildfires.tooltip.reinforcement": "加固：%s（%s%%不消耗耐久概率）",
   "wildfires.tooltip.reinforcement.normal": "%s",
+  "wildfires.tooltip.size_limit": "可容纳最大尺寸：%s",
   "wildfires.tooltip.reinforcement.loose": "松动",
   "wildfires.tooltip.reinforcement.bound": "绑定",
   "wildfires.tooltip.reinforcement.firm": "牢固",
@@ -337,5 +338,10 @@
   ,"death.attack.wildfires.galaxy_hymn.player": "%1$s 被 %2$s 化作了散落的星光"
   ,"block.wildfires.wild_brown_mushroom": "野生棕蘑菇"
   ,"block.wildfires.wild_red_mushroom": "野生红蘑菇"
-  ,"block.wildfires.wild_fluorescyst_shroom": "野生荧泡菌"
+  ,"block.wildfires.wild_fluorescyst_shroom": "野生荧泡菌",
+  "item.wildfires.satchel_leather": "皮革挎包",
+  "item.wildfires.hiking_backpack_leather": "皮革登山包",
+  "item.wildfires.small_backpack_leather": "皮革小背包",
+  "item.wildfires.military_backpack_leather": "皮革军用背包",
+  "item.wildfires.duffel_bag_leather": "皮革行李袋"
 }

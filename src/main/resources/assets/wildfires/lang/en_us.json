@@ -33,6 +33,7 @@
   "wildfires.loom.space_insufficient": "Not enough space to place loom",
   "wildfires.tooltip.reinforcement": "Reinforcement: %s (%s%% no durability loss)",
   "wildfires.tooltip.reinforcement.normal": "%s",
+  "wildfires.tooltip.size_limit": "Fits at most size: %s",
   "wildfires.tooltip.reinforcement.loose": "Loose",
   "wildfires.tooltip.reinforcement.bound": "Bound",
   "wildfires.tooltip.reinforcement.firm": "Firm",
@@ -224,5 +225,10 @@
   "death.attack.wildfires.galaxy_hymn.player": "%1$s was scattered across the galaxy by %2$s",
   "block.wildfires.wild_brown_mushroom": "Wild Brown Mushroom",
   "block.wildfires.wild_red_mushroom": "Wild Red Mushroom",
-  "block.wildfires.wild_fluorescyst_shroom": "Wild Fluorescyst Shroom"
+  "block.wildfires.wild_fluorescyst_shroom": "Wild Fluorescyst Shroom",
+  "item.wildfires.satchel_leather": "Leather Satchel",
+  "item.wildfires.hiking_backpack_leather": "Leather Hiking Backpack",
+  "item.wildfires.small_backpack_leather": "Small Leather Backpack",
+  "item.wildfires.military_backpack_leather": "Leather Military Backpack",
+  "item.wildfires.duffel_bag_leather": "Leather Duffel Bag"
 }

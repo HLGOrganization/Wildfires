@@ -20,6 +20,7 @@ import first.wildfires.client.celestial.CelestialClientStateCache;
 import first.wildfires.client.spell.GalaxyHymnImpactVisuals;
 import first.wildfires.client.space.render.NtmAscentPlanetRenderer;
 import first.wildfires.api.customEvent.CreativeTabBuildEvent;
+import first.wildfires.compat.sacombat.SatchelSizeRules;
 import first.wildfires.kinetic.loom.LoomControlBlock;
 import first.wildfires.network.PlayerInputPacket;
 import first.wildfires.ponder.WildfiresPonderPlugin;
@@ -37,6 +38,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.dries007.tfc.common.capabilities.size.Size;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
@@ -216,6 +218,20 @@ public class ClientForgeEvent {
         Player player = event.getEntity();
         List<Component> toolTip = event.getToolTip();
         CompoundTag tag = stack.getTag();
+
+        // Survivors Arsenal containers: show the TFC size ceiling of this container.
+        //
+        // The mod has no such setting, so the limit is imposed from the outside by
+        // SatchelSizeRules; without a tooltip the player has no way to know why a large item is
+        // refused. The size name is read from TFC's own tfc.enum.size.* keys, so the wording
+        // matches what the size system shows everywhere else.
+        Size sizeLimit = SatchelSizeRules.tooltipLimitFor(stack);
+        if (sizeLimit != null) {
+            toolTip.add(Component.translatable("wildfires.tooltip.size_limit",
+                            Component.translatable(SatchelSizeRules.sizeTranslationKey(sizeLimit)))
+                    .withStyle(ChatFormatting.GRAY));
+        }
+
         if (tag != null && tag.contains("Reinforcement")) {
             int reinforcement = tag.getInt("Reinforcement");
             String statusKey = reinforcement >= 6 ? "wildfires.tooltip.reinforcement.firm" : reinforcement >= 4 ? "wildfires.tooltip.reinforcement.bound" : "wildfires.tooltip.reinforcement.loose";
