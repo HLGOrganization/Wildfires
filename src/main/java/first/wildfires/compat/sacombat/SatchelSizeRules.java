@@ -135,10 +135,8 @@ public final class SatchelSizeRules {
             // Wildfires undyed leather variants, limited exactly like the family they copy.
             //
             // These are registered under the "wildfires" namespace, not "sa_combat", so they need
-            // the two-argument id() overload. Using the one-argument form here would silently map
-            // them to sa_combat:satchel_leather and so on - items that do not exist - and the limit
-            // would never apply to the Wildfires packs.
-            leather("satchel_leather", SATCHEL_MAX),
+            // the two-argument id() overload. The one-argument form would map them to sa_combat
+            // paths that do not exist and the limit would never apply to the Wildfires packs.
             leather("small_backpack_leather", SMALL_BACKPACK_MAX),
             leather("duffel_bag_leather", LARGE_BACKPACK_MAX),
             leather("hiking_backpack_leather", LARGE_BACKPACK_MAX),
@@ -205,7 +203,6 @@ public final class SatchelSizeRules {
             id("military_backpack_blue"), id("military_backpack_camo"),
             id("military_backpack_desert"), id("military_backpack_green"),
             // Wildfires undyed leather variants
-            id("wildfires", "satchel_leather"),
             id("wildfires", "small_backpack_leather"),
             id("wildfires", "duffel_bag_leather"),
             id("wildfires", "hiking_backpack_leather"),

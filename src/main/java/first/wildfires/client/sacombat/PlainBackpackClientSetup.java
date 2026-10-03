@@ -40,13 +40,12 @@ public final class PlainBackpackClientSetup {
     private static final String RENDER_TAG = "SatchelCurioRender";
 
     /**
-     * Every plain pack, so the shared renderer and the worn-model predicate cover all five.
+     * Every plain pack, so the shared renderer and the worn-model predicate cover all of them.
      *
      * <p>The renderer itself picks the correct worn pose per family, so one registration call per
      * item is enough; only the satchel family swaps in a separate worn model through the property.
      */
     private static final List<RegistryObject<? extends Item>> PLAIN_PACKS = List.of(
-            ItemRegister.SatchelLeather,
             ItemRegister.SmallBackpackLeather,
             ItemRegister.DuffelBagLeather,
             ItemRegister.HikingBackpackLeather,

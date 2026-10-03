@@ -22,7 +22,6 @@ public final class PlainBackpackFamilies {
 
     /** Wildfires leather variant -> the sa_combat prototype whose family it belongs to. */
     private static final Map<ResourceLocation, ResourceLocation> FAMILY_BY_PLAIN = Map.of(
-            id("wildfires", "satchel_leather"), id("sa_combat", "satchel_black"),
             id("wildfires", "small_backpack_leather"), id("sa_combat", "small_backpack_black"),
             id("wildfires", "duffel_bag_leather"), id("sa_combat", "duffel_bag_black"),
             id("wildfires", "hiking_backpack_leather"), id("sa_combat", "hiking_backpack_black"),

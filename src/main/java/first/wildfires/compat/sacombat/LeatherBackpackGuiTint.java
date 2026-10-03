@@ -30,7 +30,6 @@ public final class LeatherBackpackGuiTint {
 
     /** Item ids that should receive {@link #LEATHER_TINT}. */
     private static final Set<ResourceLocation> LEATHER_PACKS = Set.of(
-            id("satchel_leather"),
             id("small_backpack_leather"),
             id("duffel_bag_leather"),
             id("hiking_backpack_leather"),
