@@ -13,8 +13,18 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /** Replaces Wooden Cog's linear MoreBurners temperature formula with its heat-level values. */
-@Pseudo
-@Mixin(targets = "net.chauvedev.woodencog.compat.createmoreburners.CMBIntegrationImpl", remap = false)
+// DISABLED 2026-09-30 - see the comment in wildfires.mixins.json.
+//
+// Ported natively. The heat-level mapping and the gradual warm-up this mixin applied from the
+// outside now live inside Wooden Cog itself, in
+// net.chauvedev.woodencog.compat.createmoreburners.CMBIntegrationImpl, as part of the
+// woodencog_wildfire build. Keeping this enabled as well would only duplicate the same mapping
+// from a second place.
+//
+// Kept for reference. To re-enable, restore the annotations below and the matching entry in
+// wildfires.mixins.json.
+// @Pseudo
+// @Mixin(targets = "net.chauvedev.woodencog.compat.createmoreburners.CMBIntegrationImpl", remap = false)
 public abstract class WoodenCogMoreBurnerTemperatureMixin {
 
     private static final ResourceLocation ELECTRIC_BURNER_ID =

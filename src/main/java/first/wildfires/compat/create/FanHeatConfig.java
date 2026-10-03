@@ -5,7 +5,14 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 
 /**
- * The destruction ceilings Wildfires adds on top of Wooden Cog's fan heating.
+ * <p>Relocated on 2026-10-01: the two values moved into woodencog_wildfire's own
+ * {@code woodencog-common.toml} under {@code [woodencog.fan]} (see
+ * {@code net.chauvedev.woodencog.config.WoodenCogCommonConfigs}), and Wildfires no longer registers
+ * this file, so {@code wildfires-fan-heat.toml} is no longer created or read. The class is kept -
+ * with its fallbacks, which is what the accessors return while nothing is registered - so that the
+ * mixin and the guard beside it still compile if they are ever enabled again.
+ *
+ * <p>The destruction ceilings Wildfires added on top of Wooden Cog's fan heating.
  *
  * <p>Wooden Cog discards an item only once a TFC heating recipe melts it. An item that has no such
  * recipe is therefore heated without limit and never destroyed, however hot it gets. Two ceilings

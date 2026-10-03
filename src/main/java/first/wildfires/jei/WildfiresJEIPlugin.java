@@ -7,6 +7,7 @@ import first.wildfires.kinetic.loom.recipe.WeavingRecipeType;
 import first.wildfires.register.BlockRegister;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
@@ -32,12 +33,15 @@ public class WildfiresJEIPlugin implements IModPlugin {
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
-        registration.addRecipeCategories(new WeavingRecipeCategory(registration.getJeiHelpers().getGuiHelper()));
+        IGuiHelper guiHelper = registration.getJeiHelpers().getGuiHelper();
+        registration.addRecipeCategories(new WeavingRecipeCategory(guiHelper));
+        DepositRecipes.registerCategories(registration, guiHelper);
     }
 
     @Override
     public void registerRecipeCatalysts(@NotNull IRecipeCatalystRegistration registration) {
         registration.addRecipeCatalyst(BlockRegister.LoomControlBlock.get().asItem(), WeavingRecipeCategory.RECIPE_TYPE);
+        DepositRecipes.registerCatalysts(registration);
     }
 
     @Override
@@ -47,5 +51,7 @@ public class WildfiresJEIPlugin implements IModPlugin {
             List<WeavingRecipe> recipes = level.getRecipeManager().getAllRecipesFor(WeavingRecipeType.INSTANCE);
             registration.addRecipes(WeavingRecipeCategory.RECIPE_TYPE, recipes);
         }
+        // Not tied to the level: the deposits come from TFC's synced registries and the loaded data packs.
+        DepositRecipes.registerRecipes(registration);
     }
 }

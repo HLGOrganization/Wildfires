@@ -24,8 +24,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * through TFC's normal heat decay. The temperature is only forced upwards and only for the
  * {@code kubejs:*_mold_filled} items, so no other Wooden Cog recipe changes behaviour.
  */
-@Pseudo
-@Mixin(targets = "net.chauvedev.woodencog.recipes.advancedProcessingRecipe.baseRecipes.AdvancedRecipe", remap = false)
+// DISABLED 2026-09-30 - see the comment in wildfires.mixins.json.
+//
+// Dead code. The last woodencog:filling mould recipe is commented out in
+// kubejs/server_scripts/thirace/recipes/glass_mold.js and pouring moved to
+// createmetallurgy:casting_in_table, so AdvancedRecipe.onResultStackSingle is no longer on any
+// live path and this injection can never fire. CastingTableMoldHeatMixin, still enabled,
+// handles the casting-table route that replaced it.
+//
+// Kept for reference. To re-enable, restore the annotations below and the matching entry in
+// wildfires.mixins.json.
+// @Pseudo
+// @Mixin(targets = "net.chauvedev.woodencog.recipes.advancedProcessingRecipe.baseRecipes.AdvancedRecipe", remap = false)
 public abstract class WoodenCogMoldHeatMixin {
 
     /** Must match the {@code tfc:add_heat} value used by the pouring recipes. */

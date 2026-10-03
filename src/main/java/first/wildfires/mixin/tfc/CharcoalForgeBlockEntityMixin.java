@@ -2,24 +2,36 @@ package first.wildfires.mixin.tfc;
 
 import first.wildfires.block.UnrestrictedCharcoalForgeBlock;
 import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
-import net.dries007.tfc.common.blocks.devices.CharcoalForgeBlock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.items.ItemStackHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Adds a true eighth heat tier to every TFC charcoal forge at 2300 degrees. */
+/**
+ * Keeps the earthen oven's inventory reachable from every side.
+ *
+ * <p>The eighth heat tier of the charcoal forge is no longer implemented here. It used to be a
+ * {@code @ModifyVariable} that masked tier 8 down to TFC's maximum of 7 plus a {@code @Inject} at
+ * return that promoted the forge back to tier 8 at 2300 degrees. That work now lives natively in
+ * the rebuilt Wooden Cog: Wildfire mod, because the {@code heat_level} property can only have one
+ * owner - two mods extending the same property install two redirects on the same
+ * {@code IntegerProperty.create} call site, and two writers of the same block state make the model
+ * flicker. See {@code net.chauvedev.woodencog.mixin.heat.MixinCharcoalForgeBlockEntity} and
+ * {@code net.chauvedev.woodencog.mixin.heat.MixinTFCBlockStateProperties}.
+ *
+ * <p>Consequence: the {@code heat_level=8} variants in
+ * {@code assets/wildfires/blockstates/unrestricted_charcoal_forge.json} are resolved against the
+ * property that Wooden Cog: Wildfire extends. Running Wildfires without that mod therefore leaves
+ * the earthen oven without a usable block state definition. If Wildfires ever has to work
+ * standalone again, re-enable {@code first.wildfires.mixin.tfc.TFCBlockStatePropertiesMixin} in
+ * {@code wildfires.mixins.json} (the class is kept for exactly that reason) and move the eighth
+ * tier handling back into this file.
+ */
 @Mixin(value = CharcoalForgeBlockEntity.class, remap = false)
 public abstract class CharcoalForgeBlockEntityMixin {
-
-    private static final int WILDFIRES_MAX_TFC_HEAT_LEVEL = 7;
-    private static final int WILDFIRES_OVERHEATED_HEAT_LEVEL = 8;
-    private static final float WILDFIRES_OVERHEATED_TEMPERATURE = 2300.0F;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void wildfires$enableAllSidedAutomation(BlockPos pos, BlockState state, CallbackInfo ci) {
@@ -30,38 +42,5 @@ public abstract class CharcoalForgeBlockEntityMixin {
         InventoryBlockEntityAccessor<ItemStackHandler> accessor =
                 (InventoryBlockEntityAccessor<ItemStackHandler>) (Object) this;
         accessor.getSidedInventory().on(accessor.getInventory(), direction -> true);
-    }
-
-    @ModifyVariable(
-            method = "serverTick",
-            at = @At("HEAD"),
-            argsOnly = true,
-            index = 2
-    )
-    private static BlockState wildfires$presentEighthTierAsTfcMaximum(BlockState state) {
-        if (state.hasProperty(CharcoalForgeBlock.HEAT)
-                && state.getValue(CharcoalForgeBlock.HEAT) == WILDFIRES_OVERHEATED_HEAT_LEVEL) {
-            return state.setValue(CharcoalForgeBlock.HEAT, WILDFIRES_MAX_TFC_HEAT_LEVEL);
-        }
-        return state;
-    }
-
-    @Inject(method = "serverTick", at = @At("RETURN"))
-    private static void wildfires$applyEighthTier(Level level, BlockPos pos, BlockState state,
-                                                  CharcoalForgeBlockEntity blockEntity, CallbackInfo ci) {
-        BlockState currentState = level.getBlockState(pos);
-        if (!(currentState.getBlock() instanceof CharcoalForgeBlock)
-                || !currentState.hasProperty(CharcoalForgeBlock.HEAT)) {
-            return;
-        }
-
-        int currentHeatLevel = currentState.getValue(CharcoalForgeBlock.HEAT);
-        int targetHeatLevel = currentHeatLevel > 0
-                && blockEntity.getTemperature() >= WILDFIRES_OVERHEATED_TEMPERATURE
-                ? WILDFIRES_OVERHEATED_HEAT_LEVEL
-                : Math.min(currentHeatLevel, WILDFIRES_MAX_TFC_HEAT_LEVEL);
-        if (currentHeatLevel != targetHeatLevel) {
-            level.setBlockAndUpdate(pos, currentState.setValue(CharcoalForgeBlock.HEAT, targetHeatLevel));
-        }
     }
 }

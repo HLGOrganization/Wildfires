@@ -33,6 +33,27 @@ public final class WoodenCogBurnerTemperatures {
     }
 
     /**
+     * The temperature Wooden Cog treats as smouldering.
+     *
+     * <p>Exposed so other compatibility code can map a real temperature onto Create's heat levels
+     * without restating the thresholds, which would let the two drift apart if the pack's config
+     * changes.
+     */
+    public static float smouldering() {
+        return SMOULDERING;
+    }
+
+    /** The temperature Wooden Cog treats as kindled; see {@link #smouldering()}. */
+    public static float kindled() {
+        return KINDLED;
+    }
+
+    /** The temperature Wooden Cog treats as seething; see {@link #smouldering()}. */
+    public static float seething() {
+        return SEETHING;
+    }
+
+    /**
      * Returns the TFC target temperature for the two useful burner modes.
      * Lower Create states are not active heating modes for these burners.
      */

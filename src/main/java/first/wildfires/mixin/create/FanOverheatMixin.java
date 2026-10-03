@@ -23,8 +23,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  *
  * <p>Neither injection cancels when the item is fine, so the normal heating, cooking and melting
  * paths are untouched.
+ * Moved into woodencog_wildfire on 2026-10-01 as
+ * {@code net.chauvedev.woodencog.mixin.MixinFanOverheat} together with this guard, so it is no
+ * longer registered here: {@code @Mixin} is commented out and the entry is commented out in
+ * wildfires.mixins.json. Re-enable both only after removing that woodencog mixin.
  */
-@Mixin(value = FanProcessing.class, priority = 900, remap = false)
+// @Mixin(value = FanProcessing.class, priority = 900, remap = false)
 public abstract class FanOverheatMixin {
 
     @Inject(
