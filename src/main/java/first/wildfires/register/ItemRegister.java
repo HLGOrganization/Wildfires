@@ -5,7 +5,9 @@ import first.wildfires.Wildfires;
 import first.wildfires.item.GeckoSimpleArmorItem;
 import first.wildfires.item.HeatResistantArmorItem;
 import first.wildfires.item.DrainedPulpScoopItem;
+import first.wildfires.item.DumbbellItem;
 import first.wildfires.item.FilledPulpScoopItem;
+import first.wildfires.item.ForgingManualItem;
 import first.wildfires.item.PlanetariumItem;
 import first.wildfires.item.PulpScoopItem;
 import first.wildfires.item.PlainBackpackItem;
@@ -60,6 +62,18 @@ public class ItemRegister {
 
     public static final RegistryObject<Item> Planetarium =
             Register.register("planetarium", () -> new PlanetariumItem(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
+
+    /**
+     * Training weights: slow swinging, hard hitting melee weapons that can be charged up and thrown.
+     * The attack style (0.5 attack speed, the charge throw, crushing damage) comes from the
+     * {@code wildfires:dumbbells} tag, the damage from the item itself.
+     */
+    public static final RegistryObject<Item> StoneDumbbell =
+            Register.register("stone_dumbbell", () -> new DumbbellItem(new Item.Properties().stacksTo(1), 5.0F));
+
+    /** Cast iron weight: two points harder hitting than the stone one. */
+    public static final RegistryObject<Item> IronDumbbell =
+            Register.register("iron_dumbbell", () -> new DumbbellItem(new Item.Properties().stacksTo(1), 7.0F));
 
     public static final CustomArmorMaterial RainGearArmorMaterial = new CustomArmorMaterial(
             "minecraft:leather",
@@ -183,6 +197,12 @@ public class ItemRegister {
             "wild_red_mushroom", () -> new BlockItem(BlockRegister.WildRedMushroom.get(), new Item.Properties()));
     public static final RegistryObject<Item> WildFluorescystShroom = Register.register(
             "wild_fluorescyst_shroom", () -> new BlockItem(BlockRegister.WildFluorescystShroom.get(), new Item.Properties()));
+
+    // 筋腱（贴地摆放的方块物品）
+    public static final RegistryObject<Item> Sinew = Register.register(
+            "sinew", () -> new BlockItem(BlockRegister.Sinew.get(), new Item.Properties()));
+    public static final RegistryObject<Item> DriedSinew = Register.register(
+            "dried_sinew", () -> new BlockItem(BlockRegister.DriedSinew.get(), new Item.Properties()));
 
     public static final RegistryObject<Item> UnrestrictedCharcoalForge =
             Register.register("unrestricted_charcoal_forge", () -> new BlockItem(BlockRegister.UnrestrictedCharcoalForge.get(), new Item.Properties()));
@@ -378,11 +398,9 @@ public class ItemRegister {
 
 
     // Undyed leather backpack variants, one per sa_combat family. Slot counts mirror the matching
-    // family so a leather pack is never a downgrade: satchel 15, small 18, duffel 30, hiking 36,
-    // military 42. Each model inherits the sa_combat prototype, so the pack renders exactly like
-    // that family until dedicated art replaces it.
-    public static final RegistryObject<PlainBackpackItem> SatchelLeather =
-            leather("satchel_leather", 15);
+    // family so a leather pack is never a downgrade: small 18, duffel 30, hiking 36, military 42. Each
+    // model inherits the sa_combat prototype, so the pack renders exactly like that family until
+    // dedicated art replaces it.
     public static final RegistryObject<PlainBackpackItem> SmallBackpackLeather =
             leather("small_backpack_leather", 18);
     public static final RegistryObject<PlainBackpackItem> DuffelBagLeather =
@@ -395,6 +413,14 @@ public class ItemRegister {
     private static RegistryObject<PlainBackpackItem> leather(String name, int slots) {
         return Register.register(name, () -> new PlainBackpackItem(new Item.Properties(), slots));
     }
+
+    /**
+     * Lists every anvil recipe with its progress towards the one-click forge.
+     *
+     * <p>Stack size one, so it is a keepsake the player carries rather than a stackable consumable.
+     */
+    public static final RegistryObject<ForgingManualItem> ForgingManual =
+            Register.register("forging_manual", () -> new ForgingManualItem(new Item.Properties().stacksTo(1)));
 
     public static void register(IEventBus eventBus) {
         Register.register(eventBus);

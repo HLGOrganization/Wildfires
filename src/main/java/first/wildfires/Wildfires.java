@@ -41,7 +41,7 @@ public class Wildfires {
 		CelestialApi.register(net.minecraft.world.level.Level.OVERWORLD, OverworldCelestialProvider.INSTANCE);
 		CelestialApi.register(SpaceDimensions.ORBIT, StationCelestialProvider.INSTANCE);
 		ThermalConfig.register();
-		FanHeatConfig.register();
+		// FanHeatConfig.register(); // Moved into woodencog_wildfire: the fan ceilings now live in woodencog-common.toml under [woodencog.fan]
 		SophisticatedItemActionsConfig.register();
 		FoodTraitDisplayConfig.register();
 		CreateMechanicalArmCompat.register();
@@ -56,6 +56,7 @@ public class Wildfires {
 		CreativeModeTabRegister.register(eventBus);
 		ItemRegister.register(eventBus);
 		SoundRegister.register(eventBus);
+		EntityRegister.register(eventBus);
 		WeavingRecipeRegister.register(eventBus);
 	}
 

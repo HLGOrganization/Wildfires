@@ -12,6 +12,12 @@
   "item.wildfires.drained_pulp_scoop": "已沥干的抄网",
   "item.wildfires.planetarium": "星象仪",
   "item.wildfires.planetarium.overworld_only": "星象仪只能观测主世界天空",
+  "item.wildfires.stone_dumbbell": "石质哑铃",
+  "item.wildfires.stone_dumbbell.tooltip.weight": "放在背包中：+250 负重",
+  "item.wildfires.stone_dumbbell.tooltip.exp": "体力经验 +25%",
+  "item.wildfires.iron_dumbbell": "铸铁哑铃",
+  "item.wildfires.iron_dumbbell.tooltip.weight": "放在背包中：+500 负重",
+  "item.wildfires.iron_dumbbell.tooltip.exp": "体力经验 +50%",
   "item.wildfires.umbrella_hat": "伞帽",
   "item.wildfires.wide_straw_hat": "大草帽",
   "item.wildfires.conical_hat": "斗笠",
@@ -195,6 +201,25 @@
   ,"commands.wildfires.tfctime.event.blood_moon": "可见血月"
   ,"commands.wildfires.tfctime.event.aurora": "自然极光"
   ,"commands.wildfires.tfctime.event.rainbow": "自然彩虹"
+  ,"commands.wildfires.smithing.players_only": "该指令只能由玩家执行"
+  ,"commands.wildfires.smithing.bad_id": "不是合法的配方ID：%s"
+  ,"commands.wildfires.smithing.unknown_recipe": "没有这个铁砧配方：%s"
+  ,"commands.wildfires.smithing.unlocked": "已解锁一键锻造：%s"
+  ,"commands.wildfires.smithing.already": "%s 的一键锻造早已解锁，未做改动"
+  ,"commands.wildfires.smithing.unlocked_all": "已解锁全部 %2$s 个铁砧配方的一键锻造（本次新增 %1$s 个）"
+  ,"commands.wildfires.smithing.cleared": "已清除锻造记录：%s（锻造经验、解锁与记忆一并归零）"
+  ,"commands.wildfires.smithing.cleared_all": "已清除该玩家的全部锻造记录：%s 个配方（锻造经验、解锁与记忆一并归零）"
+  ,"commands.wildfires.smithing.nothing": "%s 没有锻造记录，未做改动"
+  ,"commands.wildfires.smithing.nothing_at_all": "该玩家没有任何锻造记录，未做改动"
+  ,"commands.wildfires.smithing.list_header": "已解锁 %1$s / %2$s 个铁砧配方的一键锻造"
+  ,"commands.wildfires.smithing.list_entry": "%1$s（锻造经验 %2$s/%3$s）"
+  ,"commands.wildfires.smithing.list_more": "……其余 %s 个未列出"
+  ,"commands.wildfires.smithing.messages_on": "锻造提示已开启：之后每次锻造都会在聊天栏显示获得的经验与解锁概率"
+  ,"commands.wildfires.smithing.messages_off": "锻造提示已关闭"
+  ,"commands.wildfires.smithing.messages_was_on": "锻造提示本来就是开启的，未做改动"
+  ,"commands.wildfires.smithing.messages_was_off": "锻造提示本来就是关闭的，未做改动"
+  ,"commands.wildfires.smithing.messages_state_on": "锻造提示当前是开启的"
+  ,"commands.wildfires.smithing.messages_state_off": "锻造提示当前是关闭的"
   ,"screen.wildfires.planetarium.title": "Wildfires 星象仪"
   ,"screen.wildfires.planetarium.unavailable": "天体数据当前不可用"
   ,"screen.wildfires.planetarium.current": "当前观测"
@@ -338,10 +363,40 @@
   ,"death.attack.wildfires.galaxy_hymn.player": "%1$s 被 %2$s 化作了散落的星光"
   ,"block.wildfires.wild_brown_mushroom": "野生棕蘑菇"
   ,"block.wildfires.wild_red_mushroom": "野生红蘑菇"
-  ,"block.wildfires.wild_fluorescyst_shroom": "野生荧泡菌",
-  "item.wildfires.satchel_leather": "皮革挎包",
+  ,"block.wildfires.wild_fluorescyst_shroom": "野生荧泡菌"
+  ,"block.wildfires.sinew": "筋腱"
+  ,"block.wildfires.dried_sinew": "风干的筋腱",
   "item.wildfires.hiking_backpack_leather": "皮革登山包",
   "item.wildfires.small_backpack_leather": "皮革小背包",
   "item.wildfires.military_backpack_leather": "皮革军用背包",
-  "item.wildfires.duffel_bag_leather": "皮革行李袋"
+  "item.wildfires.duffel_bag_leather": "皮革行李袋",
+  "item.wildfires.forging_manual": "锻造手册",
+  "wildfires.smithing.button": "一键锻造",
+  "wildfires.smithing.perfect.no_recipe": "铁砧上没有选择配方",
+  "wildfires.smithing.perfect.busy": "这个铁砧上的一键锻造正在进行中",
+  "wildfires.smithing.perfect.interrupted": "锻造被打断：铁砧上的东西已经不是原来那件了",
+  "wildfires.smithing.perfect.cold": "金属温度不足，无法锻造",
+  "wildfires.smithing.perfect.hammer": "需要一把锤子",
+  "wildfires.smithing.perfect.durability": "锤子至少需要 %s 点耐久",
+  "wildfires.smithing.perfect.stranded": "这块材料已经敲不到目标了：一键完美锻造没法从这个进度接着敲",
+  "wildfires.smithing.perfect.unsolvable": "这个配方找不到可行的完美敲打顺序，无法一键锻造",
+  "wildfires.smithing.memory.none": "这个配方还没有记录：先在铁砧上手动敲完一次",
+  "wildfires.smithing.memory.none_xp": "（锻造经验 %s/%s）",
+  "wildfires.smithing.memory.dirty": "这块材料的状态和记录里的步骤对不上：记忆锻造没法接着敲",
+  "wildfires.smithing.memory.interrupted": "记忆锻造被打断：铁砧上的东西已经变了",
+  "wildfires.smithing.unlocked": "解锁一键锻造：%s",
+  "wildfires.smithing.xp": "锻造经验 +%1$s · %2$s/%3$s · %4$s%% 概率直接解锁",
+  "wildfires.manual.forged": "锻造经验 %s/%s",
+  "wildfires.manual.count": "已锻造 %s 个",
+  "wildfires.manual.empty": "还没有解锁任何一键锻造",
+  "wildfires.manual.target": "目标 %s",
+  "wildfires.manual.path": "最短 %s 步",
+  "wildfires.manual.nopath": "按配方规则无法规划路径",
+  "wildfires.manual.noseed": "等待服务器提供世界种子",
+  "wildfires.jei.category.sluicing": "洗矿槽掉落",
+  "wildfires.jei.category.panning": "淘金盘掉落",
+  "wildfires.jei.chance": "掉落概率：%s",
+  "wildfires.jei.chance_approx": "掉落概率：约 %s",
+  "death.attack.dumbbell": "%1$s 被飞来的哑铃砸扁了",
+  "death.attack.dumbbell.player": "%1$s 被 %2$s 扔出的哑铃砸扁了"
 }

@@ -293,6 +293,21 @@ public class BlockRegister {
             "wild_fluorescyst_shroom", () -> new WildMushroomBlock(
                     BlockBehaviour.Properties.copy(Blocks.BROWN_MUSHROOM).lightLevel(state -> 5)));
 
+    // 筋腱：贴地摆放，湿的过 20 分钟风干；两者遇水都会被冲走，失去下方支撑就掉落
+    public static final RegistryObject<FreshSinewBlock> Sinew = Register.register("sinew",
+            () -> new FreshSinewBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_ORANGE)
+                    .strength(0.5F)
+                    .sound(SoundType.WOOL)
+                    .noCollission()));
+
+    public static final RegistryObject<SinewBlock> DriedSinew = Register.register("dried_sinew",
+            () -> new SinewBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_YELLOW)
+                    .strength(0.5F)
+                    .sound(SoundType.WOOL)
+                    .noCollission()));
+
     // 水下涡轮
     public static final RegistryObject<Block> UnderwaterTurbine = Register.register("underwater_turbine",
             () -> {

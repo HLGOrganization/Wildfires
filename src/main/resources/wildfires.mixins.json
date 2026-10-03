@@ -16,13 +16,61 @@
     "create.CrushingWheelControllerBlockEntityMixin",
     "create.CrushingWheelControllerBlockMixin",
     "create.DieselGeneratorBurnerTemperatureMixin",
-    "create.FanOverheatMixin",
+    /*
+     * Disabled 2026-10-01 - the fan overheat guard moved into the rebuilt
+     * woodencog_wildfire mod itself:
+     *
+     *   create.FanOverheatMixin - relocated.
+     *       It destroyed an item that a blasting fan had heated past its ceiling, both as a
+     *       dropped entity and as an item carried on a belt. Every item a fan heats passes
+     *       through Wooden Cog, so the guard belongs with the fan temperatures it protects.
+     *       woodencog_wildfire injects it itself at the same priority of 900
+     *       (net.chauvedev.woodencog.mixin.MixinFanOverheat, with the logic in
+     *       net.chauvedev.woodencog.compat.create.FanOverheatGuard) and reads the two
+     *       ceilings from woodencog-common.toml under [woodencog.fan] instead of from
+     *       wildfires-fan-heat.toml. The class is kept in the source tree for the case that
+     *       Wildfires has to run without woodencog_wildfire again.
+     *       Keeping this entry as well would install a second head injection on both of the
+     *       same methods, at the same priority, and one of the two would find the item already
+     *       discarded.
+     *
+     * To re-enable it, move the entry back into the array below - but only after removing the
+     * woodencog mixin named above and registering FanHeatConfig in Wildfires.java again.
+     */
+    // "create.FanOverheatMixin",
     "create.KineticBlockEntityMixin",
     "create.ProcessingRecipeMixin",
     "create.RecipeApplierHeatMixin",
     "createmetallurgy.CastingTableMoldHeatMixin",
-    "create.WoodenCogMoldHeatMixin",
-    "create.WoodenCogMoreBurnerTemperatureMixin",
+    /*
+     * Disabled 2026-09-30 - the three Wooden Cog patches either moved into the
+     * rebuilt woodencog_wildfire mod itself or turned out not to be needed:
+     *
+     *   create.WoodenCogForgeHeatLevelMixin - obsolete.
+     *       Wooden Cog commit 582c633 changed tempFromBlockstate's multiplier from
+     *       Heat.maxVisibleTemperature() (1600) to the configured blaze_burner_seething,
+     *       which this pack sets to 2300 and which is present in woodencog 1.2.17.
+     *       Heat level 7 now reverse-computes to 2300C and level 8 to 2683C, so both
+     *       already reach SEETHING. The 433.3C shortfall this mixin existed to fix is gone.
+     *
+     *   create.WoodenCogMoldHeatMixin - dead code.
+     *       The last woodencog:filling mould recipe is commented out in
+     *       kubejs/server_scripts/thirace/recipes/glass_mold.js and pouring moved to
+     *       createmetallurgy:casting_in_table, so AdvancedRecipe.onResultStackSingle is no
+     *       longer on any live path. CastingTableMoldHeatMixin, still enabled above,
+     *       covers the route that is actually used.
+     *
+     *   create.WoodenCogMoreBurnerTemperatureMixin - ported natively.
+     *       Its heat-level mapping and gradual warm-up now live in
+     *       net.chauvedev.woodencog.compat.createmoreburners.CMBIntegrationImpl
+     *       inside woodencog_wildfire, so keeping this would only duplicate the same
+     *       mapping from the outside.
+     *
+     * To re-enable one, move its entry back into the array below.
+     */
+    // "create.WoodenCogForgeHeatLevelMixin",
+    // "create.WoodenCogMoldHeatMixin",
+    // "create.WoodenCogMoreBurnerTemperatureMixin",
     "farmersdelight.BasketBlockEntityMixin",
     "farmersdelight.CuttingBoardRendererMixin",
     "firmalife.DryingMatBlockEntityMixin",
@@ -39,7 +87,10 @@
     "legendarysurvivaloverhaul.WetnessCapabilityMixin",
     "minecraft.ChunkGeneratorMixin",
     "minecraft.BlockEntityTypeAccessor",
+    "minecraft.SlotPositionAccessor",
+    "minecraft.LeonJacketArmorMixin",
     "minecraft.DiggerItemMixin",
+    "minecraft.DumbbellItemMixin",
     "minecraft.ShearsItemMixin",
     "minecraft.WaterFluidMixin",
     "minecraft.ItemEntityMixin",
@@ -60,13 +111,38 @@
     "spartan.ThrowingWeaponItemAccessor",
     "sophisticatedsorter.CoreUtilsMixin",
     "tfc.AnvilBlockEntityMixin",
+    "tfc.AnvilInventoryExcessAccessor",
     "tfc.CalendarAccessor",
     "sacombat.BackpackSlotMixin",
+    "sacombat.BackpackMenuGeometryAccessor",
+    "sacombat.BackpackPanelMenuMixin",
     "sacombat.DynamicClothingItemHandlerMixin",
     "sacombat.DynamicBackpackItemHandlerMixin",
     "tfc.CharcoalForgeBlockEntityMixin",
+    "tfc.CharcoalForgeFireSpreadMixin",
+    "tfc.FirepitFireSpreadMixin",
     "tfc.TFCChestBlockEntityMixin",
-    "tfc.TFCBlockStatePropertiesMixin",
+    /*
+     * Disabled 2026-10-01 - the eighth charcoal forge heat tier moved into the
+     * rebuilt woodencog_wildfire mod itself:
+     *
+     *   tfc.TFCBlockStatePropertiesMixin - relocated.
+     *       It raised TFC's shared heat_level property maximum from 7 to 8 so that
+     *       the earthen oven's heat_level=8 block state variants would resolve.
+     *       That property can only have one owner. woodencog_wildfire now extends it
+     *       itself (net.chauvedev.woodencog.mixin.heat.MixinTFCBlockStateProperties)
+     *       and promotes a forge to tier 8 at 2300C
+     *       (net.chauvedev.woodencog.mixin.heat.MixinCharcoalForgeBlockEntity).
+     *       Keeping this entry as well would install a second redirect on the very
+     *       same IntegerProperty.create call site and a second writer of the same
+     *       block state. The earthen oven reaches tier 8 through the woodencog
+     *       property now; the class is kept in the source tree for the case that
+     *       Wildfires has to run without woodencog_wildfire again.
+     *
+     * To re-enable it, move the entry back into the array below - but only after
+     * removing the two woodencog mixins named above.
+     */
+    // "tfc.TFCBlockStatePropertiesMixin",
     "tfc.ExtendedFluidTypeMixin",
     "tfc.InventoryBlockEntityAccessor",
     "tfc.ItemTypeMixin",
@@ -81,6 +157,9 @@
     "create.AbstractRegistrateMixin",
     "sacombat.client.BackpackCurioRendererMixin",
     "sacombat.client.BackpackGuiTintMixin",
+    "sacombat.client.BackpackScreenMixin",
+    "sacombat.BackpackGuiTintInvoker",
+    "sacombat.BackpackTitleColorInvoker",
     "curios.SPacketSyncCuriosMixin",
     "curios.SPacketSyncStackMixin",
     "embeddium.BlockOcclusionCacheMixin",
@@ -100,6 +179,9 @@
     "minecraft.CreativeModeInventoryScreenMixin",
     "minecraft.BlockShouldRenderFaceMixin",
     "minecraft.EffectRenderingInventoryScreenMixin",
+    "minecraft.ContainerScreenOriginAccessor",
+    "minecraft.ScreenTextAccessor",
+    "tfc.client.PerfectForgeOverlayMixin",
     "minecraft.ItemColorsMixin",
     "minecraft.LevelRendererMixin",
     "minecraft.OrbitLightTextureMixin",
