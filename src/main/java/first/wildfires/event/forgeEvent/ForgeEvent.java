@@ -5,6 +5,7 @@ import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import dev.latvian.mods.kubejs.item.ItemClickedEventJS;
 import first.wildfires.Wildfires;
 import first.wildfires.diagnostics.StartupDiagnostics;
+import first.wildfires.dumbbell.Dumbbells;
 import first.wildfires.api.KineticData;
 import first.wildfires.api.MobPoopData;
 import first.wildfires.api.customEvent.*;
@@ -505,6 +506,9 @@ public class ForgeEvent {
 		ItemStack itemStack = event.getItemStack();
 		CompoundTag tag = itemStack.getTag();
 		addWetnessProtectionModifiers(event, itemStack);
+		if (event.getSlotType() == EquipmentSlot.MAINHAND && Dumbbells.isDumbbell(itemStack)) {
+			Dumbbells.addAttributeModifiers(event);
+		}
 		if (tag != null && event.getSlotType() == EquipmentSlot.MAINHAND && itemStack.getTags().anyMatch(itemTagKey -> itemTagKey.location().toString().equals("kubejs:polish"))) {
 			int polish = tag.getInt("Polish");
 			if (polish > 0) {

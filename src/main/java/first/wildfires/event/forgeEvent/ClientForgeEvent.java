@@ -21,6 +21,7 @@ import first.wildfires.client.spell.GalaxyHymnImpactVisuals;
 import first.wildfires.client.space.render.NtmAscentPlanetRenderer;
 import first.wildfires.api.customEvent.CreativeTabBuildEvent;
 import first.wildfires.compat.sacombat.SatchelSizeRules;
+import first.wildfires.dumbbell.Dumbbells;
 import first.wildfires.kinetic.loom.LoomControlBlock;
 import first.wildfires.network.PlayerInputPacket;
 import first.wildfires.ponder.WildfiresPonderPlugin;
@@ -36,6 +37,8 @@ import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.dries007.tfc.common.capabilities.size.Size;
@@ -261,6 +264,53 @@ public class ClientForgeEvent {
                     .style(ChatFormatting.GOLD)
                     .addTo(toolTip);
         }
+
+        // Dumbbells: the vanilla attribute section lists the raw modifiers, so a dumbbell reads as
+        // "-3.5 attack speed" even though the player's real attack speed is 0.5 (4.0 base - 3.5) and the real
+        // damage of the item is 5 / 7. Show the totals the player actually gets instead.
+        if (Dumbbells.isDumbbell(stack)) {
+            replaceAttributeTotal(toolTip, Attributes.ATTACK_DAMAGE, Dumbbells.attackDamage(stack));
+            replaceAttributeTotal(toolTip, Attributes.ATTACK_SPEED, Dumbbells.ATTACK_SPEED);
+        }
+    }
+
+    /**
+     * Rewrites the vanilla "when in main hand" line of one attribute so it shows the final value instead of the flat
+     * modifier. Vanilla 1.20.1 fires {@link ItemTooltipEvent} once that section has been built, so the line is always
+     * present by the time this runs; its original style (colour, indent) is kept.
+     */
+    private static void replaceAttributeTotal(List<Component> toolTip, Attribute attribute, double total) {
+        String name = Component.translatable(attribute.getDescriptionId()).getString();
+        if (name.isEmpty()) {
+            return;
+        }
+        for (int i = 1; i < toolTip.size(); i++) {
+            Component line = toolTip.get(i);
+            String rendered = line.getString();
+            int nameAt = rendered.lastIndexOf(name);
+            if (nameAt < 0) {
+                continue;
+            }
+            toolTip.set(i, Component.literal(attributeValueLead(rendered.substring(0, nameAt)))
+                    .append(Component.translatable("attribute.modifier.equals.0",
+                            ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(total),
+                            Component.translatable(attribute.getDescriptionId())))
+                    .withStyle(line.getStyle()));
+            return;
+        }
+    }
+
+    /** Everything in front of the number in a vanilla attribute line, so the rewrite keeps its indent. */
+    private static String attributeValueLead(String beforeName) {
+        int i = 0;
+        while (i < beforeName.length()) {
+            char c = beforeName.charAt(i);
+            if (Character.isDigit(c) || c == '-' || c == '+' || c == '\u00d7') {
+                break;
+            }
+            i++;
+        }
+        return beforeName.substring(0, i);
     }
 
 }

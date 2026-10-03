@@ -1,0 +1,24 @@
+{
+  "variants": {
+    "age=0": { "model": "wildfires:block/sinew" },
+    "age=1": { "model": "wildfires:block/sinew" },
+    "age=2": { "model": "wildfires:block/sinew" },
+    "age=3": { "model": "wildfires:block/sinew" },
+    "age=4": { "model": "wildfires:block/sinew" },
+    "age=5": { "model": "wildfires:block/sinew" },
+    "age=6": { "model": "wildfires:block/sinew" },
+    "age=7": { "model": "wildfires:block/sinew" },
+    "age=8": { "model": "wildfires:block/sinew" },
+    "age=9": { "model": "wildfires:block/sinew" },
+    "age=10": { "model": "wildfires:block/sinew" },
+    "age=11": { "model": "wildfires:block/sinew" },
+    "age=12": { "model": "wildfires:block/sinew" },
+    "age=13": { "model": "wildfires:block/sinew" },
+    "age=14": { "model": "wildfires:block/sinew" },
+    "age=15": { "model": "wildfires:block/sinew" },
+    "age=16": { "model": "wildfires:block/sinew" },
+    "age=17": { "model": "wildfires:block/sinew" },
+    "age=18": { "model": "wildfires:block/sinew" },
+    "age=19": { "model": "wildfires:block/sinew" }
+  }
+}

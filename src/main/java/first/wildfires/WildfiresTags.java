@@ -17,6 +17,12 @@ public final class WildfiresTags {
             ResourceLocation.fromNamespaceAndPath("tfc", "knives")
     );
 
+    /** The dumbbells, which are given a slow heavy melee style and a charge throw. Open to any item. */
+    public static final TagKey<Item> DUMBBELLS = TagKey.create(
+            Registries.ITEM,
+            ResourceLocation.fromNamespaceAndPath(Wildfires.MODID, "dumbbells")
+    );
+
     private WildfiresTags() {
     }
 }

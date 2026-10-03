@@ -1,6 +1,7 @@
 package first.wildfires.event.forgeEvent;
 
 import first.wildfires.Wildfires;
+import first.wildfires.client.renderer.entity.DumbbellRenderer;
 import first.wildfires.client.renderer.entity.ReplacedBearRenderer;
 import first.wildfires.client.spell.GalaxyHymnStarlinkParticle;
 import first.wildfires.client.spell.GalaxyHymnBlackWorldShader;
@@ -11,6 +12,7 @@ import first.wildfires.client.spell.GalaxyHymnNebulaShader;
 import first.wildfires.client.spell.GalaxyHymnProjectileRenderer;
 import first.wildfires.client.spell.GalaxyHymnSpaceWindowShader;
 import first.wildfires.compats.irons_spellbooks.GalaxyHymnRegister;
+import first.wildfires.register.EntityRegister;
 import first.wildfires.register.ItemRegister;
 import net.dries007.tfc.common.entities.TFCEntities;
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
@@ -53,6 +55,7 @@ public final class ClientModEvent {
                 GalaxyHymnFieldRenderer::new);
         event.registerEntityRenderer(GalaxyHymnRegister.GALAXY_HYMN_HOMING_STAR.get(),
                 GalaxyHymnHomingStarRenderer::new);
+        event.registerEntityRenderer(EntityRegister.DUMBBELL.get(), DumbbellRenderer::new);
     }
 
     @SubscribeEvent
