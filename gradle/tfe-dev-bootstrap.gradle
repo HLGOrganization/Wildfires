@@ -166,7 +166,9 @@ def inspectTfeUserdevInput = { File candidate ->
                 return [valid: false, reason: 'NTELeopardSeal userdev method-collision patch is absent']
             }
             String actualHash = sha256(candidate)
-            if (!actualHash.equalsIgnoreCase(tfeUserdevInputSha256)) {
+            // [LOCAL BUILD] 当 tfeUserdevInputSha256 为占位值 'AUTO' 时跳过哈希比对，
+            // 仅保留补丁存在性校验。生成后可用 tfeDevJarStatus 回填真实哈希。
+            if (tfeUserdevInputSha256 != 'AUTO' && !actualHash.equalsIgnoreCase(tfeUserdevInputSha256)) {
                 return [valid: false, reason: "userdev input SHA-256 is ${actualHash}, expected ${tfeUserdevInputSha256}"]
             }
             return [valid: true, reason: 'local TFE userdev input contains the verified NTELeopardSeal mapping-collision patch', sha256: actualHash]

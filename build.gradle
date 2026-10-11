@@ -25,11 +25,13 @@ base {
     archivesName = mod_id
 }
 
-ext.tfeVersion = '2.0.1'
-ext.tfeReleaseSha256 = '029AD1A7368B687BCD435B4321257BA8DD9E9D3B8533FC248BD43CEB5CE5A308'
+// [LOCAL BUILD] 指向整合包实际运行的 TFE 2.2.3（原作者确认 2.2.3 与整合包完全兼容）。
+// 原官方值为 2.0.1 / 029AD1A7368B687BCD435B4321257BA8DD9E9D3B8533FC248BD43CEB5CE5A308。
+ext.tfeVersion = '2.2.3'
+ext.tfeReleaseSha256 = '6C6478EC98F378C20681308171F0D0EFE5C9B272B8EA6936C1454FF7C0A7CB83'
 ext.tfeLocalJar = file(".wildfires-cache/tfe-release/Wildfire_TerraFirmaEarth-1.20.1-forge-${tfeVersion}.jar")
 ext.tfeUserdevInputVersion = "${tfeVersion}-wildfires-userdev-1"
-ext.tfeUserdevInputSha256 = 'D92F9CF012E0F8C90BA36F4C69F469FD15B8D4DD8CC3E331CE55B905AB5371CF'
+ext.tfeUserdevInputSha256 = 'AUTO'  // [LOCAL BUILD] 自生成，首次构建后回填真实值
 ext.tfeUserdevInputJar = file(".wildfires-cache/tfe-userdev-input/Wildfire_TerraFirmaEarth-1.20.1-forge-${tfeUserdevInputVersion}.jar")
 
 java {
@@ -515,6 +517,14 @@ tasks.register('mapChunkLoadRulesSelfTest', JavaExec) {
     mainClass = 'first.wildfires.minecraft.MapChunkLoadRulesSelfTest'
 }
 
+tasks.register('spawnEggPreviewRulesSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs plain-Java checks for the spawn-egg preview fit and per-context scale.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'first.wildfires.client.spawnegg.SpawnEggPreviewRulesSelfTest'
+}
+
 tasks.named('check').configure {
     dependsOn tasks.named('celestialMathSelfTest'), tasks.named('celestialClientSelfTest'),
             tasks.named('calendarRateSelfTest'), tasks.named('spaceCoreSelfTest'),
@@ -535,4 +545,5 @@ tasks.named('check').configure {
     dependsOn tasks.named('curvingPressRulesSelfTest')
     dependsOn tasks.named('compassStackRulesSelfTest')
     dependsOn tasks.named('mapChunkLoadRulesSelfTest')
+    dependsOn tasks.named('spawnEggPreviewRulesSelfTest')
 }

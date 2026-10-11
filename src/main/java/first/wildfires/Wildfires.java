@@ -13,6 +13,7 @@ import first.wildfires.compat.minecraft.MapChunkLoadConfig;
 import first.wildfires.compat.net.NetworkGuardTargets;
 import first.wildfires.compat.sophisticateditemactions.SophisticatedItemActionsConfig;
 import first.wildfires.jei.FoodTraitDisplayConfig;
+import first.wildfires.client.spawnegg.SpawnEggPreviewConfig;
 import first.wildfires.diagnostics.StartupDiagnostics;
 import first.wildfires.register.*;
 import first.wildfires.space.SpaceBootstrap;
@@ -48,6 +49,10 @@ public class Wildfires {
 		SophisticatedItemActionsConfig.register();
 		MapChunkLoadConfig.register();
 		FoodTraitDisplayConfig.register();
+		// Ported from the standalone entityspawnegg 1.0.0 mod: draws a spawn egg's mob in place of
+		// the flat egg icon. Registered unconditionally like FoodTraitDisplayConfig above; Forge
+		// ignores a CLIENT config on a dedicated server.
+		SpawnEggPreviewConfig.register();
 		CreateMechanicalArmCompat.register();
 		IEventBus eventBus = context.getModEventBus();
 		GalaxyHymnRegister.register(eventBus);

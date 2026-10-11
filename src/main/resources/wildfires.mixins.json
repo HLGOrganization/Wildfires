@@ -327,6 +327,7 @@
     "minecraft.ReturnCapsuleMinecraftMixin",
     "minecraft.ReturnCapsuleLivingEntityRendererMixin",
     "minecraft.ReturnCapsulePlayerRendererMixin",
+    "minecraft.SpawnEggItemRendererMixin",
     "minecraft.StructureBiomeMixin",
     "sophisticatedsorter.ClientUtilsMixin",
     "tfc.ClimateScreenMixin",
