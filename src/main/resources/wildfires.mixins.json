@@ -4,6 +4,7 @@
   "package": "first.wildfires.mixin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "wildfires.refmap.json",
+  "plugin": "first.wildfires.mixin.WildfiresMixinPlugin",
   "mixins": [
     "aquaculture.FishDataMixin",
     "alex.GuanoLayerBlockMixin",
@@ -12,6 +13,7 @@
     "create.AttributeFilterItemStackMixin",
     "create.AttributeFilterMenuAccessor",
     "create.AttributeFilterScreenAccessor",
+    "create.BasketBeltInputMixin",
     "create.CrushingWheelBlockMixin",
     "create.CrushingWheelControllerBlockEntityMixin",
     "create.CrushingWheelControllerBlockMixin",
@@ -95,12 +97,15 @@
     "minecraft.WaterFluidMixin",
     "minecraft.ItemEntityMixin",
     "minecraft.ItemStackMixin",
+    "minecraft.AbstractContainerMenuMixin",
     "minecraft.LevelThermalMixin",
     "minecraft.LivingEntityMixin",
     "minecraft.LocalMobCapCalculatorMixin",
     "minecraft.LocalMobCountsAccessor",
     "minecraft.MonsterMixin",
     "minecraft.StructureManagerMixin",
+    "minecraft.MapItemUpdateGuardMixin",
+    "minecraft.ServerChunkCacheWatchMixin",
     "minecraft.attackspeed.HoeAttackSpeedMixin",
     "minecraft.attackspeed.ScytheAttackSpeedMixin",
     "sophisticateditemactions.ItemActionHandlerRegistryMixin",
@@ -110,8 +115,39 @@
     "spartan.SwordBaseItemMixin",
     "spartan.ThrowingWeaponItemAccessor",
     "sophisticatedsorter.CoreUtilsMixin",
+    "tfc.AbstractFirepitBlockEntityMixin",
     "tfc.AnvilBlockEntityMixin",
     "tfc.AnvilInventoryExcessAccessor",
+    /*
+     * 凝乳桶配方返还奶酪布。
+     *
+     * 桶配方只有一个物品产出位、也没有「保留输入物」字段，数据包层面做不到，所以补在
+     * BarrelRecipe#assembleOutputs 的 TAIL（唯一往桶里塞产出的地方，封盖配方没有覆盖它）：
+     * 输入需要奶酪布、产出的主物品却不是布时，往桶里补一块 —— 槽位被凝乳占着就进 excess，
+     * 由 BarrelBlockEntity#serverTick 弹到桶边。cream 那种产物就是布的配方自动跳过。
+     * 布按物品 id 现查，Firmalife 缺席时静默跳过，所以它不是编译依赖。
+     */
+    /*
+     * 桶里淬火，追加 2026-10-08。
+     *
+     * 放在桶里的工具头是方块实体物品栏里的一件物品，永远不会变成掉落的 ItemEntity，所以
+     * ItemEntityTickEvent 那条路看不见它。改挂在 BarrelBlockEntity#serverTick 的 HEAD（TAIL 会因为
+     * serverTick 的多条提前 return 而落在一个几乎走不到的分支上）：桶里有水（原版水 / TFC 淡水标签）、
+     * 物品栏里的东西够热且带 kubejs:tool_head，就按入水处理，每 tick 攒一次淬火值。
+     * 水、阈值、裂纹档三条规则和掉落那条路共用 first.wildfires.compat.tfc.Quenching。
+     */
+    /*
+     * Valhelsia 家具的椅子 / 凳子"自动吸附"关掉，追加 2026-10-09。
+     *
+     * 椅子（ChairBlock，含继承它的 UpholsteredChairBlock）和凳子（StoolBlock）各自实现了
+     * Block#entityInside（SRG m_7892_）：实体一碰到碰撞箱就建 SeatEntity 按上去，人走过去会被吸住。
+     * 两个 mixin 都在 HEAD 取消这个方法，只去掉"碰一下就坐"；右键坐下是 Block#use（m_6227_），保留。
+     * 目标用 SRG + remap=false + @Pseudo + require=1，和其它第三方守卫同一套写法。
+     */
+    "valhelsiafurniture.ChairAutoSitGuardMixin",
+    "valhelsiafurniture.StoolAutoSitGuardMixin",
+    "tfc.BarrelBlockEntityMixin",
+    "tfc.BarrelRecipeMixin",
     "tfc.CalendarAccessor",
     "sacombat.BackpackSlotMixin",
     "sacombat.BackpackMenuGeometryAccessor",
@@ -149,9 +185,107 @@
     "tfc.ForgeEventHandlerCelestialMixin",
     "tfc.ServerCalendarRateMixin",
     "tfc.PanItemMixin",
+    "tfc.PotRecipeAccessor",
     "tfc.PredatorMixin",
     "tfc.SluiceBlockEntityMixin",
-    "tfc.ToolItemMixin"
+    "tfc.ToolItemMixin",
+    /*
+     * 温度接近的堆叠合并，2026-10-05。
+     *
+     * 需求：温差不超过"这份物品 10 秒里自己会变化的温度量"的同一种物品允许合并，
+     * 合并后取两个温度的平均值（2026-10-06 由"热容 × 10、取较低温度"改为此规则）。
+     *
+     *   forge.ItemHandlerHelperMixin - 机器、管道、物品处理器那一半的"能不能叠"。
+     *   tfc.FoodCapabilityMixin      - 群峦设备自己的合并（拿副本判定，改不到真堆叠）。
+     *
+     * 原版那一半（物品栏、物品实体、合成栏）挂在已有的 minecraft.ItemStackMixin 上，
+     * 三个判定合起来用 first.wildfires.utils.HeatStacking 里的同一条规则；
+     * "取平均"的落点在 ItemStack#grow 与 FoodCapability#mergeItemStacks。
+     * 两边都必须放宽，否则热锭在箱子里叠不起来、在机器里却叠得起来。
+     */
+    "forge.ItemHandlerHelperMixin",
+    "tfc.FoodCapabilityMixin",
+    /*
+     * Vintage Improvements curving press guard, added 2026-10-05.
+     *
+     * canCurve walks the recipe's ingredients and, in modes 1 and 2, reads getItems()[0] of the slot
+     * it pre-checked without checking the length of that array. An ingredient that is not empty while
+     * its item list resolved to nothing - a TFC trait, food or heat filter over a tag whose items
+     * carry none of that data - therefore throws ArrayIndexOutOfBoundsException out of a predicate.
+     * JEI walks every crafting recipe through that predicate inside one plugin callback and abandons
+     * the whole callback when it throws, which is why the turning and laser-cutting categories come
+     * up empty for the session while the press itself keeps working.
+     *
+     *   vintageimprovements.CurvingPressGuardMixin - refuses the recipe, with the false that canCurve
+     *       already answers for every recipe it cannot process, and names it once in the log so the
+     *       pack can fix the ingredient. The rule and the log budget live in
+     *       first.wildfires.compat.vintageimprovements and are covered by CurvingPressRulesSelfTest.
+     *
+     * Like the network guards below it is @Pseudo, names its target as a string and uses remap = false,
+     * so the mod is not a compile dependency, no target type appears in a handler signature and the
+     * guard is skipped when the mod is absent; require = 1 makes a renamed method fail loudly at
+     * start-up.
+     */
+    "vintageimprovements.CurvingPressGuardMixin",
+    /*
+     * Simply Tents cellar preservation guard, added 2026-10-07.
+     *
+     * A tent packs the blocks inside it by copying each block entity's saved data into the tent item and
+     * only then removing the block, so the removal hooks that TFC Modern Life takes its temporary cellar
+     * preservation off with (the block's onRemove, the drop path, the slot and capability callbacks) find
+     * nothing left to clean. A container that stood in a Modern Life cellar therefore travels with
+     * tfc_modern_life:cellar_Nx already written onto its food, and food that never stood in a cellar
+     * afterwards keeps the doubled shelf life that trait is worth.
+     *
+     *   simplytents.TentCellarPreservationMixin - puts the cleanup back where the tent restores a container,
+     *       which is one call per restored block entity rather than the two the packing side would need
+     *       pinned by ordinal, and which also cleans tents packed before this guard existed. It calls
+     *       Modern Life's own public strip through first.wildfires.compat.simplytents.
+     *
+     * Like the guards around it, it is @Pseudo, names its target as a string, uses remap = false and
+     * carries require = 1. TFC Modern Life itself is optional for it: the strip is looked up by name and
+     * does nothing when that mod is absent.
+     */
+    "simplytents.TentCellarPreservationMixin",
+    /*
+     * Outbound network guards, added 2026-10-04.
+     *
+     * These cut the start-up "phone home" requests of mods that expose no config
+     * switch for them. The mods that do have a switch are turned off in config/
+     * instead (Xaero, Distant Horizons, ModernUI telemetry, Oculus, IE news...).
+     *
+     * Every guard is @Pseudo and names its target class as a string with remap = false, so no mod
+     * is a compile dependency, no target type appears in a handler signature and the guard is
+     * skipped when its mod is not installed at all. That is why they can share this one config and
+     * why they are safe to load on either side. Each one also carries require = 1: if an installed
+     * mod update renames the guarded method, the guard fails loudly at start-up instead of quietly
+     * letting the request through again.
+     *
+     *   network.AdAstraStationsMixin                   - radio station list
+     *   network.AlexsCavesConflictsMixin               - mod conflict list (keeps bundled copy)
+     *   network.CitadelPatreonMixin                    - patreon list (keeps bundled copy)
+     *   network.ExposureSupportersMixin                - supporter badge list
+     *   network.FancyToastsCreditsMixin                - online credit list
+     *   network.ImmersiveEngineeringContributorsMixin  - contributor revolver skins
+     *   network.KiwiContributorsMixin                  - contributor tiers
+     *   network.KubeJsUpdateMixin                      - version check
+     *   network.PlaceboTrailsMixin                     - patreon trail list
+     *   network.PlaceboWingsMixin                      - patreon wing list
+     *   network.SteamRailsDevCapeMixin                 - developer cape list
+     *   network.SupplementariesCreditsMixin            - remote credits document
+     */
+    "network.AdAstraStationsMixin",
+    "network.AlexsCavesConflictsMixin",
+    "network.CitadelPatreonMixin",
+    "network.ExposureSupportersMixin",
+    "network.FancyToastsCreditsMixin",
+    "network.ImmersiveEngineeringContributorsMixin",
+    "network.KiwiContributorsMixin",
+    "network.KubeJsUpdateMixin",
+    "network.PlaceboTrailsMixin",
+    "network.PlaceboWingsMixin",
+    "network.SteamRailsDevCapeMixin",
+    "network.SupplementariesCreditsMixin"
   ],
   "client": [
     "create.AbstractRegistrateMixin",

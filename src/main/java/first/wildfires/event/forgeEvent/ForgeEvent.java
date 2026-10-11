@@ -9,6 +9,11 @@ import first.wildfires.dumbbell.Dumbbells;
 import first.wildfires.api.KineticData;
 import first.wildfires.api.MobPoopData;
 import first.wildfires.api.customEvent.*;
+import first.wildfires.compat.tfc.AnvilInsertGuard;
+import first.wildfires.compat.tfc.AnvilInsertRules;
+import first.wildfires.compat.tfc.CompassStackRules;
+import first.wildfires.compat.tfc.IgnitionInterrupt;
+import first.wildfires.compat.tfc.Quenching;
 import first.wildfires.register.SoundRegister;
 import first.wildfires.register.AttributeRegister;
 import first.wildfires.register.BlockRegister;
@@ -17,13 +22,11 @@ import first.wildfires.structure.AndesiteCasingFrameDetector;
 import first.wildfires.utils.CuriosUtil;
 import first.wildfires.utils.WildfiresUtil;
 import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
-import net.dries007.tfc.common.TFCTags;
 import net.dries007.tfc.common.blocks.plant.fruit.FruitTreeBranchBlock;
 import net.dries007.tfc.common.blocks.plant.fruit.FruitTreeLeavesBlock;
 import net.dries007.tfc.common.blocks.plant.fruit.Lifecycle;
 import net.dries007.tfc.common.capabilities.food.FoodCapability;
 import net.dries007.tfc.common.capabilities.heat.HeatCapability;
-import net.dries007.tfc.common.capabilities.heat.IHeat;
 import net.dries007.tfc.common.entities.livestock.TFCAnimalProperties;
 import net.dries007.tfc.common.items.IngotItem;
 import net.dries007.tfc.common.items.TFCItems;
@@ -49,7 +52,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SnowLayerBlock;
-import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -431,14 +434,10 @@ public class ForgeEvent {
 	public static void itemEntityTick(ItemEntityTickEvent.Post event) {
 		ItemEntity itemEntity = event.getItemEntity();
 		ItemStack itemStack = itemEntity.getItem();
-		IHeat iHeat = HeatCapability.get(itemStack);
-		if (!itemEntity.level().isClientSide() && itemEntity.isInWaterRainOrBubble() && iHeat != null && (iHeat.getTemperature() >= iHeat.getWorkingTemperature() * 0.6) && itemStack.getTags().anyMatch(itemTagKey -> itemTagKey.location().toString().equals("kubejs:tool_head"))) {
-			CompoundTag tag = itemStack.getOrCreateTag();
-			tag.putInt("Quenching", tag.getInt("Quenching") + 1);
-			tag.putInt("Polish", tag.getInt("Polish") + 1);
-			if (iHeat.canWeld()) {
-				tag.putBoolean("Broken", true);
-			}
+		// 入水即淬火：泡在水 / 雨 / 气泡柱里，且够热、是工具头。木桶里那一份走桶自己的 tick，两条路
+		// 共用 {@link Quenching} 里的同一套规则（水、阈值、裂纹档），免得两边漂移。
+		if (!itemEntity.level().isClientSide() && itemEntity.isInWaterRainOrBubble() && Quenching.canQuench(itemStack)) {
+			Quenching.quench(itemStack);
 		}
 	}
 
@@ -486,8 +485,9 @@ public class ForgeEvent {
 
 	@SubscribeEvent
 	public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
-		CompoundTag tag = event.getEntity().getMainHandItem().getTag();
-		if (tag != null && event.getEntity().getMainHandItem().getTags().anyMatch(itemTagKey -> itemTagKey.location().toString().equals("kubejs:polish"))) {
+		ItemStack mainHand = event.getEntity().getMainHandItem();
+		CompoundTag tag = mainHand.getTag();
+		if (tag != null && mainHand.getTags().anyMatch(itemTagKey -> itemTagKey.location().toString().equals("kubejs:polish"))) {
 			int polish = tag.getInt("Polish");
 			if (polish > 0) {
 				event.setNewSpeed(event.getNewSpeed() * Math.min(2, (1 + polish * 0.001f)));
@@ -498,6 +498,11 @@ public class ForgeEvent {
 			if (quenching > 0) {
 				event.setNewSpeed(event.getNewSpeed() * (1 + (float) (1 - 1.0 / (1 + quenching / 900.0))));
 			}
+		}
+		// 锯子：挖掘速度提升到同材质斧头的 125%（TFC 的锯子注册为原版 AxeItem，基础速度与斧头相同）
+		if (mainHand.getTags().anyMatch(itemTagKey -> itemTagKey.location().toString().equals("tfc:saws"))
+				&& event.getState().is(BlockTags.MINEABLE_WITH_AXE)) {
+			event.setNewSpeed(event.getNewSpeed() * 1.25F);
 		}
 	}
 
@@ -637,7 +642,15 @@ public class ForgeEvent {
 
 		if (!level.isClientSide()) {
 			if (isDamagedCompass) {
-				player.setItemInHand(hand, new ItemStack(ItemRegister.SimpleCompass.get()));
+				ItemStack charged = new ItemStack(ItemRegister.SimpleCompass.get());
+				if (CompassStackRules.leavesTheRestBehind(heldItem.getCount())) {
+					// Leftovers from before the compasses were made unstackable: charge one of them and leave
+					// the rest in hand, instead of replacing the whole stack with a single compass.
+					heldItem.shrink(1);
+					handOut(player, charged);
+				} else {
+					player.setItemInHand(hand, charged);
+				}
 			} else {
 				heldItem.setDamageValue(0);
 			}
@@ -647,10 +660,68 @@ public class ForgeEvent {
 	}
 
 	private static boolean isWaterSource(FluidState fluid) {
-		return fluid.isSource()
-				&& (fluid.getType().is(FluidTags.WATER)
-				|| fluid.getType().is(TFCTags.Fluids.ANY_FRESH_WATER)
-				|| fluid.getType().is(TFCTags.Fluids.ANY_WATER));
+		return Quenching.isQuenchWater(fluid);
+	}
+
+	/**
+	 * Watches both hands at the end of every player tick and opens the window that refuses the click a burned
+	 * out ignition item leaves behind. On the server this is the tick a firestarter at one durability breaks,
+	 * because the break happens inside the player's own tick and this runs at the very end of it.
+	 */
+	@SubscribeEvent
+	public static void trackIgnitionItemBurnedOut(TickEvent.PlayerTickEvent event) {
+		if (event.phase != TickEvent.Phase.END) {
+			return;
+		}
+
+		IgnitionInterrupt.track(event.player);
+	}
+
+	/**
+	 * Refuses the bare-handed sneak click on a pot for a moment after an ignition item burned out, so the
+	 * button that is still held from lighting the pot does not take it off the fire in the same breath. This
+	 * runs at HIGHEST because TFC performs an empty-handed click on a block itself, at the lowest priority,
+	 * and a cancelled click is the only thing that stops it.
+	 */
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void interruptClickAfterIgnitionItemBurnedOut(PlayerInteractEvent.RightClickBlock event) {
+		if (!IgnitionInterrupt.interrupt(event)) {
+			return;
+		}
+
+		// PASS rather than FAIL. The client stops trying the other hand the moment a block click returns
+		// FAIL, and a pot can legitimately be lit with a firestarter held in the other hand, so FAIL would
+		// drop that click. PASS refuses this hand without consuming the click and without telling the client
+		// to give up - and it costs nothing here, because the hand that clicked is empty and therefore has no
+		// use of its own to fall through to.
+		event.setCancellationResult(InteractionResult.PASS);
+		event.setCanceled(true);
+	}
+
+	/**
+	 * Keeps the tongs out of an anvil. Sneaking on an anvil with an item in hand puts that item into one of
+	 * the anvil's slots, and TFC answers a weld and a take-out that did nothing with PASS - which vanilla
+	 * reads as "try the other hand". A player working hot metal keeps tongs in that other hand, so the
+	 * tongs are the item that ends up in the anvil, and losing them is what turns the pack's own heat
+	 * damage loose on the rest of the inventory. This runs at HIGHEST for the same reason the pot click
+	 * above does: the decision has to be made before TFC's own block use, and a cancelled click is the only
+	 * thing that stops it.
+	 */
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void keepTongsOutOfAnvil(PlayerInteractEvent.RightClickBlock event) {
+		AnvilInsertRules.Decision decision = AnvilInsertGuard.decide(event);
+		if (decision == AnvilInsertRules.Decision.ALLOW) {
+			return;
+		}
+
+		// PASS hands the click to the other hand, which is what lets a workpiece held there still be put
+		// in by the same click. SUCCESS spends it, and is the answer when there is no other hand to ask:
+		// handing the falling click to an empty hand would reach TFC's take-out and put a hot workpiece in
+		// it, which is the accident being fixed, one hand over.
+		event.setCancellationResult(decision == AnvilInsertRules.Decision.TRY_OTHER_HAND
+				? InteractionResult.PASS
+				: InteractionResult.SUCCESS);
+		event.setCanceled(true);
 	}
 
 	/**
@@ -677,10 +748,10 @@ public class ForgeEvent {
 		}
 
 		for (int slot = 0; slot < player.getInventory().items.size(); slot++) {
-			decaySimpleCompass(player.getInventory().items, slot, raining ? mainHand : null, raining ? offhand : null);
+			decaySimpleCompass(player, player.getInventory().items, slot, raining ? mainHand : null, raining ? offhand : null);
 		}
 		for (int slot = 0; slot < player.getInventory().offhand.size(); slot++) {
-			decaySimpleCompass(player.getInventory().offhand, slot, raining ? mainHand : null, raining ? offhand : null);
+			decaySimpleCompass(player, player.getInventory().offhand, slot, raining ? mainHand : null, raining ? offhand : null);
 		}
 	}
 
@@ -690,16 +761,31 @@ public class ForgeEvent {
 		}
 	}
 
-	private static void decaySimpleCompass(java.util.List<ItemStack> inventory, int slot, ItemStack protectedMainHand, ItemStack protectedOffhand) {
+	private static void decaySimpleCompass(Player player, java.util.List<ItemStack> inventory, int slot, ItemStack protectedMainHand, ItemStack protectedOffhand) {
 		ItemStack stack = inventory.get(slot);
 		if (!stack.is(ItemRegister.SimpleCompass.get()) || stack == protectedMainHand || stack == protectedOffhand) {
 			return;
 		}
 
 		if (stack.getDamageValue() + 1 >= stack.getMaxDamage()) {
-			inventory.set(slot, new ItemStack(ItemRegister.DamagedCompass.get()));
+			ItemStack dehydrated = new ItemStack(ItemRegister.DamagedCompass.get());
+			if (CompassStackRules.leavesTheRestBehind(stack.getCount())) {
+				// The same leftovers the water source has to deal with: a stack saved while compasses still
+				// stacked gives up one compass per decay step instead of collapsing into a single one.
+				stack.shrink(1);
+				handOut(player, dehydrated);
+			} else {
+				inventory.set(slot, dehydrated);
+			}
 		} else {
 			stack.setDamageValue(stack.getDamageValue() + 1);
+		}
+	}
+
+	/** Puts a compass the player has just earned into the inventory, and on the ground when there is no room. */
+	private static void handOut(Player player, ItemStack stack) {
+		if (!player.getInventory().add(stack)) {
+			player.drop(stack, false);
 		}
 	}
 

@@ -204,14 +204,14 @@
   ,"commands.wildfires.smithing.players_only": "该指令只能由玩家执行"
   ,"commands.wildfires.smithing.bad_id": "不是合法的配方ID：%s"
   ,"commands.wildfires.smithing.unknown_recipe": "没有这个铁砧配方：%s"
-  ,"commands.wildfires.smithing.unlocked": "已解锁一键锻造：%s"
-  ,"commands.wildfires.smithing.already": "%s 的一键锻造早已解锁，未做改动"
-  ,"commands.wildfires.smithing.unlocked_all": "已解锁全部 %2$s 个铁砧配方的一键锻造（本次新增 %1$s 个）"
+  ,"commands.wildfires.smithing.unlocked": "已解锁记忆锻造：%s"
+  ,"commands.wildfires.smithing.already": "%s 的记忆锻造早已解锁，未做改动"
+  ,"commands.wildfires.smithing.unlocked_all": "已解锁全部 %2$s 个铁砧配方的记忆锻造（本次新增 %1$s 个）"
   ,"commands.wildfires.smithing.cleared": "已清除锻造记录：%s（锻造经验、解锁与记忆一并归零）"
   ,"commands.wildfires.smithing.cleared_all": "已清除该玩家的全部锻造记录：%s 个配方（锻造经验、解锁与记忆一并归零）"
   ,"commands.wildfires.smithing.nothing": "%s 没有锻造记录，未做改动"
   ,"commands.wildfires.smithing.nothing_at_all": "该玩家没有任何锻造记录，未做改动"
-  ,"commands.wildfires.smithing.list_header": "已解锁 %1$s / %2$s 个铁砧配方的一键锻造"
+  ,"commands.wildfires.smithing.list_header": "已解锁 %1$s / %2$s 个铁砧配方的记忆锻造"
   ,"commands.wildfires.smithing.list_entry": "%1$s（锻造经验 %2$s/%3$s）"
   ,"commands.wildfires.smithing.list_more": "……其余 %s 个未列出"
   ,"commands.wildfires.smithing.messages_on": "锻造提示已开启：之后每次锻造都会在聊天栏显示获得的经验与解锁概率"
@@ -371,32 +371,33 @@
   "item.wildfires.military_backpack_leather": "皮革军用背包",
   "item.wildfires.duffel_bag_leather": "皮革行李袋",
   "item.wildfires.forging_manual": "锻造手册",
-  "wildfires.smithing.button": "一键锻造",
-  "wildfires.smithing.perfect.no_recipe": "铁砧上没有选择配方",
-  "wildfires.smithing.perfect.busy": "这个铁砧上的一键锻造正在进行中",
-  "wildfires.smithing.perfect.interrupted": "锻造被打断：铁砧上的东西已经不是原来那件了",
-  "wildfires.smithing.perfect.cold": "金属温度不足，无法锻造",
-  "wildfires.smithing.perfect.hammer": "需要一把锤子",
-  "wildfires.smithing.perfect.durability": "锤子至少需要 %s 点耐久",
-  "wildfires.smithing.perfect.stranded": "这块材料已经敲不到目标了：一键完美锻造没法从这个进度接着敲",
-  "wildfires.smithing.perfect.unsolvable": "这个配方找不到可行的完美敲打顺序，无法一键锻造",
+  "wildfires.smithing.forge.no_recipe": "铁砧上没有选择配方",
+  "wildfires.smithing.forge.locked": "这个配方的记忆锻造还没解锁：先在铁砧上手动锻造（经验 %s/%s）",
+  "wildfires.smithing.button.mastered": "这个配方已经熟练掌握锻造",
+  "wildfires.smithing.button.remembered": "已记住配方顺序",
+  "wildfires.smithing.button.locked_hint": "先在铁砧上手动锻造：经验 %s/%s",
+  "wildfires.smithing.button.none": "还没有记录",
+  "wildfires.smithing.button.hint": "点击：按你上次敲出的步骤自动敲下去",
+  "wildfires.smithing.forge.busy": "这个铁砧上正在按记忆锻造敲打",
+  "wildfires.smithing.forge.cold": "金属温度不足，无法锻造",
+  "wildfires.smithing.forge.hammer": "需要一把锤子",
+  "wildfires.smithing.forge.durability": "锤子至少需要 %s 点耐久",
   "wildfires.smithing.memory.none": "这个配方还没有记录：先在铁砧上手动敲完一次",
   "wildfires.smithing.memory.none_xp": "（锻造经验 %s/%s）",
   "wildfires.smithing.memory.dirty": "这块材料的状态和记录里的步骤对不上：记忆锻造没法接着敲",
   "wildfires.smithing.memory.interrupted": "记忆锻造被打断：铁砧上的东西已经变了",
-  "wildfires.smithing.unlocked": "解锁一键锻造：%s",
+  "wildfires.smithing.unlocked": "解锁记忆锻造：%s",
   "wildfires.smithing.xp": "锻造经验 +%1$s · %2$s/%3$s · %4$s%% 概率直接解锁",
   "wildfires.manual.forged": "锻造经验 %s/%s",
   "wildfires.manual.count": "已锻造 %s 个",
-  "wildfires.manual.empty": "还没有解锁任何一键锻造",
+  "wildfires.manual.empty": "还没有记录下任何敲制步骤：在铁砧上敲完一件，它就会出现在这里",
   "wildfires.manual.target": "目标 %s",
-  "wildfires.manual.path": "最短 %s 步",
-  "wildfires.manual.nopath": "按配方规则无法规划路径",
-  "wildfires.manual.noseed": "等待服务器提供世界种子",
+  "wildfires.manual.path": "上次 %s 步",
   "wildfires.jei.category.sluicing": "洗矿槽掉落",
   "wildfires.jei.category.panning": "淘金盘掉落",
   "wildfires.jei.chance": "掉落概率：%s",
   "wildfires.jei.chance_approx": "掉落概率：约 %s",
+  "wildfires.jei.pot.temperature": "需要温度：%s°C",
   "death.attack.dumbbell": "%1$s 被飞来的哑铃砸扁了",
   "death.attack.dumbbell.player": "%1$s 被 %2$s 扔出的哑铃砸扁了"
 }

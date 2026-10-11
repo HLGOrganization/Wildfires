@@ -61,32 +61,26 @@ import java.util.UUID;
  * ({@link #reportsProgress}).
  *
  * <h2>One-click forge</h2>
- * Pressing the button on an unlocked recipe strikes {@link PerfectForgePlan the recipe's own sequence} on
- * the anvil - the fewest blows that finish it and satisfy its rules - one blow every
- * {@link PerfectForgeSequence#PERFECT_TICKS} ticks. Nothing is handed over and nothing is stamped: the blows
- * are handed to the anvil, which builds the item when the work is finished and grades it by how many blows
- * that took. Because the sequence is never shorter than TFC's own estimate of the fewest needed, the grade
- * comes out perfect by TFC's own reckoning.
+ * Pressing the button strikes the sequence the player themselves last finished that recipe with
+ * ({@link ForgeMemory}) - their own blows, struck again on the anvil rather than the item being handed
+ * over - and nothing is stamped: the blows go through the anvil, which builds the item when the work is
+ * finished and grades it by how many blows that took.
  *
- * <p>A plan belongs to the piece that is on the anvil rather than to the recipe, so a run that was
+ * <p>The unlock is what buys the click. Until a recipe's one-click forge is unlocked there is nothing to
+ * press for: the button is there, dim, and a click is refused with the bar that is filling towards it. Once
+ * it is unlocked every blow of the recorded sequence is struck at {@link PerfectForgeSequence#MEMORY_TICKS}
+ * ticks a blow, twice the pace a smith clicking the step buttons can hold.
+ *
+ * <p>A sequence belongs to the piece that is on the anvil rather than to the recipe, so a run that was
  * interrupted is picked up where it stopped: the blows the piece has already taken are counted against the
- * sequence, and only the work that is left is asked for ({@link PerfectForgePlan}). A fresh piece is that
- * same case with nothing taken off the front.
+ * sequence, and only the work that is left is asked for ({@link ForgeMemory#remaining}). A fresh piece is
+ * that same case with nothing taken off the front.
  *
  * <p>The cost is one hammer durability per blow, the anvil's own price, and every gate the anvil itself
  * applies is kept: there must be a recipe, the metal must be hot enough to work, and a hammer must be
  * present and last the whole run. Because the blows are real anvil strikes they earn what a smith's blows
- * earn - experience towards unlocking, the unlock roll, and TFC's perfectly-forged advancement - and they
- * replace the recipe's memory with the sequence they struck.
- *
- * <h2>Memory forge</h2>
- * Before a recipe is unlocked, the same button repeats the sequence its smith last finished there: one blow
- * every {@link PerfectForgeSequence#MEMORY_TICKS} ticks, struck through the anvil's own work method, so
- * every rule the anvil applies is still applied and the item is built by those blows as it would be by hand
- * ({@link ForgeMemory}).
- *
- * <p>Unlocking replaces it rather than adding to it, as the recipe's own sequence is at least as good as
- * anything a smith struck by hand - there is one button, and this is what it does at each stage.
+ * earn - experience towards unlocking, the unlock roll, and TFC's perfectly-forged advancement when the
+ * sequence comes out perfect - and a finished one replaces that recipe's memory with what was struck.
  */
 public final class PerfectForgeService {
 
@@ -235,16 +229,18 @@ public final class PerfectForgeService {
     /**
      * Runs the anvil's one-click forge button against whatever recipe the anvil is set to.
      *
-     * <p>Two things can come of a click, and the recipe alone decides which. A recipe whose one-click forge
-     * is unlocked has its own sequence struck on the anvil - the blows that finish it and satisfy its rules,
-     * worked out from the recipe (see {@link PerfectForgePlan}). A recipe that is not unlocked yet instead
-     * has the sequence its smith last finished there struck again. Either way the button does the striking
-     * rather than handing over the result, and pays the anvil's usual single point of durability per blow.
+     * <p>What comes of a click is the sequence this player last finished the recipe with, struck again on the
+     * anvil, from wherever the piece there stands. Nothing is produced here and nothing is stamped: the
+     * button does the striking rather than handing over the result, at the anvil's usual single point of
+     * durability per blow, and the anvil builds the item when the work is finished.
      *
-     * <p>Neither produces anything here, and every gate is answered at the click rather than during the
-     * run: that is what makes a click that cannot forge fail immediately with a reason instead of after a
-     * run of noise. Every failure says why in chat, because the button is one click and a silent no-op is
-     * indistinguishable from a broken one.
+     * <p>Only an unlocked recipe can be struck this way. Until the recipe's one-click forge is unlocked the
+     * click is refused and says how far the bar has come, because the unlock is the whole of what the click
+     * is for: a smith who wants the item sooner strikes it by hand, which is what fills that bar.
+     *
+     * <p>Every gate is answered at the click rather than during the run: that is what makes a click that
+     * cannot forge fail immediately with a reason instead of after a run of noise. Every failure says why in
+     * chat, because the button is one click and a silent no-op is indistinguishable from a broken one.
      */
     public static void tryPerfectForge(ServerPlayer player, AnvilBlockEntity anvil) {
         Level level = anvil.getLevel();
@@ -260,7 +256,7 @@ public final class PerfectForgeService {
         Forging forging = ForgingCapability.get(input);
         AnvilRecipe recipe = forging == null ? null : forging.getRecipe(level);
         if (recipe == null) {
-            fail(player, "wildfires.smithing.perfect.no_recipe");
+            fail(player, "wildfires.smithing.forge.no_recipe");
             return;
         }
 
@@ -270,47 +266,37 @@ public final class PerfectForgeService {
             return;
         }
         PerfectForgeData data = PerfectForgeData.get(server);
-        boolean unlocked = data.isUnlocked(playerId, recipe.getId());
-        // A run works on whatever piece the anvil is holding, from wherever that piece stands: its blows count
-        // against what is left to strike, and its work is where the run begins. A piece left part worked by an
-        // interrupted run - or by the smith's own hand - is therefore finished by clicking again, and only a
-        // piece that neither kind of run can make anything of is refused.
-        List<ForgeStep> strikes;
-        if (unlocked) {
-            strikes = PerfectForgePlan.of(recipe, inventory, forging);
-            if (strikes.isEmpty()) {
-                // Either TFC's own estimate of the fewest blows is runaway or out of reach of anything the
-                // anvil can strike, or this piece cannot be brought onto the recipe's target from where it
-                // stands - struck past what the recipe needs, or worked somewhere the blows cannot come back
-                // from. A fresh piece has only the first of those to blame, and says so differently.
-                fail(player, forging.getSteps().total() > 0
-                        ? "wildfires.smithing.perfect.stranded"
-                        : "wildfires.smithing.perfect.unsolvable");
-                return;
+        if (!data.isUnlocked(playerId, recipe.getId())) {
+            // The whole of what the click is for is the unlock, so a locked recipe has nothing to offer yet.
+            // The bar comes with the refusal whoever the player is - a refusal is an answer to something the
+            // player just did, and it is the only place the total is ever said out loud, since the running
+            // total itself only speaks to a player who asked for the forge's reports.
+            fail(player, Component.translatable("wildfires.smithing.forge.locked",
+                    data.progress(playerId, recipe.getId()).xp(), xpToUnlock(SkillLevels.of(player))));
+            return;
+        }
+        // Read at the click rather than during the run: the click has to fail on the spot when there is
+        // nothing to repeat, before anything is set going.
+        List<ForgeStep> remembered = ForgeMemory.remembered(server, playerId, recipe.getId());
+        if (remembered.isEmpty()) {
+            // The recipe is unlocked but has nothing remembered: it was unlocked by a forge whose blows were
+            // not recorded in full, or by an administrator. Forging it by hand once is what fills it in.
+            Component refusal = Component.translatable("wildfires.smithing.memory.none");
+            if (reportsProgress(player)) {
+                refusal = refusal.copy().append(Component.translatable("wildfires.smithing.memory.none_xp",
+                        data.progress(playerId, recipe.getId()).xp(), xpToUnlock(SkillLevels.of(player))));
             }
-        } else {
-            // The sequence is only wanted while the recipe is locked - an unlocked one strikes its own - so
-            // it is not even read once the button is going to do the recipe's own sequence.
-            List<ForgeStep> remembered = ForgeMemory.remembered(server, playerId, recipe.getId());
-            if (remembered.isEmpty()) {
-                // Nothing has been finished here by hand yet, so there is nothing to repeat. Unlocking is
-                // what this click was really asking for, so the recipe's running total comes with the
-                // refusal - but only for a player who asked for the forge's reports, like every other total.
-                Component refusal = Component.translatable("wildfires.smithing.memory.none");
-                if (reportsProgress(player)) {
-                    refusal = refusal.copy().append(Component.translatable("wildfires.smithing.memory.none_xp",
-                            data.progress(playerId, recipe.getId()).xp(), xpToUnlock(SkillLevels.of(player))));
-                }
-                fail(player, refusal);
-                return;
-            }
-            // Only the blows still to come: a piece that is the first blows of the remembered sequence has
-            // already done the rest of it, and is finished here from where it stopped.
-            strikes = ForgeMemory.remaining(remembered, forging);
-            if (strikes == null) {
-                fail(player, "wildfires.smithing.memory.dirty");
-                return;
-            }
+            fail(player, refusal);
+            return;
+        }
+        // A run works on whatever piece the anvil is holding, from wherever that piece stands: only the blows
+        // still to come are struck, and the piece's own work is where the run begins. A piece left part
+        // worked by an interrupted run - or by the smith's own hand - is therefore finished by clicking again,
+        // and only a piece that is not this sequence's own work is refused.
+        List<ForgeStep> strikes = ForgeMemory.remaining(remembered, forging);
+        if (strikes == null) {
+            fail(player, "wildfires.smithing.memory.dirty");
+            return;
         }
         // Read before the first blow lands: it is the strike count the anvil is expected to be at while the
         // run is under way, which is what tells a piece that has been taken off the anvil from one that has
@@ -322,13 +308,13 @@ public final class PerfectForgeService {
         // no heat at all must still be forgeable here.
         IHeat heat = HeatCapability.get(input);
         if (heat != null && !heat.canWork()) {
-            fail(player, "wildfires.smithing.perfect.cold");
+            fail(player, "wildfires.smithing.forge.cold");
             return;
         }
 
         ItemStack hammer = findHammer(player, inventory);
         if (hammer == null) {
-            fail(player, "wildfires.smithing.perfect.hammer");
+            fail(player, "wildfires.smithing.forge.hammer");
             return;
         }
         // Checked before any wear is applied, so a hammer that cannot take the whole run is left alone
@@ -336,13 +322,13 @@ public final class PerfectForgeService {
         // TFC charges a smith striking by hand.
         int cost = strikes.size();
         if (hammer.getMaxDamage() - hammer.getDamageValue() < cost) {
-            fail(player, "wildfires.smithing.perfect.durability", cost);
+            fail(player, "wildfires.smithing.forge.durability", cost);
             return;
         }
 
         // End of the gates: the hammering takes over from here and builds the item when it is done.
-        if (!PerfectForgeSequence.start(player, anvil, recipe, alreadyStruck, strikes, unlocked)) {
-            fail(player, "wildfires.smithing.perfect.busy");
+        if (!PerfectForgeSequence.start(player, anvil, recipe, alreadyStruck, strikes)) {
+            fail(player, "wildfires.smithing.forge.busy");
         }
     }
 

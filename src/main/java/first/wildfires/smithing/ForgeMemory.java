@@ -19,11 +19,10 @@ import java.util.UUID;
 /**
  * Remembers the last sequence a smith struck out on a recipe, and plays it back.
  *
- * <p>This is the half of the one-click forge that is available before its unlock: the button repeats the
- * work the player did by hand the last time they finished that recipe, one blow every
- * {@link PerfectForgeSequence#MEMORY_TICKS} ticks, instead of making the item outright. Once the recipe is
- * unlocked the perfect forge takes the button over, because making the item is strictly better than
- * repeating a sequence that made it.
+ * <p>This is what the one-click forge strikes: the work the player did by hand the last time they finished
+ * that recipe, one blow at a time, rather than the item being made outright. It is struck at
+ * {@link PerfectForgeSequence#MEMORY_TICKS} ticks a blow, and only for a recipe whose forge this player has
+ * unlocked - until then there is nothing to press for, and the blows are what fills the bar that unlocks it.
  *
  * <p>A replay is started on whatever the anvil holds, so a piece that already carries the first blows of the
  * sequence - left there by a replay that was interrupted, or struck by the smith's own hand - is finished by
@@ -40,7 +39,9 @@ import java.util.UUID;
  * begins striking from one again and so overwrites the draft from its first blow rather than extending a
  * sequence that no longer describes anything.
  *
- * <p>All of this is server-side; the client is never told a sequence.
+ * <p>All of this is server-side, and the sequences themselves are the one thing sent out: the anvil's
+ * memory strip and the manual both draw the player's own blows, and both of those are client-side. Nothing
+ * else about a forging leaves the server, and a player is only ever sent their own sequences.
  */
 public final class ForgeMemory {
 
@@ -118,7 +119,27 @@ public final class ForgeMemory {
      *         cannot be read as a sequence of real steps
      */
     public static List<ForgeStep> remembered(MinecraftServer server, UUID player, ResourceLocation recipe) {
-        List<String> names = ForgeMemoryData.get(server).steps(player, recipe);
+        return steps(ForgeMemoryData.get(server).steps(player, recipe));
+    }
+
+    /**
+     * Every sequence this player has, by recipe. What the anvil's strip and the manual read from the
+     * server's copy, one entry per recipe the player has finished by hand at least once.
+     */
+    public static Map<ResourceLocation, List<ForgeStep>> rememberedAll(MinecraftServer server, UUID player) {
+        Map<ResourceLocation, List<ForgeStep>> all = new HashMap<>();
+        for (Map.Entry<ResourceLocation, List<String>> entry
+                : ForgeMemoryData.get(server).sequences(player).entrySet()) {
+            List<ForgeStep> steps = steps(entry.getValue());
+            if (!steps.isEmpty()) {
+                all.put(entry.getKey(), steps);
+            }
+        }
+        return all;
+    }
+
+    /** Reads stored step names back as steps, or nothing at all when one of them is not a real step. */
+    private static List<ForgeStep> steps(List<String> names) {
         if (names.isEmpty()) {
             return List.of();
         }

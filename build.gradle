@@ -411,14 +411,6 @@ tasks.register('depositLootSelfTest', JavaExec) {
     mainClass = 'first.wildfires.jei.DepositLootSelfTest'
 }
 
-tasks.register('forgingPathSelfTest', JavaExec) {
-    group = 'verification'
-    description = 'Runs plain-Java checks for the forging manual target and shortest-path search.'
-    dependsOn tasks.named('testClasses')
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'first.wildfires.smithing.ForgePathFinderSelfTest'
-}
-
 tasks.register('perfectForgeDataSelfTest', JavaExec) {
     group = 'verification'
     description = 'Runs plain-Java checks for perfect-forge records, resets, and save compatibility.'
@@ -435,12 +427,12 @@ tasks.register('forgeMemoryDataSelfTest', JavaExec) {
     mainClass = 'first.wildfires.smithing.ForgeMemoryDataSelfTest'
 }
 
-tasks.register('forgePlanSelfTest', JavaExec) {
+tasks.register('forgeMemoryStripSelfTest', JavaExec) {
     group = 'verification'
-    description = 'Runs plain-Java checks for the one-click forge blow search.'
+    description = 'Runs plain-Java checks for the memory strip window drawn above the anvil panel.'
     dependsOn tasks.named('testClasses')
     classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'first.wildfires.smithing.ForgePlanSelfTest'
+    mainClass = 'first.wildfires.smithing.ForgeMemoryStripSelfTest'
 }
 
 tasks.register('forgeMemoryResumeSelfTest', JavaExec) {
@@ -459,6 +451,70 @@ tasks.register('perfectForgeRulesSelfTest', JavaExec) {
     mainClass = 'first.wildfires.smithing.PerfectForgeRulesSelfTest'
 }
 
+tasks.register('smolderingRulesSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs plain-Java checks for the hot-device relight window.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'first.wildfires.tfc.heat.SmolderingRulesSelfTest'
+}
+
+tasks.register('ignitionInterruptRulesSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs plain-Java checks for the window that follows a burned out ignition item.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'first.wildfires.tfc.interaction.IgnitionInterruptRulesSelfTest'
+}
+
+tasks.register('anvilInsertRulesSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs plain-Java checks for the rule that keeps tongs out of an anvil.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'first.wildfires.tfc.interaction.AnvilInsertRulesSelfTest'
+}
+
+tasks.register('networkGuardTargetsSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs plain-Java checks for the mods the network guards are gated on.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'first.wildfires.mixin.NetworkGuardTargetsSelfTest'
+}
+
+tasks.register('torchIgnitionRulesSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs plain-Java checks for the blocks a torch may light and what each costs.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'first.wildfires.tfc.interaction.TorchIgnitionRulesSelfTest'
+}
+
+tasks.register('curvingPressRulesSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs plain-Java checks for the ingredients the curving press guard refuses.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'first.wildfires.vintageimprovements.CurvingPressRulesSelfTest'
+}
+
+tasks.register('compassStackRulesSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs plain-Java checks for what one compass exchange may take out of a stack.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'first.wildfires.tfc.compass.CompassStackRulesSelfTest'
+}
+
+tasks.register('mapChunkLoadRulesSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs plain-Java checks for the chunks a deferred map update would have read.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'first.wildfires.minecraft.MapChunkLoadRulesSelfTest'
+}
+
 tasks.named('check').configure {
     dependsOn tasks.named('celestialMathSelfTest'), tasks.named('celestialClientSelfTest'),
             tasks.named('calendarRateSelfTest'), tasks.named('spaceCoreSelfTest'),
@@ -466,10 +522,17 @@ tasks.named('check').configure {
             tasks.named('spaceTravelSelfTest'), tasks.named('spaceVisualSelfTest')
     dependsOn tasks.named('returnCapsuleSelfTest'), tasks.named('galaxyHymnSelfTest')
     dependsOn tasks.named('depositLootSelfTest')
-    dependsOn tasks.named('forgingPathSelfTest')
     dependsOn tasks.named('perfectForgeDataSelfTest')
     dependsOn tasks.named('forgeMemoryDataSelfTest')
-    dependsOn tasks.named('forgePlanSelfTest')
+    dependsOn tasks.named('forgeMemoryStripSelfTest')
     dependsOn tasks.named('forgeMemoryResumeSelfTest')
     dependsOn tasks.named('perfectForgeRulesSelfTest')
+    dependsOn tasks.named('smolderingRulesSelfTest')
+    dependsOn tasks.named('ignitionInterruptRulesSelfTest')
+    dependsOn tasks.named('anvilInsertRulesSelfTest')
+    dependsOn tasks.named('networkGuardTargetsSelfTest')
+    dependsOn tasks.named('torchIgnitionRulesSelfTest')
+    dependsOn tasks.named('curvingPressRulesSelfTest')
+    dependsOn tasks.named('compassStackRulesSelfTest')
+    dependsOn tasks.named('mapChunkLoadRulesSelfTest')
 }

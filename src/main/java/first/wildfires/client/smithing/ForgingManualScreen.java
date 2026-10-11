@@ -2,10 +2,8 @@ package first.wildfires.client.smithing;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import first.wildfires.Wildfires;
+import first.wildfires.smithing.ForgeMemoryStrip;
 import first.wildfires.smithing.ForgePath;
-import first.wildfires.smithing.ForgePathFinder;
-import first.wildfires.smithing.ForgeTargets;
-import net.dries007.tfc.common.capabilities.forge.ForgeRule;
 import net.dries007.tfc.common.capabilities.forge.ForgeStep;
 import net.dries007.tfc.common.recipes.AnvilRecipe;
 import net.dries007.tfc.common.recipes.TFCRecipeTypes;
@@ -16,7 +14,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
@@ -24,30 +21,31 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.OptionalLong;
 
 /**
- * The forging manual: the anvil recipes whose one-click forge this player has unlocked, each with the
- * shortest way to forge it by hand.
+ * The forging manual: the anvil recipes whose blows this player has already struck, each showing the
+ * sequence they struck.
  *
  * <h2>What it lists</h2>
- * Only unlocked recipes. A recipe still being worked towards is deliberately left out - showing the ones
- * that have not happened yet would turn a record of what a player can do into a list of what they cannot.
+ * Only recipes this player has finished on an anvil with their own hands. A recipe they have not forged yet
+ * is deliberately left out - showing the ones that have not happened would turn a record of what a player
+ * can do into a list of what they cannot.
  *
  * <h2>What each entry shows</h2>
- * The recipe's output in the slot, then its shortest sequence of strikes as icons, one per run of the same
- * strike, with the run's length in the corner of the icon, and how many times the recipe has been forged at
- * the right. Rules are not spelled out: they are what the sequence is, and the anvil only judges the last
- * three strikes, so a player following the icons is following the rules without having to hold them in
- * mind. The item's name, its forging experience, the work value its sequence ends on and the exact path
- * length are in the hover tooltip, which is also where an unavailable path is reported.
+ * The recipe's output in the slot, then the player's own registered sequence of strikes as icons, one per
+ * run of the same strike, with the run's length in the corner of the icon, and how many times the recipe has
+ * been forged at the right. It is the player's sequence that is drawn rather than a shorter one worked out
+ * from the recipe's rules: the manual is a record of what they did, and following their own blows is what
+ * the anvil's memory strip will do for them. Rules are not spelled out for the same reason - the anvil only
+ * judges the last three strikes, so a player following the icons is following the rules without having to
+ * hold them in mind. The item's name, its forging experience, the work value its sequence ends on and the
+ * number of blows it took are in the hover tooltip.
  *
  * <h2>Where the contents come from</h2>
  * The recipe list is read from the client's own recipe manager, so it always matches the recipes the player
  * is actually able to make - including anything a datapack adds - with no server round trip and no list to
- * keep in sync. Which of them are unlocked, and their counts, are the local player's, pushed by the server
- * (see {@link PerfectForgeClientData}). The world seed behind every target is pushed the same way
- * (see {@link ForgeSeedClientData}); without it there are no targets, and the manual says so.
+ * keep in sync. Which of them this player has already forged, their counts, and the sequence each one
+ * remembers are the local player's, pushed by the server (see {@link PerfectForgeClientData}).
  *
  * <p>Entries are ordered by how often they have been forged, so the most-practised are on the first page.
  */
@@ -88,11 +86,6 @@ public class ForgingManualScreen extends Screen {
     private static final int COLOR_INK_SOFT = 0xFF673D2A;
     private static final int COLOR_ROW_HOVER = 0x22C08A3E;
 
-    /** The icons in the sheet, in the sheet's order: the lang file's step names, in TFC's own words. */
-    private static final List<ForgeStep> ART_ORDER = List.of(
-            ForgeStep.PUNCH, ForgeStep.BEND, ForgeStep.UPSET, ForgeStep.SHRINK,
-            ForgeStep.HIT_LIGHT, ForgeStep.HIT_MEDIUM, ForgeStep.HIT_HARD, ForgeStep.DRAW);
-
     private final List<Entry> entries = new ArrayList<>();
     private int spread;
 
@@ -100,7 +93,7 @@ public class ForgingManualScreen extends Screen {
         super(Component.translatable("item.wildfires.forging_manual"));
     }
 
-    /** One listed recipe, with the shortest path worked out when the manual is opened. */
+    /** One listed recipe, with the blows the player last struck on it. */
     private record Entry(ResourceLocation id, ItemStack icon, Component name, ForgePath path) {
     }
 
@@ -109,22 +102,21 @@ public class ForgingManualScreen extends Screen {
         entries.clear();
 
         Minecraft minecraft = Minecraft.getInstance();
-        OptionalLong seed = worldSeed(minecraft);
-
         if (minecraft.level != null) {
             RegistryAccess access = minecraft.level.registryAccess();
             for (AnvilRecipe recipe : minecraft.level.getRecipeManager()
                     .getAllRecipesFor(TFCRecipeTypes.ANVIL.get())) {
                 ResourceLocation id = recipe.getId();
-                if (!PerfectForgeClientData.isUnlocked(id)) {
-                    // The manual records what has been unlocked. A recipe still being worked towards is not
-                    // its business - that progress belongs to the anvil that will unlock it.
+                List<ForgeStep> remembered = PerfectForgeClientData.sequence(id);
+                if (remembered.isEmpty()) {
+                    // The manual records what this player has already struck. A recipe they have not forged
+                    // by hand is not its business - that is what the anvil is for.
                     continue;
                 }
                 ItemStack icon = iconFor(recipe, access);
                 entries.add(new Entry(id, icon,
                         icon.isEmpty() ? Component.literal(id.getPath()) : icon.getHoverName(),
-                        pathFor(seed, id, recipe)));
+                        pathFor(remembered)));
             }
         }
 
@@ -137,27 +129,13 @@ public class ForgingManualScreen extends Screen {
     }
 
     /**
-     * The world seed, from the server if it has told us, or from the local world in single player.
+     * The player's remembered blows as a drawable sequence, ending on the work they add up to.
      *
-     * <p>A client on a server has no other way to know it, and only the server can derive it; empty means
-     * no target can be worked out yet.
+     * <p>Only a finished forge is ever remembered, so the work is the recipe's own target; it is summed here
+     * rather than read from the recipe for the same reason - what is drawn is the record, not the recipe.
      */
-    private static OptionalLong worldSeed(Minecraft minecraft) {
-        OptionalLong known = ForgeSeedClientData.seed();
-        if (known.isPresent()) {
-            return known;
-        }
-        MinecraftServer server = minecraft.getSingleplayerServer();
-        return server == null ? OptionalLong.empty() : OptionalLong.of(server.overworld().getSeed());
-    }
-
-    /** The shortest sequence that forges this recipe, or an unknown path when the seed is not known yet. */
-    private static ForgePath pathFor(OptionalLong seed, ResourceLocation id, AnvilRecipe recipe) {
-        if (seed.isEmpty()) {
-            return ForgePath.unknown();
-        }
-        ForgeRule[] rules = recipe.getRules();
-        return ForgePathFinder.instance().find(ForgeTargets.compute(seed.getAsLong(), id), rules);
+    private static ForgePath pathFor(List<ForgeStep> remembered) {
+        return ForgePath.of(ForgeMemoryStrip.work(remembered), remembered);
     }
 
     /**
@@ -224,8 +202,8 @@ public class ForgingManualScreen extends Screen {
 
             int x = pageX + ICON_X;
             for (ForgePath.Run run : runs) {
-                graphics.blit(ICONS, x, slotY, ART_ORDER.indexOf(run.step()) * ICON_SIZE, 0,
-                        ICON_SIZE, ICON_SIZE, ICON_SIZE * ART_ORDER.size(), ICON_SIZE);
+                graphics.blit(ICONS, x, slotY, ForgeMemoryStrip.iconU(run.step()), 0,
+                        ICON_SIZE, ICON_SIZE, ICON_SIZE * ForgeMemoryStrip.ART_ORDER.size(), ICON_SIZE);
                 if (run.count() > 1) {
                     drawRepeatCount(graphics, x, slotY, run.count());
                 }
@@ -233,8 +211,8 @@ public class ForgingManualScreen extends Screen {
             }
         }
 
-        // The tally is the one figure on the row that owes nothing to the path, so it is written whether or
-        // not the strikes could be worked out.
+        // The tally is the one figure on the row that owes nothing to the sequence, so it is written whether
+        // or not the blows could be drawn.
         graphics.drawString(font, Component.literal(Integer.toString(forged)),
                 pageX + ICON_RIGHT - forgedWidth, slotY + 4, COLOR_INK, false);
     }
@@ -316,19 +294,12 @@ public class ForgingManualScreen extends Screen {
         lines.add(Component.translatable("wildfires.manual.count", PerfectForgeClientData.forged(entry.id()))
                 .withStyle(ChatFormatting.GRAY));
 
+        // A listed recipe has been forged by hand, so there is always a sequence to describe.
         ForgePath path = entry.path();
-        if (path.target() < 0) {
-            lines.add(Component.translatable("wildfires.manual.noseed").withStyle(ChatFormatting.DARK_GRAY));
-        } else {
-            lines.add(Component.translatable("wildfires.manual.target", path.target())
-                    .withStyle(ChatFormatting.GOLD));
-            if (path.isEmpty()) {
-                lines.add(Component.translatable("wildfires.manual.nopath").withStyle(ChatFormatting.GRAY));
-            } else {
-                lines.add(Component.translatable("wildfires.manual.path", path.length())
-                        .withStyle(ChatFormatting.GRAY));
-            }
-        }
+        lines.add(Component.translatable("wildfires.manual.target", path.target())
+                .withStyle(ChatFormatting.GOLD));
+        lines.add(Component.translatable("wildfires.manual.path", path.length())
+                .withStyle(ChatFormatting.GRAY));
         return lines;
     }
 

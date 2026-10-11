@@ -22,7 +22,7 @@ import first.wildfires.network.ReturnCapsuleTransitionAbortPacket;
 import first.wildfires.network.GalaxyHymnImpactVisualPacket;
 import first.wildfires.network.PerfectForgeRequestPacket;
 import first.wildfires.network.PerfectForgeSyncPacket;
-import first.wildfires.network.ForgeSeedSyncPacket;
+import first.wildfires.network.QuickStoreBackpackPacket;
 import first.wildfires.network.base.ICustomPacketPayload;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.NetworkDirection;
@@ -56,7 +56,7 @@ public class NetworkPacketRegister {
         ICustomPacketPayload.register(GalaxyHymnImpactVisualPacket.class, NetworkDirection.PLAY_TO_CLIENT);
         ICustomPacketPayload.register(PerfectForgeRequestPacket.class, NetworkDirection.PLAY_TO_SERVER);
         ICustomPacketPayload.register(PerfectForgeSyncPacket.class, NetworkDirection.PLAY_TO_CLIENT);
-        ICustomPacketPayload.register(ForgeSeedSyncPacket.class, NetworkDirection.PLAY_TO_CLIENT);
+        ICustomPacketPayload.register(QuickStoreBackpackPacket.class, NetworkDirection.PLAY_TO_SERVER);
     }
 
 }

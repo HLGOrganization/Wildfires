@@ -39,13 +39,32 @@ public class ItemRegister {
 
 
 
-    /** A vanilla-style compass that is consumed gradually while carried. */
+    /**
+     * A vanilla-style compass that is consumed gradually while carried.
+     *
+     * <p>Unstackable on purpose. Durability belongs to the stack, not to the item, so a stack of eight
+     * compasses carries one shared water level: a single decay step would dry out all eight at once and leave
+     * one dehydrated compass behind, and a single visit to a water source would charge all eight again. Both
+     * of those are a one-for-one exchange for one compass, which only holds while a compass is one item.
+     *
+     * <p>{@code durability(60)} alone is what makes it unstackable: vanilla's
+     * {@code Item.Properties.durability(int)} already sets the maximum stack size to one. Do not append
+     * {@code stacksTo(1)} to it - vanilla's {@code stacksTo(int)} throws
+     * {@code "Unable to have damage AND stack."} as soon as durability has been set, even for
+     * {@code stacksTo(1)}, and that exception during item registration aborts the whole registry dispatch.
+     */
     public static final RegistryObject<CompassItem> SimpleCompass =
             Register.register("simple_compass", () -> new CompassItem(new Item.Properties().durability(60)));
 
-    /** The result left when a simple compass has used all six durability points. */
+    /**
+     * The result left when a simple compass has used up its sixty durability points.
+     *
+     * <p>Unstackable for the same reason as {@link #SimpleCompass}: the water source hands back a charged
+     * compass in place of the stack it was used on, so a stack of dehydrated compasses would collapse into
+     * one charged compass and take the rest of the stack with it.
+     */
     public static final RegistryObject<Item> DamagedCompass =
-            Register.register("damaged_compass", () -> new Item(new Item.Properties()));
+            Register.register("damaged_compass", () -> new Item(new Item.Properties().stacksTo(1)));
 
     /** Empty container returned when Create's super glue runs out of durability. */
     public static final RegistryObject<Item> EmptySuperGlue =

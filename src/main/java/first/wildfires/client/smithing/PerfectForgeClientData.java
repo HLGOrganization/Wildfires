@@ -2,10 +2,11 @@ package first.wildfires.client.smithing;
 
 import first.wildfires.smithing.PerfectForgeProgress;
 import first.wildfires.smithing.PerfectForgeService;
+import net.dries007.tfc.common.capabilities.forge.ForgeStep;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The local player's forging record, as last sent by the server.
@@ -17,8 +18,8 @@ import java.util.Set;
  * <p>Replaced wholesale rather than merged: the server's copy is the only truth, so a stale local entry
  * can never outlive the update that removed it.
  *
- * <p>Whether a sequence is remembered for a recipe rides along with the same update, because the button
- * draws from that too - see {@link #isRemembered}.
+ * <p>The steps themselves ride along with the same update: the button draws its memory frame from them,
+ * and so does the strip above the anvil and every page of the manual - see {@link #sequence}.
  */
 public final class PerfectForgeClientData {
 
@@ -27,22 +28,17 @@ public final class PerfectForgeClientData {
     /** The bar those entries are measured against, which the server sends with them. */
     private static volatile int xpToUnlock = PerfectForgeService.XP_TO_UNLOCK;
 
-    /**
-     * Recipes this player has a remembered sequence for, which is what the button's memory frame means.
-     *
-     * <p>Only the fact that a sequence is remembered travels: the blows themselves stay on the server, so
-     * knowing this tells a client no more about how to forge an item than watching the button light up.
-     */
-    private static volatile Set<ResourceLocation> remembered = Set.of();
+    /** The last sequence this player struck out per recipe, in strike order. */
+    private static volatile Map<ResourceLocation, List<ForgeStep>> sequences = Map.of();
 
     private PerfectForgeClientData() {
     }
 
     public static void accept(Map<ResourceLocation, PerfectForgeProgress> incoming, int bar,
-                              Set<ResourceLocation> rememberedRecipes) {
+                              Map<ResourceLocation, List<ForgeStep>> remembered) {
         progress = Map.copyOf(incoming);
         xpToUnlock = Math.max(1, bar);
-        remembered = Set.copyOf(rememberedRecipes);
+        sequences = Map.copyOf(remembered);
     }
 
     /**
@@ -75,6 +71,18 @@ public final class PerfectForgeClientData {
     }
 
     /**
+     * The sequence this player last struck out on a recipe, in strike order, or an empty list when the
+     * server holds none.
+     *
+     * <p>A whole sequence, not a fact about one: it is what the anvil's memory strip draws and what the
+     * manual lists, so it has to arrive here rather than be worked out. It is the player's own work, and
+     * the server only ever remembers a run that ended in an item.
+     */
+    public static List<ForgeStep> sequence(ResourceLocation recipe) {
+        return sequences.getOrDefault(recipe, List.of());
+    }
+
+    /**
      * Whether the server holds a sequence for this recipe that this player can have struck again.
      *
      * <p>Says nothing about whether it can be struck right now: a remembered sequence is only picked up
@@ -82,6 +90,6 @@ public final class PerfectForgeClientData {
      * is pressed. This is the fact the button draws its third frame from, and nothing more.
      */
     public static boolean isRemembered(ResourceLocation recipe) {
-        return remembered.contains(recipe);
+        return !sequence(recipe).isEmpty();
     }
 }

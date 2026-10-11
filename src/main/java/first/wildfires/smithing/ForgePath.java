@@ -6,14 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The shortest way to forge one recipe: the target work value, the steps to strike in order, and those
- * steps collapsed into runs of the same strike.
+ * The blows of one remembered forge: the work value they end on, the steps in the order they were struck,
+ * and those steps collapsed into runs of the same strike.
  *
  * <p>The anvil only ever looks at the last three steps when it checks a recipe's rules, so a long stretch
  * of the same strike in the middle of a sequence is one instruction to the player. Runs are what the
  * manual draws - one icon per run, with the run's length beside it.
  *
- * @param target the work value the sequence ends on, or -1 when the world seed is not known yet
+ * @param target the work value the sequence ends on, which for a sequence that built the item is the
+ *               recipe's own target
  */
 public record ForgePath(int target, List<ForgeStep> steps, List<Run> runs) {
 
@@ -24,16 +25,6 @@ public record ForgePath(int target, List<ForgeStep> steps, List<Run> runs) {
     public ForgePath {
         steps = List.copyOf(steps);
         runs = List.copyOf(runs);
-    }
-
-    /** No target known yet: the world seed has not arrived, so nothing can be worked out. */
-    public static ForgePath unknown() {
-        return new ForgePath(-1, List.of(), List.of());
-    }
-
-    /** A known target with no path to it. Not expected in practice, but the manual has to draw something. */
-    public static ForgePath empty(int target) {
-        return new ForgePath(target, List.of(), List.of());
     }
 
     /** Counts the runs out of a full sequence. */
@@ -53,9 +44,5 @@ public record ForgePath(int target, List<ForgeStep> steps, List<Run> runs) {
     /** How many strikes the sequence has, run lengths included. */
     public int length() {
         return steps.size();
-    }
-
-    public boolean isEmpty() {
-        return steps.isEmpty();
     }
 }

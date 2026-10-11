@@ -100,6 +100,11 @@ public final class ForgeMemoryData extends SavedData {
         return Set.copyOf(memories.getOrDefault(player, Map.of()).keySet());
     }
 
+    /** Every sequence this player has, by recipe. Read once when the whole lot is being sent out. */
+    public Map<ResourceLocation, List<String>> sequences(UUID player) {
+        return Map.copyOf(memories.getOrDefault(player, Map.of()));
+    }
+
     /**
      * Forgets every sequence a player has, for a reset of everything they have done on the anvil.
      *

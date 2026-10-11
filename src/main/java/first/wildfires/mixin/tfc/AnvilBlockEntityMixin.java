@@ -137,8 +137,12 @@ public class AnvilBlockEntityMixin {
                                              CallbackInfoReturnable<InteractionResult> cir,
                                              @Local(name = "bonus") ForgingBonus bonus) {
         AnvilBlockEntity anvil = (AnvilBlockEntity) (Object) this;
-        PerfectForgeService.recordForge(player, anvil, bonus);
+        // The memory of this sequence has to be stored first: recordForge finishes by pushing this player's
+        // record to their client, and what it pushes is the memory as it stands at that moment. Committing
+        // afterwards sent a record that was one completed forge out of date, so the strip above the anvil
+        // and the memory-forge button only caught up once something else changed the record.
         ForgeMemory.commit(player, anvil);
+        PerfectForgeService.recordForge(player, anvil, bonus);
     }
 
     /**
@@ -177,8 +181,10 @@ public class AnvilBlockEntityMixin {
         Forging forging = anvil.getMainInputForging();
         AnvilRecipe recipe = level == null || forging == null ? null : forging.getRecipe(level);
         if (recipe != null && !recipe.shouldApplyForgingBonus()) {
-            PerfectForgeService.recordForge(player, anvil, null);
+            // Same order as the graded path: the record that recordForge pushes has to already carry the
+            // sequence this forge just produced.
             ForgeMemory.commit(player, anvil);
+            PerfectForgeService.recordForge(player, anvil, null);
         }
     }
 

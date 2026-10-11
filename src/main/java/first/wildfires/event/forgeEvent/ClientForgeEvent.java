@@ -238,7 +238,8 @@ public class ClientForgeEvent {
         if (tag != null && tag.contains("Reinforcement")) {
             int reinforcement = tag.getInt("Reinforcement");
             String statusKey = reinforcement >= 6 ? "wildfires.tooltip.reinforcement.firm" : reinforcement >= 4 ? "wildfires.tooltip.reinforcement.bound" : "wildfires.tooltip.reinforcement.loose";
-            ChatFormatting statusColor = reinforcement >= 8 ? ChatFormatting.BLUE : reinforcement >= 6 ? ChatFormatting.WHITE : reinforcement >= 2 ? ChatFormatting.GRAY : ChatFormatting.DARK_GRAY;
+            // 颜色分档：>=8 白色，6~7 蓝色，2~5 灰色，更低深灰（蓝白两档已对调）
+            ChatFormatting statusColor = reinforcement >= 8 ? ChatFormatting.WHITE : reinforcement >= 6 ? ChatFormatting.BLUE : reinforcement >= 2 ? ChatFormatting.GRAY : ChatFormatting.DARK_GRAY;
             int reinforcementTooltipIndex = Math.min(1, toolTip.size());
             toolTip.add(reinforcementTooltipIndex, Component.translatable("wildfires.tooltip.reinforcement.normal", Component.translatable(statusKey).withStyle(statusColor)));
             if (player != null && player.getAbilities().instabuild) {

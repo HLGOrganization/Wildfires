@@ -1,8 +1,10 @@
 package first.wildfires.mixin.tfc;
 
 import first.wildfires.block.UnrestrictedCharcoalForgeBlock;
+import first.wildfires.compat.tfc.Smoldering;
 import net.dries007.tfc.common.blockentities.CharcoalForgeBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.items.ItemStackHandler;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,7 +13,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Keeps the earthen oven's inventory reachable from every side.
+ * Keeps the earthen oven's inventory reachable from every side, and lets a hot forge that has gone out catch
+ * again from the fuel it holds.
  *
  * <p>The eighth heat tier of the charcoal forge is no longer implemented here. It used to be a
  * {@code @ModifyVariable} that masked tier 8 down to TFC's maximum of 7 plus a {@code @Inject} at
@@ -42,5 +45,16 @@ public abstract class CharcoalForgeBlockEntityMixin {
         InventoryBlockEntityAccessor<ItemStackHandler> accessor =
                 (InventoryBlockEntityAccessor<ItemStackHandler>) (Object) this;
         accessor.getSidedInventory().on(accessor.getInventory(), direction -> true);
+    }
+
+    /**
+     * Lets a forge that has gone out but is still hot catch again from the fuel it is holding, and the same
+     * for the earthen oven - the oven's own tick delegates to this one. The rule, and why a forge that no
+     * longer passes its multiblock check is left alone, is in {@link Smoldering}.
+     */
+    @Inject(method = "serverTick", at = @At("TAIL"))
+    private static void wildfires$relightWhileHot(Level level, BlockPos pos, BlockState state,
+                                                 CharcoalForgeBlockEntity forge, CallbackInfo ci) {
+        Smoldering.forge(level, pos, state, forge);
     }
 }

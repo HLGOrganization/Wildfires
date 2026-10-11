@@ -28,22 +28,21 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * The hammering behind the anvil's one-click forge: both things the button can set going are a run of real
- * blows on the anvil, and this owns the run.
+ * The hammering behind the anvil's one-click forge: what the button sets going is a run of real blows on the
+ * anvil, and this owns the run.
  *
- * <h2>Two runs, one mechanism</h2>
- * A recipe whose one-click forge is unlocked is struck through the sequence
- * {@link PerfectForgePlan} reads off the recipe - the fewest blows that finish it and satisfy its rules -
- * which is the run a flawless smith would have made, so TFC grades it perfect on its own terms. A recipe
- * that is not unlocked yet instead has the sequence its smith last finished there struck again, one blow at
- * a time, which is the button doing the smith's own work rather than handing over the result.
+ * <h2>One mechanism</h2>
+ * A run strikes the sequence the player themselves last finished that recipe with ({@link ForgeMemory}), so
+ * the button is repeating the smith's own work rather than handing over the result. Every blow comes
+ * {@value #MEMORY_TICKS} ticks after the last, which is what 记忆锻造 is: a pace a hand cannot hold, for a
+ * recipe the smith has already learned - the unlock being the whole of what the button asks for
+ * ({@link PerfectForgeService#tryPerfectForge}).
  *
- * <p>Both are the same thing to this class: a list of blows, a pause between them, and a check before each
- * one that the anvil still holds the work the run was started for. A perfect run strikes every
- * {@value #PERFECT_TICKS} ticks and a remembered one every {@value #MEMORY_TICKS}, and neither plays its own
- * sound or applies its own rules - the blow is handed to the anvil, which plays the strike, sparks, wears
- * the hammer, applies the recipe's rules and builds the item when the work is finished. Repeating TFC's
- * smithing here would be a second set of rules to keep in step with the first.
+ * <p>It is one thing to this class: a list of blows, a pause between them, and a check before each one that
+ * the anvil still holds the work the run was started for. It plays no sound and applies no rules of its own -
+ * the blow is handed to the anvil, which plays the strike, sparks, wears the hammer, applies the recipe's
+ * rules and builds the item when the work is finished. Repeating TFC's smithing here would be a second set of
+ * rules to keep in step with the first.
  *
  * <h2>Why one run per anvil</h2>
  * Two players at the same anvil, or one player clicking twice, would otherwise each strike their own blows
@@ -58,9 +57,9 @@ import java.util.UUID;
  *
  * <h2>Why finishing says nothing</h2>
  * The last blow is the anvil's own blow, and it finishes the item exactly as a hand-struck one would: the
- * result appearing in the input slot is the whole answer, and it is already in front of the player. So
- * neither kind of run announces itself. A perfect run would only be narrating a button the player has just
- * pressed, and what a forge earned is the forge's business, said to whoever asked to hear it.
+ * result appearing in the input slot is the whole answer, and it is already in front of the player. So a run
+ * announces nothing of its own: it would only be narrating a button the player has just pressed, and what a
+ * forge earned is the forge's business, said to whoever asked to hear it.
  *
  * <h2>Why a run may start on a struck piece</h2>
  * A run that is abandoned leaves its work where it stopped, and clicking the button again picks it up: the
@@ -70,11 +69,8 @@ import java.util.UUID;
 @Mod.EventBusSubscriber(modid = Wildfires.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class PerfectForgeSequence {
 
-    /** How long a perfect forge leaves between two blows: 3 ticks. */
-    public static final int PERFECT_TICKS = 3;
-
-    /** How long a memory forge leaves between two of the smith's blows: 6 ticks. */
-    public static final int MEMORY_TICKS = 6;
+    /** How long 记忆锻造 leaves between two of the smith's blows: 3 ticks. */
+    public static final int MEMORY_TICKS = 3;
 
     /** The runs in flight, at most one per anvil. */
     private static final Map<AnvilKey, Pending> PENDING = new HashMap<>();
@@ -90,11 +86,10 @@ public final class PerfectForgeSequence {
      *
      * @param alreadyStruck how many blows the piece on the anvil has already taken
      * @param strikes       the blows to strike, in order; must not be empty
-     * @param perfect       whether this is the recipe's own sequence rather than the smith's remembered one
      * @return whether the run was started; {@code false} means this anvil is already busy
      */
     static boolean start(ServerPlayer player, AnvilBlockEntity anvil, AnvilRecipe recipe, int alreadyStruck,
-                         List<ForgeStep> strikes, boolean perfect) {
+                         List<ForgeStep> strikes) {
         if (!(anvil.getLevel() instanceof ServerLevel level) || strikes.isEmpty()) {
             return false;
         }
@@ -102,7 +97,7 @@ public final class PerfectForgeSequence {
         if (PENDING.containsKey(key)) {
             return false;
         }
-        PENDING.put(key, new Pending(player.getUUID(), recipe.getId(), alreadyStruck, strikes, perfect));
+        PENDING.put(key, new Pending(player.getUUID(), recipe.getId(), alreadyStruck, strikes));
         return true;
     }
 
@@ -154,29 +149,20 @@ public final class PerfectForgeSequence {
         private final int before;
         /** The blows still to come, in order. */
         private final List<ForgeStep> strikes;
-        /** Whether this is the recipe's own sequence rather than a remembered one. */
-        private final boolean perfect;
         private int untilBlow;
         /** How many blows this run has struck: also the index of the next one. */
         private int struck;
 
-        private Pending(UUID playerId, ResourceLocation recipeId, int before, List<ForgeStep> strikes,
-                        boolean perfect) {
+        private Pending(UUID playerId, ResourceLocation recipeId, int before, List<ForgeStep> strikes) {
             this.playerId = playerId;
             this.recipeId = recipeId;
             this.before = before;
             this.strikes = List.copyOf(strikes);
-            this.perfect = perfect;
-        }
-
-        /** The pause between two blows, which is the only thing the two kinds of run do differently. */
-        private int interval() {
-            return perfect ? PERFECT_TICKS : MEMORY_TICKS;
         }
 
         /** What to say when the anvil stops holding the work this run was started on. */
         private String interrupted() {
-            return perfect ? "wildfires.smithing.perfect.interrupted" : "wildfires.smithing.memory.interrupted";
+            return "wildfires.smithing.memory.interrupted";
         }
 
         /**
@@ -232,11 +218,11 @@ public final class PerfectForgeSequence {
             if (++struck >= strikes.size()) {
                 // The last blow is the one that finished the recipe, so the anvil has built the item by now
                 // and there is nothing left to hand over - and nothing to say about it either, since the
-                // result is already in the input slot. The perfect run is quiet here for the same reason as
-                // the remembered one: this is an ordinary forge that the player asked for, not a discovery.
+                // result is already in the input slot. This is an ordinary forge that the player asked for,
+                // not a discovery.
                 return true;
             }
-            untilBlow = interval();
+            untilBlow = MEMORY_TICKS;
             return false;
         }
     }

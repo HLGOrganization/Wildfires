@@ -9,6 +9,8 @@ import first.wildfires.celestial.OverworldCelestialProvider;
 import first.wildfires.compats.irons_spellbooks.GalaxyHymnRegister;
 import first.wildfires.compat.create.CreateMechanicalArmCompat;
 import first.wildfires.compat.create.FanHeatConfig;
+import first.wildfires.compat.minecraft.MapChunkLoadConfig;
+import first.wildfires.compat.net.NetworkGuardTargets;
 import first.wildfires.compat.sophisticateditemactions.SophisticatedItemActionsConfig;
 import first.wildfires.jei.FoodTraitDisplayConfig;
 import first.wildfires.diagnostics.StartupDiagnostics;
@@ -36,6 +38,7 @@ public class Wildfires {
 	public Wildfires(FMLJavaModLoadingContext context) {
 		StartupDiagnostics.commonMark("Wildfires constructor");
 		LegacyCelestialModGuard.rejectLoaded(ModList.get()::isLoaded);
+		StartupDiagnostics.networkGuards(NetworkGuardTargets.all(), NetworkGuardTargets.dropped(), ModList.get()::isLoaded);
 		CelestialConfig.register();
 		CelestialBodies.validateDefinitions();
 		CelestialApi.register(net.minecraft.world.level.Level.OVERWORLD, OverworldCelestialProvider.INSTANCE);
@@ -43,6 +46,7 @@ public class Wildfires {
 		ThermalConfig.register();
 		// FanHeatConfig.register(); // Moved into woodencog_wildfire: the fan ceilings now live in woodencog-common.toml under [woodencog.fan]
 		SophisticatedItemActionsConfig.register();
+		MapChunkLoadConfig.register();
 		FoodTraitDisplayConfig.register();
 		CreateMechanicalArmCompat.register();
 		IEventBus eventBus = context.getModEventBus();
