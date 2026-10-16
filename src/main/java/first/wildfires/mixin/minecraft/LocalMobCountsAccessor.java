@@ -1,3 +1,9 @@
+/*
+ * Adapted from TFCCaelum 1.2 `tfccaelum/mixin/accessor/MobCountsAccessor`.
+ * SPDX-License-Identifier: LicenseRef-TFCCaelum-BSD (see third_party/tfc-caelum/1.2/PROVENANCE.md).
+ * Wildfires modifications: same target and named-getter accessor pattern, renamed into the
+ * Wildfires accessor namespace.
+ */
 package first.wildfires.mixin.minecraft;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;

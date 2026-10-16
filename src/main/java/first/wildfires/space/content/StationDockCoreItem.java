@@ -1,3 +1,11 @@
+/*
+ * Adapted from NTM: Space TileEntityOrbitalStation's multiple reservable docking-core membership.
+ * Copyright NTM: Space contributors.
+ * SPDX-License-Identifier: LGPL-3.0-only
+ * Wildfires modifications: placement is authoritative on the server, requires the clicked block
+ * to sit inside the player's station region, materializes one secondary 5x5x2 core, and treats
+ * the clicked block as a construction anchor rather than a one-block BlockItem offset.
+ */
 package first.wildfires.space.content;
 
 import first.wildfires.space.SpaceDimensions;

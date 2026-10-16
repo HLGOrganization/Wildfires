@@ -1,3 +1,10 @@
+/*
+ * Adapted from TFCCaelum 1.2 `tfccaelum/Config` and `tfccaelum/Helpers`.
+ * SPDX-License-Identifier: LicenseRef-TFCCaelum-BSD (see third_party/tfc-caelum/1.2/PROVENANCE.md).
+ * Wildfires modifications: the `LEGACY_TFCCAELUM` preset reproduces the upstream mixed
+ * orbit/supermoon period semantics, while the default preset uses the unified synodic,
+ * anomalistic and nodal model.
+ */
 package first.wildfires.celestial;
 
 /** Server-authoritative parameters used by the common celestial model. */

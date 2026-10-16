@@ -1,3 +1,10 @@
+/*
+ * Adapted from TFCCaelum 1.2 `tfccaelum/Helpers` (`renderRainbow`).
+ * SPDX-License-Identifier: LicenseRef-TFCCaelum-BSD (see third_party/tfc-caelum/1.2/PROVENANCE.md).
+ * Wildfires modifications: keeps the three-point rain-fall comparison, the "current rain below
+ * 0.5" requirement, the 0.6/0.05 layer alphas and the 1:2 quad sizes, and replaces the empirical
+ * eclipse term with the unified disc coverage.
+ */
 package first.wildfires.client.celestial;
 
 import com.mojang.blaze3d.systems.RenderSystem;

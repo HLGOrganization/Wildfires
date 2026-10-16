@@ -1,5 +1,13 @@
 package first.wildfires.client.spell;
 
+/*
+ * Presentation layer for the Galaxy Hymn impact nebula.
+ * The rendered volume is the adapted user-supplied nebula shader set; its tone
+ * mapping derives from 5.txt, attributed there to sonicether's
+ * "Gargantua With HDR Bloom". License: non-commercial, share-alike, attribution
+ * (Shadertoy platform default); not part of the Wildfires ARR partition.
+ * Evidence: third_party/nebula/user-supplied-2026-08-24/PROVENANCE.md
+ */
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;

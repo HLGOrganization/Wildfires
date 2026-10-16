@@ -1,3 +1,10 @@
+/*
+ * Adapted from Caelum `1.20.1-2.0.0.0` (`client.data.StarDataManager`).
+ * SPDX-License-Identifier: MIT (see third_party/caelum/1.20.1-2.0.0.0/PROVENANCE.md).
+ * Wildfires modifications: the upstream codec's `replace` and merge semantics are kept as a
+ * deterministic, side-effect-free merge stage, so one malformed table fails in isolation instead
+ * of discarding the tables that loaded before it.
+ */
 package first.wildfires.client.celestial;
 
 import com.google.gson.JsonArray;

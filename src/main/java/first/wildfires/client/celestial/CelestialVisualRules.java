@@ -1,3 +1,13 @@
+/*
+ * Adapted from Caelum `1.20.1-2.0.0.0` (`client.SkyUtils` and `client.data.StarDataManager`
+ * star-appearance math) and from TFCCaelum 1.2 `tfccaelum/Helpers` and `tfccaelum/util/Planets`.
+ * SPDX-License-Identifier: MIT AND LicenseRef-TFCCaelum-BSD
+ * (see third_party/caelum/1.20.1-2.0.0.0/PROVENANCE.md and third_party/tfc-caelum/1.2/PROVENANCE.md).
+ * Wildfires modifications: restores the exact upstream small-angle apparent-diameter scale
+ * (206265 arcseconds per radian), the visual-only x50 satellite separation and the 5000-tick
+ * rainbow curve, keeps Caelum's logarithmic star-magnitude mapping with its once-per-buffer
+ * brightness, and applies all of it to the unified three-dimensional state.
+ */
 package first.wildfires.client.celestial;
 
 import first.wildfires.api.celestial.CelestialVector;

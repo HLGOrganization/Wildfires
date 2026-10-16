@@ -1,3 +1,9 @@
+/*
+ * Adapted from Caelum `1.20.1-2.0.0.0` (`mixin.MixinFogRenderer`).
+ * SPDX-License-Identifier: MIT (see third_party/caelum/1.20.1-2.0.0.0/PROVENANCE.md).
+ * Wildfires modifications: keeps the `setupColor` time redirect, but apparent time and sun
+ * direction come from the unified model and the redirect is gated on sky ownership.
+ */
 package first.wildfires.mixin.minecraft;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;

@@ -4,9 +4,22 @@ This file records third-party work incorporated into, adapted by, or materially 
 
 ## License model
 
-Wildfires is a multi-license distribution. The root [`LICENSE`](LICENSE) reserves all rights in original Wildfires code, assets, and documentation. It does not relicense third-party material. Every bundled third-party item remains governed by the license and copyright notice recorded below and in [`third_party/`](third_party/README.md).
+Wildfires is a multi-license distribution. The root [`LICENSE`](LICENSE) reserves all rights in original Wildfires code, assets, and documentation. Its scope is deliberately narrow — it covers only files that are original Wildfires work and are not listed in the license matrix below — and the boundary runs both ways: the open licenses of the third-party partitions do not extend to that original content, so reusing it still requires written permission. That also means the open-source status of the bundled partitions does not make the whole project open source. The root notice does not relicense third-party material. Every bundled third-party item remains governed by the license and copyright notice recorded below and in [`third_party/`](third_party/README.md).
 
 The built JAR carries `LICENSE`, this notice, and the complete versioned `third_party/` evidence directory. Presence of those files preserves notices but does not by itself resolve an incompatible or ambiguous license. Items explicitly marked unresolved remain release blockers.
+
+## Release status
+
+No partition currently carries unresolved rights, so none is blocked for publication. Two were listed here earlier and both were resolved on 2026-10-16:
+
+| Partition | Earlier blocker | Resolution |
+| --- | --- | --- |
+| TFC Caelum `1.2` | Which BSD variant governs, with no license text anywhere in the release | Project-owner decision: satisfy the stricter three-clause obligation set, which also satisfies BSD-2-Clause; the partition is identified as `LicenseRef-TFCCaelum-BSD` instead of a guessed standard identifier. See [the provenance record](third_party/tfc-caelum/1.2/PROVENANCE.md). |
+| User-supplied nebula set `2026-08-24` | Licenses of the sources the supplied files reference | Reclassified as a known non-commercial / share-alike partition under Shadertoy's platform default: the `fl2Bzd` star routine is not compiled into our shader at all, and the adapted grading is attributed to sonicether's "Gargantua With HDR Bloom". See [the provenance record](third_party/nebula/user-supplied-2026-08-24/PROVENANCE.md). |
+
+Both partitions are now closed on the rights side and on the paperwork side, and the Caelum row below has since been enumerated the same way. No partition currently has an open item in this file.
+
+Three partitions are distributable only under the terms they carry, because their licenses are non-commercial and share-alike: the Mattenii aurora shader (CC BY-NC-SA 3.0), the Waterfall engine effects (CC BY-NC-SA 4.0), and the user-supplied nebula set (Shadertoy platform default, CC BY-NC-SA 3.0). Wildfires is distributed free of charge and is never sold, so the non-commercial condition is satisfied by the project's own distribution policy rather than by a per-file exemption. The share-alike and attribution terms remain in force: none of the three may be relicensed as All Rights Reserved, and no file under them may be relicensed to permit commercial use by anyone else.
 
 | Material | Governing terms |
 | --- | --- |
@@ -14,12 +27,12 @@ The built JAR carries `LICENSE`, this notice, and the complete versioned `third_
 | Caelum-derived code/mechanisms | Caelum MIT notice, subject to deeper file-level sources |
 | BSC5P-JSON-XYZ stellar catalog data | CC BY 4.0 |
 | Mattenii-derived aurora shader | CC BY-NC-SA 3.0 |
-| TFC Caelum-derived behavior and 31 PNG files | Unresolved BSD-2-Clause / `BSD 3` conflict; not cleared for public release |
+| TFC Caelum-derived behavior and 31 PNG files | `LicenseRef-TFCCaelum-BSD` — BSD-family permissive terms as declared by the package; the clause variant is undetermined (`BSD 3` in the JAR, `BSD-2-Clause` on Modrinth, generic `BSD License` on CurseForge) and Wildfires satisfies the stricter three-clause reading. See the release decision in the provenance record |
 | VS: Genesis-derived cubemap, mesh and shaders | Apache-2.0 |
 | NTM: Space-derived orbit/capsule/navigation code, models and textures | LGPL-3.0-only |
 | Waterfall/KSP Interstellar Extended engine-effect shaders, meshes, textures and configs | CC BY-NC-SA 4.0 |
 | ArcaneVortex Starlink/cosmic/Black World/`star_sky` visual adaptation | ErChien ARR plus the user's project-specific modification/integration/redistribution authorization; tesseracts and attack-damage mechanisms excluded |
-| User-supplied nebula shader set | Project-specific visual authorization; `fl2Bzd` and sonicether deeper-source indicators preserved; public redistribution blocked pending license confirmation |
+| User-supplied nebula shader set | CC BY-NC-SA 3.0 (Shadertoy platform default) — non-commercial and share-alike; `fl2Bzd` and sonicether attributions preserved. Not ARR |
 
 ## Caelum
 
@@ -29,7 +42,9 @@ The built JAR carries `LICENSE`, this notice, and the complete versioned `third_
 - Verified source revision: `59c03cc665cb91291b1b3d3a591304be702fbc05`
 - Upstream license: MIT
 - Use in Wildfires: sky and latitude design, stellar loading/rendering behavior, and related implementation guidance.
+- Adapted material, enumerated in `files.csv`: the star data chain (`StarDataManager`, `StarTableLoader`), the star appearance and latitude-driven celestial rotation (`CelestialVisualRules`, `CelestialRenderer`), the client sky and fog time bridges (`CelestialClientLevelMixin`, `CelestialFogRendererMixin`) and the star option set in `CelestialConfig`. Each carries an MIT notice with its upstream class and modification summary.
 - Verbatim material: `src/main/resources/assets/wildfires/stars/stars.json`; its deeper catalog provenance and CC BY 4.0 terms are recorded below.
+- Deliberately not attributed to Caelum: the geometric moon phase (upstream's `MoonController` and its `DimensionType` mixin are not ported), the TFE/TFC-calendar latitude and year, the debug overlay, and everything above the star pass in `CelestialRenderer`.
 - Preserved upstream documents: [`third_party/caelum/1.20.1-2.0.0.0/`](third_party/caelum/1.20.1-2.0.0.0/PROVENANCE.md)
 
 Copyright (c) 2023 Nuparu00. The complete MIT notice is preserved with the upstream snapshot.
@@ -42,9 +57,23 @@ Copyright (c) 2023 Nuparu00. The complete MIT notice is preserved with the upstr
 - Use in Wildfires: TFC calendar integration concepts, planets and satellites, eclipses, blood moons, rainbows, aurora behavior, configuration semantics, and sky resources.
 - Verbatim material: 31 PNG files under `src/main/resources/assets/wildfires/textures/sky/`; see the preserved file manifest.
 - Adapted material: portions of the aurora shader and celestial behavior. The shader has a separate CC BY-NC-SA 3.0 attribution below.
-- Preserved upstream metadata and project description: [`third_party/tfc-caelum/1.2/`](third_party/tfc-caelum/1.2/PROVENANCE.md)
+- Preserved upstream metadata, project description and the CurseForge license field: [`third_party/tfc-caelum/1.2/`](third_party/tfc-caelum/1.2/PROVENANCE.md)
 
-License status requires resolution before public redistribution. The release JAR declares `BSD 3`, while the matching Modrinth project/version currently declares `BSD-2-Clause`; the release contains neither a complete license text nor an original README. Wildfires preserves both authoritative statements without guessing which BSD variant controls. Obtain the original license text or written clarification from Verph and then update the provenance record.
+**Cleared for redistribution by the project owner's decision of 2026-10-16, taken under the stricter-variant policy.** Every declaration found is BSD-family, so redistribution and adaptation are permitted with notice; what remained undetermined is *which* variant governs, and therefore which text we must ship. The release JAR declares `BSD 3`, the matching Modrinth project/version declares `BSD-2-Clause`, and the CurseForge project page (ID `999031`) shows the generic `BSD License`, which names no variant. The release contains no license text, no README and no source link. The author appears to have stopped developing the project and is difficult to reach, so rather than leave the partition idle, Wildfires proceeds under the reading that satisfies both candidates at once: it complies with the BSD-3-Clause obligation set, which satisfied BSD-2-Clause as well. No standard SPDX BSD identifier is asserted. The partition is identified as `LicenseRef-TFCCaelum-BSD`, defined as "BSD-family permissive terms as declared by TFC Caelum `1.2`; the clause variant is undetermined; Wildfires satisfies the stricter three-clause interpretation".
+
+Obligations in force: the upstream copyright notice and declaration travel with the JAR (see `upstream/mods.toml`); the files Wildfires adapted are identified; neither Verph's name nor any other contributor's name is used to endorse or promote Wildfires; and the standard BSD warranty disclaimer is carried. The 31 verbatim PNGs are held under the same package-level declaration, because the full-artifact scan found no per-file author or license marker and no separate asset terms.
+
+Because the author's own license file does not exist, the two clauses both variants require are carried here in their canonical wording rather than reproduced from upstream:
+
+> THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+> Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+The partition is closed: all fifteen adapted destinations (planet and satellite parameters, period/eclipse/supermoon/config semantics, the blood-moon spawn chain and its three mixins plus accessor, rainbow, aurora and the aurora shader) are enumerated in `files.csv` with destination hashes and each carries a `LicenseRef-TFCCaelum-BSD` header naming the upstream class it adapts and what Wildfires changed. The record also states what is deliberately *not* attributed to this partition — the three-dimensional orbit and eclipse geometry, the event machinery and the sky-ownership bridge are Wildfires work that replaced upstream's empirical approximations. If the author ever supplies the license text, quote it verbatim and drop the `LicenseRef`.
+
+Do not invent an SPDX identifier, do not write a substitute license file, and do not publish a JAR that still contains this partition while the conflict is open.
+
+The archived release was re-inspected in full on 2026-10-16 and is byte-identical to the copy recorded here. It contains no license, readme, notice, credits or authors file at all, and the only license text anywhere inside it is `license = "BSD 3"` in `META-INF/mods.toml`, so the complete text still has to come from the author. Note that the bundled aurora shader is outside this question: its own in-file notice names Mattenii and `CC BY-NC-SA 3.0`, and that is the license it is distributed under regardless of what the mod-level declaration says.
 
 ## BSC5P-JSON-XYZ stellar catalog
 
@@ -65,7 +94,7 @@ License status requires resolution before public redistribution. The release JAR
 - Path in Wildfires: `src/main/resources/assets/wildfires/shaders/core/aurora.fsh`
 - Changes: adapted from the TFC Caelum split shader to Minecraft's Forge-managed GLSL 150 pipeline and the `wildfires` namespace; further rendering fixes are documented in the source history.
 
-The attribution and license marker must remain in the shader source. Because this is a non-commercial, share-alike license and a file-level exception to the mod-level MIT declaration, release terms and distribution channels must be checked explicitly before publishing.
+The attribution and license marker must remain in the shader source. `aurora.fsh` is a non-ARR file: it is offered under CC BY-NC-SA 3.0, so the adaptation must keep the Mattenii and Shadertoy attribution, must not be used commercially, and any further derivative of that file must stay under the same license.
 
 ## VS: Genesis
 
@@ -94,6 +123,8 @@ Each modified source/shader carries an Apache-2.0 notice and change description.
 
 The root ARR license expressly excludes this LGPL partition. Its modified Java source, exact PNGs, build scripts, GPL/LGPL texts and attribution records are provided with the source distribution and evidence is included in the JAR. Wildfires does not claim authorship of the NTM textures; the inspected upstream snapshot did not provide per-PNG author or license exceptions, so the project-level LGPL claim and complete contributor credits are retained without narrowing them.
 
+Every adapted Java destination in this partition carries the `LGPL-3.0-only` notice naming the upstream class it adapts and what Wildfires changed. The six station-core classes (`StationCoreBlock`, `StationCoreBlockEntity`, `StationCoreService`, `StationDockCoreItem`, `StationStructureBlock`, `StationServerEvents`) had been adapted without that notice; it was added on 2026-10-16, and the two stale destination hashes in `files.csv` were recomputed in the same change.
+
 ## Waterfall engine effects
 
 - Projects: [Waterfall](https://github.com/post-kerbin-mining-corporation/Waterfall) and KSP Interstellar Extended engine configurations
@@ -121,7 +152,9 @@ The inspected release did not contain a standalone license text, README or canon
 
 ## User-supplied nebula shader set
 
-The 2026-08-24 local set is adapted into the impact-frame Galaxy Hymn point-to-nebula volume. Its Forge GLSL 150 implementation directly maps the active `1.txt` cloud-strength, reddening/saturation and `0.03R` march plus the active `5.txt` grading sequence onto a world-anchored raymarch. Shadertoy history feedback is replaced with deterministic first-step jitter; source absorption alpha stays internal. The source's five-layer star field and opaque black backdrop are excluded from the runtime shader at source-code level: neither `stars()`, its hash helper nor a background call is compiled into the Minecraft nebula program. Each raymarch step separately accumulates transported cloud emission before final composition; only that cloud-body accumulator can create premultiplied alpha, while an empty ray remains exactly transparent and exposes the existing world framebuffer. There is no render-then-color-key stage. The premultiplied cloud body and additive highlight are registered as separate `ShaderInstance` configurations whose JSON files explicitly own `ONE/ONE_MINUS_SRC_ALPHA` and `SRC_ALPHA/ONE` blending respectively; this prevents Minecraft's shader application from replacing the intended composite with its default opaque state. Minecraft-local presentation now applies a 2.0 opacity gain capped at 0.84 only to visible cloud-derived coverage and a bounded 1.35 post-grade saturation boost; source absorption alpha remains excluded. The pass is dispatched at Forge `AFTER_WEATHER`, after vanilla clouds and precipitation but before hand/GUI rendering. The `2/3/4.txt` downsample/Gaussian bloom chain is preserved in the source record but is not claimed as active because `5.txt` comments out its `GetBloom` contribution; the spell's independent bloom request is a separate thresholded additive pass. The supplied files contain deeper-source references to Shadertoy `fl2Bzd` and sonicether's “Gargantua With HDR Bloom”, but no license texts were provided. Project-specific internal visual authorization is recorded; public redistribution remains blocked until those deeper rights are confirmed or independently replaced. Exact hashes and mappings are in [`third_party/nebula/user-supplied-2026-08-24/`](third_party/nebula/user-supplied-2026-08-24/PROVENANCE.md).
+The 2026-08-24 local set is adapted into the impact-frame Galaxy Hymn point-to-nebula volume. Its Forge GLSL 150 implementation directly maps the active `1.txt` cloud-strength, reddening/saturation and `0.03R` march plus the active `5.txt` grading sequence onto a world-anchored raymarch. Shadertoy history feedback is replaced with deterministic first-step jitter; source absorption alpha stays internal. The source's five-layer star field and opaque black backdrop are excluded from the runtime shader at source-code level: neither `stars()`, its hash helper nor a background call is compiled into the Minecraft nebula program. Each raymarch step separately accumulates transported cloud emission before final composition; only that cloud-body accumulator can create premultiplied alpha, while an empty ray remains exactly transparent and exposes the existing world framebuffer. There is no render-then-color-key stage. The premultiplied cloud body and additive highlight are registered as separate `ShaderInstance` configurations whose JSON files explicitly own `ONE/ONE_MINUS_SRC_ALPHA` and `SRC_ALPHA/ONE` blending respectively; this prevents Minecraft's shader application from replacing the intended composite with its default opaque state. Minecraft-local presentation now applies a 2.0 opacity gain capped at 0.84 only to visible cloud-derived coverage and a bounded 1.35 post-grade saturation boost; source absorption alpha remains excluded. The pass is dispatched at Forge `AFTER_WEATHER`, after vanilla clouds and precipitation but before hand/GUI rendering. The `2/3/4.txt` downsample/Gaussian bloom chain is preserved in the source record but is not claimed as active because `5.txt` comments out its `GetBloom` contribution; the spell's independent bloom request is a separate thresholded additive pass.
+
+Attribution and terms: the cloud equations come from the supplied `1.txt`, and the tone mapping and grading come from `5.txt`, which states that Buffer B/C/D and the image pass are sonicether's “Gargantua With HDR Bloom”. The `stars()` routine inside `1.txt` is credited there to Shadertoy `fl2Bzd`; that routine, its hash helper and the opaque backdrop are not compiled into this program, so the credit is preserved rather than relied on. The set is treated as carrying Shadertoy's platform default license (CC BY-NC-SA 3.0): its non-commercial condition is satisfied by the project's free-distribution policy, while the attribution and share-alike terms travel with the adapted files, which are not part of the ARR partition. The supplied files themselves are preserved as an immutable snapshot under `third_party/`. Exact hashes and mappings are in [`third_party/nebula/user-supplied-2026-08-24/`](third_party/nebula/user-supplied-2026-08-24/PROVENANCE.md).
 
 ## Dependencies and APIs
 

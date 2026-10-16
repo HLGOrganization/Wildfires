@@ -1,3 +1,12 @@
+/*
+ * Adapted from NTM: Space OrbitalStation / TileEntityOrbitalStation station-core construction and
+ * membership lifecycle.
+ * Copyright NTM: Space contributors.
+ * SPDX-License-Identifier: LGPL-3.0-only
+ * Wildfires modifications: replaces the fixed orbit-grid station with UUID stations persisted in
+ * SavedData, materializes the exact one-root-plus-forty-nine-proxy 5x5x2 core idempotently at
+ * placement, interaction and server-start boundaries, and adds no periodic reconciliation tick.
+ */
 package first.wildfires.space.content;
 
 import com.mojang.logging.LogUtils;

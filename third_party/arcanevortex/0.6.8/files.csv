@@ -1,7 +1,7 @@
 wildfires_path,upstream_path,sha256,classification
 src/main/java/first/wildfires/compats/irons_spellbooks/entity/GalaxyHymnCoreProjectile.java,com/erchien/arcanevortex/Content/Item/Bow/SkyRipper/SkyRipperArrow.class + com/erchien/arcanevortex/Help/ScreenShakeHelper.class,,adapted
-src/main/java/first/wildfires/compats/irons_spellbooks/entity/GalaxyHymnHomingStar.java,com/erchien/arcanevortex/Content/Item/Bow/SkyRipper/SkyRipperArrow.class,9e8615bce3dfe86ac268dd8f28edd39762a01012da283c20303dd12ff489ab83,adapted
-src/main/java/first/wildfires/compats/irons_spellbooks/GalaxyHymnVisualMath.java,com/erchien/arcanevortex/Content/Item/Bow/SkyRipper/SkyRipperArrow.class,78448ece55508fd7b70ddd1bc7f01d0177774963d8ef6268bfb9b5c463e27a38,adapted
+src/main/java/first/wildfires/compats/irons_spellbooks/entity/GalaxyHymnHomingStar.java,com/erchien/arcanevortex/Content/Item/Bow/SkyRipper/SkyRipperArrow.class,1620449c04d94e9d1925084df9ce5f0c99d86bf0d59f5445253274ec8a050e9a,adapted
+src/main/java/first/wildfires/compats/irons_spellbooks/GalaxyHymnVisualMath.java,com/erchien/arcanevortex/Content/Item/Bow/SkyRipper/SkyRipperArrow.class,32b3a292deef8585654f6abbc8239d92e3ec4759327ab590f01da72ed77e089d,adapted
 src/main/java/first/wildfires/compats/irons_spellbooks/GalaxyHymnStarlinkSpawner.java,com/erchien/arcanevortex/Content/Item/Bow/SkyRipper/SkyRipperArrow.class,,adapted
 src/main/java/first/wildfires/client/spell/GalaxyHymnStarlinkParticle.java,com/erchien/arcanevortex/Content/Particle/World/StarlinkParticle/StarlinkParticle.class + com/erchien/arcanevortex/Content/Particle/World/StarlinkParticle/StarlinkParticleRenderTypes.class,,adapted
 src/main/java/first/wildfires/client/spell/GalaxyHymnGpuStarParticle.java,com/erchien/arcanevortex/Content/Particle/World/FragmentParticle/FragmentParticle.class + com/erchien/arcanevortex/Content/Particle/World/FragmentParticle/FragmentParticleRenderTypes.class,,adapted

@@ -1,3 +1,10 @@
+/*
+ * Adapted from Caelum `1.20.1-2.0.0.0` (`mixin.MixinClientLevel`).
+ * SPDX-License-Identifier: MIT (see third_party/caelum/1.20.1-2.0.0.0/PROVENANCE.md).
+ * Wildfires modifications: same sky-colour, cloud, star-brightness and lightmap redirect points,
+ * but the substituted value is the local apparent time of the unified model, and the whole
+ * modification is skipped while another shader pack owns the sky.
+ */
 package first.wildfires.mixin.minecraft;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;

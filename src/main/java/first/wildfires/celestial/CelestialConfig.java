@@ -1,3 +1,12 @@
+/*
+ * Adapted from Caelum `1.20.1-2.0.0.0` (`config.ClientConfig`, star option set) and from
+ * TFCCaelum 1.2 `tfccaelum/Config`.
+ * SPDX-License-Identifier: MIT AND LicenseRef-TFCCaelum-BSD
+ * (see third_party/caelum/1.20.1-2.0.0.0/PROVENANCE.md and third_party/tfc-caelum/1.2/PROVENANCE.md).
+ * Wildfires modifications: the retained option set moves to Forge 1.20.1 config with deprecated
+ * compatibility keys kept readable, and the upstream keys that had no read point (sun blindness,
+ * blend, orbit/distance factors) stay recorded without gaining behaviour.
+ */
 package first.wildfires.celestial;
 
 import java.util.ArrayList;

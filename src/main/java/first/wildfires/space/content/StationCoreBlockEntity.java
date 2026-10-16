@@ -1,3 +1,12 @@
+/*
+ * Adapted from NTM: Space TileEntityOrbitalStation's docked-rocket and port bookkeeping.
+ * Copyright NTM: Space contributors.
+ * SPDX-License-Identifier: LGPL-3.0-only
+ * Wildfires modifications: replaces the live in-memory docked-rocket reference with persistent
+ * station/dock UUIDs, keeps reservation and physical docking as separate ids, exposes the
+ * synchronized client clamp rotation, and forwards Forge water through the physically docked
+ * capsule only.
+ */
 package first.wildfires.space.content;
 
 import net.minecraft.core.BlockPos;

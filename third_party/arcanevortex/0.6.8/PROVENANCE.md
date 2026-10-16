@@ -95,5 +95,9 @@ The inspected release did not include an upstream README, standalone LICENSE, NO
 - [x] `files.csv` lists every planned adapted destination.
 - [x] Preserved upstream hashes were compared to the read-only local release.
 - [x] Root acknowledgement and `THIRD_PARTY_NOTICES.md` identify the authorization boundary.
-- [x] Adapted source files retain an ArcaneVortex credit and modification notice; all twenty verbatim sprite/animation files, two verbatim Black World programs and all three preserved `star_sky` source resources match their registered upstream hashes.
+- [x] Every adapted source file now retains an ArcaneVortex credit and modification notice. All twenty verbatim sprite/animation files, two verbatim Black World programs and all three preserved `star_sky` source resources match their registered upstream hashes.
 - [x] No ArcaneVortex damage mechanism is included in the adapted scope.
+
+## Corrections
+
+- `2026-10-16`: the verification line above previously asserted that adapted source files retained the credit and modification notice without a per-row check of `files.csv`. Two destinations — `src/main/java/first/wildfires/compats/irons_spellbooks/entity/GalaxyHymnHomingStar.java` and `src/main/java/first/wildfires/compats/irons_spellbooks/GalaxyHymnVisualMath.java` — were added on 2026-09-01, in the same commit as this record, without one; they had not been modified since. Both now carry the notice, and their destination hashes in `files.csv` were refreshed. Only comments were added: no adaptation scope, exclusion, authorization boundary, constant or behavior changed, and no verbatim asset was affected.

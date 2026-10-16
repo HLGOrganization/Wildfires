@@ -1,3 +1,10 @@
+/*
+ * Adapted from TFCCaelum 1.2 `tfccaelum/mixin/ForgeEventHandlerMixin`.
+ * SPDX-License-Identifier: LicenseRef-TFCCaelum-BSD (see third_party/tfc-caelum/1.2/PROVENANCE.md).
+ * Wildfires modifications: only the raw-brightness and height expressions inside TFC 3.2.20's
+ * spawn check are altered while the local moon is a visible blood moon; TFC's spawn tags, types,
+ * light rules and its own cancellation logic stay untouched.
+ */
 package first.wildfires.mixin.tfc;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;

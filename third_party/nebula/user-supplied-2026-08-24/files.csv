@@ -1,8 +1,7 @@
-destination,source,source_sha256,use
-src/main/java/first/wildfires/client/spell/GalaxyHymnNebulaShader.java,E:/wildfirecore/nebula/1.txt,03644B24ECB0ED5BEC74AEB1E9ADF3E811EC3EE1805A3F01BBF658C9EAE778B9,adapted
-src/main/java/first/wildfires/client/spell/GalaxyHymnNebulaVisuals.java,E:/wildfirecore/nebula/1.txt,03644B24ECB0ED5BEC74AEB1E9ADF3E811EC3EE1805A3F01BBF658C9EAE778B9,adapted
-src/main/resources/assets/wildfires/shaders/core/galaxy_hymn_nebula.json,E:/wildfirecore/nebula/1.txt,03644B24ECB0ED5BEC74AEB1E9ADF3E811EC3EE1805A3F01BBF658C9EAE778B9,adapted
-src/main/resources/assets/wildfires/shaders/core/galaxy_hymn_nebula_glow.json,E:/wildfirecore/nebula/1.txt,03644B24ECB0ED5BEC74AEB1E9ADF3E811EC3EE1805A3F01BBF658C9EAE778B9,adapted
-src/main/resources/assets/wildfires/shaders/core/galaxy_hymn_nebula.vsh,E:/wildfirecore/nebula/1.txt,03644B24ECB0ED5BEC74AEB1E9ADF3E811EC3EE1805A3F01BBF658C9EAE778B9,adapted
-src/main/resources/assets/wildfires/shaders/core/galaxy_hymn_nebula.fsh,E:/wildfirecore/nebula/1.txt,03644B24ECB0ED5BEC74AEB1E9ADF3E811EC3EE1805A3F01BBF658C9EAE778B9,adapted
-src/main/resources/assets/wildfires/shaders/core/galaxy_hymn_nebula.fsh,E:/wildfirecore/nebula/5.txt,9BAC9480871E672936335C5AA43F97F7E938708CAD555524D8236FCC1B7F0346,adapted
+wildfires_path,upstream_path,sha256,classification
+"src/main/java/first/wildfires/client/spell/GalaxyHymnNebulaShader.java","upstream/1.txt; upstream/5.txt","4f691410577eafe87567274fa765e3d95746ced27ceae266902a026767fb3c19","adapted"
+"src/main/java/first/wildfires/client/spell/GalaxyHymnNebulaVisuals.java","upstream/1.txt; upstream/5.txt","7b0c0e2ea0f058ad479d276b7215421670a5464c4feb6e431e41636752ad6752","adapted"
+"src/main/resources/assets/wildfires/shaders/core/galaxy_hymn_nebula.json","upstream/1.txt; upstream/5.txt","55d4346125f52de25bf79557ddf034ad4391f6749825d32c3c29e54ae6b109cc","adapted"
+"src/main/resources/assets/wildfires/shaders/core/galaxy_hymn_nebula_glow.json","upstream/1.txt; upstream/5.txt","db678beb291d767c981d59721c33ee59bde0b77685ab654b383fd1e6dba90926","adapted"
+"src/main/resources/assets/wildfires/shaders/core/galaxy_hymn_nebula.vsh","upstream/1.txt","be35b516636916abe289df264a530a76c0c907b0c066abb8681435b0b4d5ca95","adapted"
+"src/main/resources/assets/wildfires/shaders/core/galaxy_hymn_nebula.fsh","upstream/1.txt; upstream/5.txt","58ca38204dfd011673d25385a5e3faa48109d8538235a4bff42751b2e485c0e8","adapted"

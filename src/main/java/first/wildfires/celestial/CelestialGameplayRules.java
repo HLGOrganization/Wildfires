@@ -1,3 +1,11 @@
+/*
+ * Adapted from TFCCaelum 1.2 `tfccaelum/Helpers`, `tfccaelum/mixin/LocalMobCapCalculatorMixin`
+ * and `tfccaelum/mixin/MonsterMixin`.
+ * SPDX-License-Identifier: LicenseRef-TFCCaelum-BSD (see third_party/tfc-caelum/1.2/PROVENANCE.md).
+ * Wildfires modifications: the retained blood-moon gameplay effects (Unluck amplifier, finite
+ * intensity-scaled local mob cap, visibility gating) are collected into pure deterministic rules
+ * driven by the unified celestial state.
+ */
 package first.wildfires.celestial;
 
 import first.wildfires.api.celestial.CelestialState;

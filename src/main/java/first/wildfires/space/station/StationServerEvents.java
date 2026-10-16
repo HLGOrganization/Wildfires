@@ -1,3 +1,11 @@
+/*
+ * Adapted from NTM: Space OrbitalStation / TileEntityOrbitalStation station lifecycle.
+ * Copyright NTM: Space contributors.
+ * SPDX-License-Identifier: LGPL-3.0-only
+ * Wildfires modifications: replaces the 1.7.10 world-load and teleporter hooks with Forge
+ * RegisterCommandsEvent, OnDatapackSyncEvent, ServerStartedEvent, BlockEvent.BreakEvent and
+ * EntityMountEvent listeners plus the journey ticker, without adding a periodic station scan.
+ */
 package first.wildfires.space.station;
 
 import first.wildfires.command.SpaceStationCommand;

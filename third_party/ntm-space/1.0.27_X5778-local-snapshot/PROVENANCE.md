@@ -51,6 +51,8 @@
 - Partition: every adapted/verbatim Java, OBJ, MTL, JSON, PNG and OGG destination listed in `files.csv` is LGPL-3.0-only. The listed station-core classes are included because their multi-port reservation, dock membership and animated-clamp lifecycle now directly adapt `OrbitalStation` / `TileEntityOrbitalStation`; unrelated Wildfires station SavedData and ephemeris code outside that list retain their separately stated licenses unless otherwise listed by another partition.
 - Corresponding source/relinking: the complete adapted Java source, resource files and build scripts are provided in this repository. The root ARR notice excludes this LGPL partition and does not restrict modification or reverse engineering of it. Recipients can replace/modify the listed sources and rebuild the combined JAR.
 - JAR license paths: `third_party/ntm-space/1.0.27_X5778-local-snapshot/upstream/LICENSE` and `LICENSE.LESSER`.
+- Notice completion (2026-10-16): all forty adapted Java destinations now carry the `LGPL-3.0-only` notice with the upstream class each one adapts and a summary of what Wildfires changed. Six station-core classes (`StationCoreBlock`, `StationCoreBlockEntity`, `StationCoreService`, `StationDockCoreItem`, `StationStructureBlock`, `StationServerEvents`) had previously carried no notice at all; only comments were added, and no statement, field, method body or behavior changed.
+- Manifest correction (2026-10-16): the `files.csv` rows for `NtmSpaceObjModels.java` and `StationCoreRenderer.java` held hashes that matched no committed revision of either file and were not explained by line-ending or encoding differences. Both were recomputed from the current sources, together with the six rows touched by the notice change.
 
 ## Rights and notices
 
@@ -74,3 +76,5 @@
 - [x] Exact-copy resource hashes match the supplied NTM snapshot.
 - [x] Root acknowledgement and `THIRD_PARTY_NOTICES.md` entry are required in this change.
 - [x] The combined distribution retains complete corresponding source for the LGPL partition.
+- [x] Every adapted Java destination carries the LGPL-3.0-only notice with its modification summary (completed 2026-10-16).
+- [x] `files.csv` destination hashes were recomputed after that change, including the two entries that previously matched no revision.

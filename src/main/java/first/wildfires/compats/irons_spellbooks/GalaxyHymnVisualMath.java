@@ -1,5 +1,13 @@
 package first.wildfires.compats.irons_spellbooks;
 
+/*
+ * Constants shared with the Galaxy Hymn impact. The source-style first-stage Starlink shell,
+ * the tracking start and the untargeted expiry follow ArcaneVortex 0.6.8 SkyRipperArrow under
+ * the user's project-specific visual authorization; the sixty-four-star volley, its stop-radius
+ * band and the burst travel ticks are Wildfires-owned values.
+ * Copyright ErChien. No upstream attack-damage mechanism is included.
+ * Evidence: third_party/arcanevortex/0.6.8/PROVENANCE.md
+ */
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Random;

@@ -1,13 +1,18 @@
 #version 150
 
 /*
- * Direct Forge adaptation of the authorized E:/wildfirecore/nebula shader set.
- * Only the cloud equations and grading below follow 1.txt and 5.txt.
- * The source's opaque backdrop and five-layer background star field are
- * deliberately absent: Minecraft's existing world framebuffer is the background.
+ * Direct Forge adaptation of the 2026-08-24 user-supplied nebula shader set.
+ * The cloud equations follow 1.txt; the tone mapping and colour grading follow
+ * 5.txt, whose Buffer B/C/D and image pass come from sonicether's
+ * "Gargantua With HDR Bloom". The stars() routine that 1.txt credits to
+ * Shadertoy fl2Bzd is deliberately not compiled here, and the source's opaque
+ * backdrop and five-layer background star field are absent: Minecraft's
+ * existing world framebuffer is the background.
  * Minecraft-specific changes are limited to world-space ray construction,
  * deterministic first-step jitter in place of iChannel3 history, alpha output,
  * and a separate thresholded highlight pass for the requested bloom.
+ * License: non-commercial, share-alike, attribution (Shadertoy platform
+ * default). This file is not part of the Wildfires ARR partition.
  * Provenance: third_party/nebula/user-supplied-2026-08-24/PROVENANCE.md
  */
 uniform float Opacity;

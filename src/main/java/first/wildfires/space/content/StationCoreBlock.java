@@ -1,3 +1,11 @@
+/*
+ * Adapted from NTM: Space TileEntityOrbitalStation's primary/secondary docking-core contract.
+ * Copyright NTM: Space contributors.
+ * SPDX-License-Identifier: LGPL-3.0-only
+ * Wildfires modifications: splits the single upstream station core into one immutable primary
+ * block plus removable secondary dock blocks, addressed by synchronized station UUIDs through
+ * Forge 1.20.1 block/entity APIs instead of the 1.7.10 tile-entity contract.
+ */
 package first.wildfires.space.content;
 
 import net.minecraft.core.BlockPos;

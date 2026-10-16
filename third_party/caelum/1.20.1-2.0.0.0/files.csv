@@ -1,2 +1,9 @@
 wildfires_path,upstream_path,sha256,classification
 "src/main/resources/assets/wildfires/stars/stars.json","src/main/resources/assets/cealum/stars/stars.json","46f2b21d8205562d5918322fbf9217c51454d2fddf05c77223e9053584abc227","verbatim"
+"src/main/java/first/wildfires/client/celestial/CelestialRenderer.java","src/main/java/nuparu/caelum/client/SkyUtils.java; src/main/java/nuparu/caelum/mixin/MixinLevelRenderer.java","b67639077df325e199d6efc1868c12d28d7625524db721d08441f6b91201e181","adapted"
+"src/main/java/first/wildfires/client/celestial/StarDataManager.java","src/main/java/nuparu/caelum/client/data/StarDataManager.java; src/main/java/nuparu/caelum/client/event/ClientReloadListeners.java","1081868b563e6d46650576cb6e7bda7511e8975dd8a65916c7cbc0b1d17e1200","adapted"
+"src/main/java/first/wildfires/client/celestial/StarTableLoader.java","src/main/java/nuparu/caelum/client/data/StarDataManager.java","46384236109a866344be85a22143e7620b1e0ec1ec018752222399801890f751","adapted"
+"src/main/java/first/wildfires/client/celestial/CelestialVisualRules.java","src/main/java/nuparu/caelum/client/SkyUtils.java; src/main/java/nuparu/caelum/client/data/StarDataManager.java","542bd1afc3bcaa6a5b7567b4a32941065935d9c562301c071bce592a11daf2fc","adapted"
+"src/main/java/first/wildfires/mixin/minecraft/CelestialClientLevelMixin.java","src/main/java/nuparu/caelum/mixin/MixinClientLevel.java","82d48aae65d11739e78dd8879a810508484069520b96650a1bcb9b61b01ace4a","adapted"
+"src/main/java/first/wildfires/mixin/minecraft/CelestialFogRendererMixin.java","src/main/java/nuparu/caelum/mixin/MixinFogRenderer.java","a3ae001181bb41e14ae828a6ddc8c5f35e3eaf3f58c1cae1394b3a77bd222a35","adapted"
+"src/main/java/first/wildfires/celestial/CelestialConfig.java","src/main/java/nuparu/caelum/config/ClientConfig.java","00e3d7e519facb989babe9a821e54ef66270ce999537b2963342f50701092d78","adapted"

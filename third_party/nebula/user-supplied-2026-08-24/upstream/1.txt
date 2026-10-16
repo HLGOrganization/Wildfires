@@ -1,0 +1,476 @@
+#define PI 3.141592653589
+#define G0 6.673e-11
+#define lightspeed 299792458.0
+#define sigma 5.670373e-8
+#define ly 9460730472580800.0
+#define Msun 1.9891e30
+#define FOV 1.0
+
+
+
+const mat3 m3 = mat3(0.33338, 0.56034, -0.71817, -0.87887, 0.32651, -0.15323, 0.15162, 0.69596, 0.61339)*2.1;
+
+float SinNoise(vec3 p ,int n,float mult)
+{
+    float d = 0.;
+    float z = 3.5;
+    float trk = 1.;
+    for(int i = 0; i < n; i++)
+    {
+        p = p*m3*mult;
+        p += sin(p.zxy*trk)*0.25;
+        d += 1.8 - abs(dot(cos(p), sin(p.zxy )) -0.3)*z ;
+        z *= 0.7;
+        trk *= 1.45;
+    }
+
+    return d;
+}
+
+
+float RandomStep(vec2 xy, float seed)//用于光线起点抖动的随机
+{
+    return fract(sin(dot(xy.xy+fract(11.4514*sin(seed)), vec2(12.9898, 78.233)))* 43758.5453);
+}
+
+
+vec3 WorldToObjectSpace(vec4 Position, vec3 ObjectPos, vec3 ObjectNormal, vec3 ObjectTangent)
+{
+    vec3 ObjectSpaceY = normalize(ObjectNormal);  
+    vec3 ObjectSpaceX = normalize(ObjectTangent);
+         ObjectSpaceX = normalize(ObjectSpaceX - dot(ObjectSpaceX, ObjectSpaceY) * ObjectSpaceY);
+    vec3 ObjectSpaceZ = normalize(cross(ObjectSpaceX, ObjectSpaceY));
+
+    mat4x4 Translate = mat4x4(1.0, 0.0, 0.0, -ObjectPos.x,
+                              0.0, 1.0, 0.0, -ObjectPos.y,
+                              0.0, 0.0, 1.0, -ObjectPos.z,
+                              0.0, 0.0, 0.0, 1.0);
+
+    mat4x4 Rotate = mat4x4(ObjectSpaceX.x, ObjectSpaceX.y, ObjectSpaceX.z, 0.0,
+                           ObjectSpaceY.x, ObjectSpaceY.y, ObjectSpaceY.z, 0.0,
+                           ObjectSpaceZ.x, ObjectSpaceZ.y, ObjectSpaceZ.z, 0.0,
+                           0.0,               0.0,               0.0,               1.0);
+
+    Position = transpose(Rotate) * transpose(Translate) * Position;
+    return Position.xyz;
+}
+
+vec4 GetCamera(vec4 a)//相机系平移旋转  本部分在实际使用时uniform输入
+{
+    float _Theta=4.0*PI*iMouse.x/iResolution.x;
+    float _Phi=0.999*PI*iMouse.y/iResolution.y+0.0005;
+    float _R=2.;
+
+    if (iMouse.x / iResolution.x<=0.01&&iMouse.y / iResolution.y<=0.01)
+    {
+        _Theta = 4.0 * PI * 0.4;
+        _Phi   = 0.999 * PI * 0.5 + 0.0005;
+    }
+    
+    if(texelFetch(iChannel0, ivec2(83, 0), 0).x > 0.){
+        _R=5.;
+    }
+    
+    if(texelFetch(iChannel0, ivec2(87, 0), 0).x > 0.){
+        _R=.2;
+    }
+    
+    vec3 _Rotcen=vec3(0.0,0.0,0.0);
+    vec3 _Campos;
+
+    // 绕Y轴旋转：XZ平面旋转由_Theta控制，高度由_Phi控制
+    vec3 reposcam=vec3(
+        _R * sin(_Phi) * cos(_Theta),    // X = R * sin(φ) * cos(θ)
+        -_R * cos(_Phi),                 // Y = -R * cos(φ) (负号使得向上看时是正的)
+        -_R * sin(_Phi) * sin(_Theta)     // Z = R * sin(φ) * sin(θ)
+    );
+
+    _Campos = _Rotcen + reposcam;
+    
+    // 绕Y轴旋转时的参考上方向是(0, 1, 0)
+    vec3 vecup = vec3(0.0, 1.0, 0.0);
+    
+    // 计算坐标系基向量
+    vec3 _Z = normalize(reposcam);  // 相机看向原点
+    vec3 _X = normalize(cross(vecup, _Z));  // 右向量
+    vec3 _Y = normalize(cross(_Z, _X));     // 上向量（修正后垂直于视线和右向量）
+
+    // 平移变换：将世界坐标变换到相机位置为原点的坐标系
+    a = transpose(mat4x4(
+        1., 0., 0., -_Campos.x,
+        0., 1., 0., -_Campos.y,
+        0., 0., 1., -_Campos.z,
+        0., 0., 0., 1.
+    )) * a;
+    
+    // 旋转变换：将世界坐标系旋转到相机坐标系
+    a = transpose(mat4x4(
+        _X.x, _X.y, _X.z, 0.,   // 右向量
+        _Y.x, _Y.y, _Y.z, 0.,   // 上向量
+        _Z.x, _Z.y, _Z.z, 0.,   // 前向量（看向负Z）
+        0.,   0.,   0.,   1.
+    )) * a;
+        
+    return a;
+}
+
+
+vec4 GetInverseCameraRot(vec4 a)//摄影机系旋转    本部分在实际使用时uniform输入
+{
+float _Theta=4.0*PI*iMouse.x/iResolution.x;
+float _Phi=0.999*PI*iMouse.y/iResolution.y+0.0005;
+float _R=2.;
+
+    if (iMouse.x / iResolution.x<=0.01&&iMouse.y / iResolution.y<=0.01)
+        {
+        _Theta = 4.0 * PI * 0.4;
+        _Phi   = 0.999 * PI * 0.5 + 0.0005;
+    }
+if(texelFetch(iChannel0, ivec2(83, 0), 0).x > 0.){
+_R=5.;
+
+
+}
+if(texelFetch(iChannel0, ivec2(87, 0), 0).x > 0.){
+_R=.2;
+
+
+}
+vec3 _Rotcen=vec3(0.0,0.0,0.0);
+
+vec3 _Campos;
+
+    vec3 reposcam=vec3(
+    _R * sin(_Phi) * cos(_Theta),
+    _R * sin(_Phi) * sin(_Theta),
+    -_R * cos(_Phi));
+
+    _Campos = _Rotcen + reposcam;
+    vec3 vecz =vec3( 0.0,0.0,1.0 );
+
+    vec3 _X = normalize(cross(vecz, reposcam));
+    vec3 _Y = normalize(cross(reposcam, _X));
+    vec3 _Z = normalize(reposcam);
+
+    a=inverse(transpose(mat4x4(
+        _X.x,_X.y,_X.z,0.,
+        _Y.x,_Y.y,_Y.z,0.,
+        _Z.x,_Z.y,_Z.z,0.,
+        0.   ,0.   ,0.   ,1.)
+        ))*a;
+    return a;
+}
+
+
+vec4 hash43x(vec3 p)
+{
+    uvec3 x = uvec3(ivec3(p));
+    x = 1103515245U*((x.xyz >> 1U)^(x.yzx));
+    uint h = 1103515245U*((x.x^x.z)^(x.y>>3U));
+    uvec4 rz = uvec4(h, h*16807U, h*48271U, h*69621U); //see: http://random.mat.sbg.ac.at/results/karl/server/node4.html
+    return vec4((rz >> 1) & uvec4(0x7fffffffU))/float(0x7fffffff);
+}
+
+
+vec3 stars(vec3 p)//from  https://www.shadertoy.com/view/fl2Bzd
+{
+    vec3 col = vec3(0);
+    float rad = .087*iResolution.y;
+    float dens = 0.15;
+    float id = 0.;
+    float rz = 0.;
+    float z = 1.;
+    
+    for (float i = 0.; i < 5.; i++)
+    {
+        p *= mat3(0.86564, -0.28535, 0.41140, 0.50033, 0.46255, -0.73193, 0.01856, 0.83942, 0.54317);
+        vec3 q = abs(p);
+        vec3 p2 = p/max(q.x, max(q.y,q.z));
+        p2 *= rad;
+        vec3 ip = floor(p2 + 1e-5);
+        vec3 fp = fract(p2 + 1e-5);
+        vec4 rand = hash43x(ip*283.1);
+        vec3 q2 = abs(p2);
+        vec3 pl = 1.0- step(max(q2.x, max(q2.y, q2.z)), q2);
+        vec3 pp = fp - ((rand.xyz-0.5)*.6 + 0.5)*pl; //don't displace points away from the cube faces
+        float pr = length(ip) - rad;   
+        if (rand.w > (dens - dens*pr*0.035)) pp += 1e6;
+
+        float d = dot(pp, pp);
+        d /= pow(fract(rand.w*172.1), 32.) + .25;
+        float bri = dot(rand.xyz*(1.-pl),vec3(1)); //since one random value is unused to displace, we can reuse
+        id = fract(rand.w*101.);
+        col += bri*z*.00009/pow(d + 0.025, 3.0)*(mix(vec3(1.0,0.45,0.1),vec3(0.75,0.85,1.), id)*0.6+0.4);
+        
+        rad = floor(rad*1.08);
+        dens *= 1.45;
+        z *= 0.6;
+        p = p.yxz;
+    }
+    
+    return col;
+}
+
+
+
+vec3 uvToDir(vec2 uv)                                                                                   //一堆坐标间变换
+{
+return normalize(vec3(FOV*(2.0*uv.x-1.0),FOV*(2.0*uv.y-1.0)*iResolution.y/iResolution.x,-1.0));
+}
+
+vec2 PosToNDC(vec4 pos)
+{
+return vec2(-pos.x/pos.z,-pos.y/pos.z*iResolution.x/iResolution.y);
+}
+
+vec2 DirToNDC(vec3 dir)
+{
+return vec2(-dir.x/dir.z,-dir.y/dir.z*iResolution.x/iResolution.y);
+}
+
+vec2 DirTouv(vec3 dir)
+{
+return vec2(0.5-0.5*dir.x/dir.z,0.5-0.5*dir.y/dir.z*iResolution.x/iResolution.y);
+}
+
+vec2 PosTouv(vec4 Pos)
+{
+return vec2(0.5-0.5*Pos.x/Pos.z,0.5-0.5*Pos.y/Pos.z*iResolution.x/iResolution.y);
+}
+
+
+
+void cloudcolor(
+inout vec4 BaseColor,float steplength,vec3 RayPos,vec3 lastRayPos,vec3 RayDir,vec3 lastRayDir,vec3 WorldY,
+vec3 targetPos,vec3 targetDir,float CR,float Aspect_Ratio_sqrt,vec2 shear,vec2 shear3,
+float timeScale){
+    vec3 CamOnTa=WorldToObjectSpace(vec4(0.,0.,0.,1.0) ,targetPos,targetDir,WorldY);//系下相机位置
+    vec3 PosOnTa=WorldToObjectSpace(vec4(RayPos,1.0)   ,targetPos,targetDir,WorldY);//目标系下位置
+    vec3 DirOnTa=WorldToObjectSpace(vec4(RayDir,0.0),targetPos,targetDir,   WorldY);//目标系下方向
+    PosOnTa=PosOnTa.xzy;
+    float posr=length(PosOnTa);
+    vec4 Color=vec4(0.);
+    if(posr<CR){
+        vec3 efpos=PosOnTa/CR;
+        float ran0=SinNoise(vec3(3.0*efpos.xy/tanh(3.0*length(efpos.xy)),efpos.z),3,1.4)+0.63;
+        float S1=Aspect_Ratio_sqrt*pow(pow(efpos.x*(1.0+0.00*ran0)+   shear.x*efpos.z+    shear3.x*efpos.z*efpos.z*efpos.z,2.0)+
+                                       pow(efpos.y*(1.0+0.00*ran0)+   shear.y*efpos.z+    shear3.y*efpos.z*efpos.z*efpos.z,2.0),2.0);//系数建议[0.5,3.0]
+        float Sf=1.0/max(pow(posr/CR,2.0+1.0/(1.0+1000.0*efpos.z*efpos.z)),0.001);
+        
+        float shape_dis=S1-0.1*0.8*pow(abs(efpos.z)+0.005,2.0);
+        float eff_dis=(shape_dis)*Sf;
+        
+        float w_shape_dis=S1-0.4*0.8*pow(abs(efpos.z)+0.005,2.0);
+        float weff_dis=(w_shape_dis)*Sf;
+        
+        float ww_shape_dis=S1-0.4*0.8*pow(abs(efpos.z)+0.005,2.0);
+        float wweff_dis=(ww_shape_dis)*Sf;
+
+        //float shape_strength1=max(0.0,1.0-10.*abs(eff_dis));
+        //float shape_strength0=max(0.0,1.0-3.0*(1.0-shape_strength1));//thin
+        vec3 prlpos=vec3(efpos.x,efpos.y,asinh(1.5*efpos.z)/1.5)/(sqrt(0.01*tanh(posr/CR/0.2)+abs(efpos.z)*0.316));
+        float noise0=SinNoise(prlpos,
+        3,1.4)-1.0;
+
+      
+        float spnoise0=SinNoise(3.0*efpos,3,1.2);
+        float spnoise1=SinNoise(3.0*efpos/tanh(posr/CR),3,1.3);
+        float spnoise2=SinNoise(1.5*efpos,3,1.2);
+        float insph_strength=0.1+0.9*clamp(0.54+spnoise0+30.0*(posr/CR-0.4),0.0,1.0);//实心内边缘
+        float bristh=clamp(0.54+spnoise2+30.0*(posr/CR-0.35),0.0,1.0)*exp(-0.8*max(0.0,0.54+spnoise2+30.0*(posr/CR-0.35)-1.0));
+        float midsph_strength=clamp(0.54+spnoise1-20.0*(posr/CR-0.6),0.0,1.0);//颜色过渡
+        float mid2sph_strength=clamp(0.54+spnoise1-40.0*(posr/CR-0.53),0.0,1.0);//颜色过渡
+        float outsph_strength=clamp(0.54+spnoise0-20.0*(posr/CR-0.8),0.0,1.0)*(1.0-pow(posr/CR,10.0));//全部外边缘
+      
+        float strengthw0=exp(-0.6*abs(noise0-100.0*(1.0-0.3*posr/CR)*pow(weff_dis,1.0)));//薄外壳
+        strengthw0*=midsph_strength*(2.0-insph_strength);
+        
+        float strengthw1=0.5*exp(0.5*(spnoise0-4.994)-0.2*abs(noise0-1.0*(1.0-0.3*posr/CR)));//弥散丝状
+        strengthw1*=midsph_strength; 
+        
+        float strengthwa=exp(-0.6*abs(SinNoise(prlpos.yxz,3,1.4)-1.0-30.0*(1.0-0.3*posr/CR)*pow(wweff_dis,1.0)));//暗外壳
+        strengthwa*=outsph_strength;
+        strengthwa*=max(1.0-1.0*abs(1.0-noise0),0.0);
+       
+        
+        float strength0=exp(-0.6*abs(noise0-100.0*eff_dis));//丝状亮线
+        strength0*=outsph_strength;
+        strength0*=insph_strength;
+        
+        float strength1=clamp((noise0-200.0*eff_dis),0.0,1.0);//体积光
+        float fs1=strength1*bristh;
+        float fs2=strength1*pow(bristh,2.0);
+        strength1*=outsph_strength;
+        strength1*=mix(insph_strength,1.6,pow(1.0-(efpos.x*efpos.x+efpos.y*efpos.y),50.0));
+        //破缺均匀性
+        float fs0=strength0;
+        float nonsp=mix(1.0,0.5+0.5*tanh(1.0*(SinNoise(1.0*efpos/(posr/CR),1,1.3)+1.0)),clamp(4.0*(posr/CR-0.2),0.0,1.0));
+        fs0*=max(0.0,1.0-2.0*abs(0.5-nonsp));
+        strengthw0*=nonsp;
+        strength0 *=nonsp;
+        strength1 *=nonsp;
+        
+        vec4 col=vec4(0.478,0.196,0.106,0.0)+ //暗橙
+                 0.66*mid2sph_strength*vec4(0.17,0.43,0.61,0.0)+ //蓝
+                 0.66*(1.0-insph_strength)*vec4(0.3,0.66,0.66,0.0);//青
+        
+        Color+=(5.0*strength0*mix(0.5+0.5*tanh(spnoise0),1.0,0.1))*col;//主体同色亮丝
+        Color+=(2.0*fs0*mix(0.5+0.5*tanh(spnoise0),1.0,0.1))*vec4(1.0,0.0,0.0,0.0);//红色丝
+        Color+=1.0*strength1*col*vec4(min(1.0,posr/CR),0.8+0.2*min(1.0,posr/CR),1.0,0.0);//主体
+        Color+=2.0*fs1*vec4(0.76,0.25,0.27,0.0);//紫色断面
+        Color+=2.0*fs2*vec4(0.3,0.3,0.3,0.0);//前者高光
+        Color+=(0.3+0.7*pow(posr/CR,1.0))*strengthw0*3.0*(vec4(0.5,0.3,0.2,0.0)+0.66*(1.0-insph_strength)*vec4(0.67,0.83,1.01,0.0));//壳
+        Color.a+=10.0*(pow(posr/CR,1.0))*strengthwa*3.0;//dark壳
+        Color+=strengthw1*3.0*vec4(0.5,0.3,0.2,0.0);//弥散丝状
+        Color+=(10.0*pow(1.0-posr/CR,10.0)*(0.5+0.5*tanh(+10.0*eff_dis)))*vec4(0.4,0.32,0.26,0.0);//中心弥散黄光
+        
+    }
+
+    Color.xyz*=steplength/CR ;
+    Color.a*=  steplength/CR;
+    
+   
+        //饱和度控制
+
+    //星际红化和饱和度控制
+    float Reddening=0.6;
+    float Saturation=0.3;
+    float aR = 1.0+ Reddening*(1.0-1.0);
+    float aG = 1.0+ Reddening*(3.0-1.0);
+    float aB = 1.0+ Reddening*(6.0-1.0);
+    float Sum_rgb = (Color.r + Color.g + Color.b)*pow(1.0 - BaseColor.a, aG);
+    Sum_rgb *= 1.0;
+    
+    float r001 = 0.0;
+    float g001 = 0.0;
+    float b001 = 0.0;
+        
+    float Denominator = Color.r*pow(1.0 - BaseColor.a, aR) + Color.g*pow(1.0 - BaseColor.a, aG) + Color.b*pow(1.0 - BaseColor.a, aB);
+    if (Denominator > 0.000001)
+    {
+        r001 = Sum_rgb * Color.r * pow(1.0 - BaseColor.a, aR) / Denominator;
+        g001 = Sum_rgb * Color.g * pow(1.0 - BaseColor.a, aG) / Denominator;
+        b001 = Sum_rgb * Color.b * pow(1.0 - BaseColor.a, aB) / Denominator;
+        
+       r001 *= pow(3.0*r001/(r001+g001+b001),Saturation);
+       g001 *= pow(3.0*g001/(r001+g001+b001),Saturation);
+       b001 *= pow(3.0*b001/(r001+g001+b001),Saturation);
+        
+    }
+
+
+    BaseColor.r += r001;
+    BaseColor.g += g001;
+    BaseColor.b += b001;
+    BaseColor.a += Color.a * pow((1.0 - BaseColor.a),1.0);
+
+}
+
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {   
+    fragColor = vec4(0.0);
+    
+    float timeScale = 0.0;
+    vec2 uv = fragCoord / iResolution.xy;
+
+    vec3 WorldY = GetCamera(vec4(0.0, 1.0, 0.0, 0.0)).xyz;
+
+    vec3 RayDir = uvToDir(uv + 0.5 * vec2(RandomStep(uv, fract(timeScale*iTime * 1.0 + 0.5)), 
+                         RandomStep(uv, fract(iTime * 1.0))) / iResolution.xy);
+    vec3 RayPos = vec3(0.0);
+    
+    // 目标参数
+    vec4 targetAbsPos = vec4(0.0*.7*sin(0.1*iTime),-0.0*2.0*sin(0.1*iTime), 0.0, 1.0);
+    vec4 targetAbsDir = vec4(normalize(vec3(-1.0,1.0,0.3)), 1.0);
+    vec3 targetPos = GetCamera(targetAbsPos).xyz;
+    vec3 targetDir =GetCamera(vec4(targetAbsDir.xyz,0.0)).xyz;
+    float targetR = 1.2;
+    float Aspect_Ratio_sqrt=1.0;//建议[0.5,3.0],但是在~30的大小配合shear与shear3有奇效
+    vec2 shear=vec2(0.0,0.0);//建议length<0.5
+    vec2 shear3=vec2(0.0,0.0);//建议length<1.0
+
+    bool flag = true;
+    // 计算光线与球体交点
+    vec3 O = RayPos;
+    vec3 D = RayDir;
+    vec3 C = targetPos;
+    float r = targetR;
+    
+    vec3 OC = O - C;
+    float a = dot(D, D);
+    float b = 2.0 * dot(D, OC);
+    float c = dot(OC, OC) - r*r;
+    float delta = b*b - 4.0*a*c;
+
+    if (delta < 0.0) flag = false; // 无交点
+    
+    float sqrtDelta = sqrt(delta);
+    float t1 = (-b - sqrtDelta) / (2.0*a);
+    float t2 = (-b + sqrtDelta) / (2.0*a);
+    float tEnter = min(t1, t2);
+    float tExit = max(t1, t2);
+
+    if (tExit < 0.0) flag = false; // 球体在视线后方
+    
+    // 计算有效步进范围
+    float tStart = max(tEnter, 0.0);
+    float tEnd = tExit;
+    if (tStart >= tEnd) flag = false;
+
+    // 初始化步进参数
+    int count = 0;
+    float tCurrent = tStart;
+    RayPos = O + D * tCurrent;
+    vec3 lastRayPos = RayPos;
+    vec3 lastRayDir = RayDir;
+
+
+    // 优化后的步进循环
+    while (flag && tCurrent < tEnd ) {
+        // 计算步长
+        float dl;
+        if(count==0){
+        dl=RandomStep(uv, fract(iTime * 1.0));//光起步步长抖动
+        }else{
+        dl=1.0;
+        }
+        dl*=0.03*targetR;
+
+        lastRayPos = RayPos;
+        tCurrent += dl;
+        RayPos = O + D * tCurrent;
+
+        // 计算当前球体相对位置
+        vec3 PosOnTa = WorldToObjectSpace(vec4(RayPos, 1.0), targetPos,targetDir, WorldY);
+        float posr = length(PosOnTa);
+        
+        // 提前退出条件
+        if (posr >targetR) {
+            flag = false;
+            break;
+        }
+
+        // 体积渲染计算
+        float steplength = dl;
+        cloudcolor(fragColor, steplength, RayPos, lastRayPos, RayDir, lastRayDir, 
+                             WorldY, targetPos,targetDir,targetR,Aspect_Ratio_sqrt,shear,shear3,timeScale);
+
+        // 透明度退出条件
+        if (fragColor.a > 0.95) flag = false;
+
+        count++;
+    }
+    
+    vec4 bk=vec4(stars(GetInverseCameraRot(vec4(RayDir,1.0)).xyz),0.0);
+    fragColor.r+=0.5*bk.r*pow((1.0 - fragColor.a),1.0+1.0*(1.0-1.0));
+    fragColor.g+=0.5*bk.g*pow((1.0 - fragColor.a),1.0+1.0*(3.0-1.0));
+    fragColor.b+=0.5*bk.b*pow((1.0 - fragColor.a),1.0+1.0*(6.0-1.0));
+    fragColor.a+=0.5*bk.a*pow((1.0 - fragColor.a),1.0);
+            
+    fragColor=max(fragColor,vec4(0.0));
+    float blendWeight = 0.3;//本部分在实际使用时max(min((0.131*36.0/(timerate)*(omega(3.*0.00000465,0.00000465))/(omega(3.*Rs,Rs))),0.3),0.02)由uniform输入
+    blendWeight = (iFrame<2 || iMouse.z > 0.0 ) ? 1.0 : blendWeight;
+    
+    vec4 previousColor = texelFetch(iChannel3, ivec2(fragCoord), 0); //获取前一帧的颜色
+    fragColor = (blendWeight)*fragColor+(1.0-blendWeight)*previousColor; //混合当前帧和前一帧
+}

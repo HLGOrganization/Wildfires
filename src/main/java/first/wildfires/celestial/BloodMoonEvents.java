@@ -1,3 +1,9 @@
+/*
+ * Adapted from TFCCaelum 1.2 `tfccaelum/EventHandler`.
+ * SPDX-License-Identifier: LicenseRef-TFCCaelum-BSD (see third_party/tfc-caelum/1.2/PROVENANCE.md).
+ * Wildfires modifications: the retained 600-tick Unluck effect is applied from the
+ * server-authoritative local moon state instead of the legacy empirical blood-moon value.
+ */
 package first.wildfires.celestial;
 
 import first.wildfires.Wildfires;

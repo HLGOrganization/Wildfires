@@ -1,5 +1,13 @@
 package first.wildfires.compats.irons_spellbooks.entity;
 
+/*
+ * Adapted from ArcaneVortex 0.6.8 SkyRipperArrow under the user's project-specific visual
+ * authorization. Copyright ErChien.
+ * Wildfires additions: the impact-frame burst, silent hover, delayed tracking start,
+ * seed-distributed stop points, distance-weighted target sampling, untargeted expiry and the
+ * independent 20 damage are Wildfires-owned. No upstream attack-damage mechanism is included.
+ * Evidence: third_party/arcanevortex/0.6.8/PROVENANCE.md
+ */
 import first.wildfires.compats.irons_spellbooks.GalaxyHymnRegister;
 import first.wildfires.compats.irons_spellbooks.GalaxyHymnStarlinkSpawner;
 import first.wildfires.compats.irons_spellbooks.GalaxyHymnVisualMath;

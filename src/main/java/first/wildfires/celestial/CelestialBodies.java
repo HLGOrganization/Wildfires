@@ -1,3 +1,10 @@
+/*
+ * Adapted from TFCCaelum 1.2 `tfccaelum/util/Planets`.
+ * SPDX-License-Identifier: LicenseRef-TFCCaelum-BSD (see third_party/tfc-caelum/1.2/PROVENANCE.md).
+ * Wildfires modifications: keeps the retained planet/satellite parameter set but drives real radii,
+ * ecliptic inclinations, nodes and parent-body relations on three-dimensional orbits instead of the
+ * legacy two-dimensional sky projection.
+ */
 package first.wildfires.celestial;
 
 import first.wildfires.api.celestial.CelestialBodyState;

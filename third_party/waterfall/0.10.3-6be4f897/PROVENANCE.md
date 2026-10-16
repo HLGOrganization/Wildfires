@@ -27,12 +27,12 @@
 
 ## Preserved upstream material
 
-- `upstream/LICENSE.md`: `8ce632c7de2946e6f259d7424d8518ecc755c12f76f11e193749353aa980ade4`
-- `upstream/README.md`: `af6b2b0312179a47145278775946da0224fd36d5cea5cde3bf3437e32b32f927`
-- `upstream/Source/ShaderLab/Additive Dynamic.shader`: `7652f56a0fdc57240b8acb947d20650a1a6b7c0426bf42acde81ea4fb4fab91b`
-- `upstream/Source/ShaderLab/Billboard Additive.shader`: `93b1fd1975aa611faa9eab07d70bf2c35eadf3ddc12a1d58a7f5cdc3a53f86f4`
-- `upstream/Source/ShaderLab/Billboard Directional.shader`: `d3f4e7d7cb189268194287d22abd8316911de0f4a77d68d45c00a68df51659e1`
-- `upstream/Source/Waterfall/Effects/WaterfallMaterial.cs`: `1b723d791f216cebf1667affc0dc1f8686ec49fd387d26ea4c568abcd22a4cf5`
+- `upstream/LICENSE.md`: `a5ac524dd78927985e9a862e8cf5e3c3e5373710b7125379505169d222cc28c1`
+- `upstream/README.md`: `6f792dcbe6d009b27d67d593e5c930d71db800e45d40f40d454569534964e95f`
+- `upstream/Source/ShaderLab/Additive Dynamic.shader`: `4f6802ebd8b1f45127075d60828952341aa7c2ef4c31ad3e1e6a03632eac549e`
+- `upstream/Source/ShaderLab/Billboard Additive.shader`: `24f81a414d44a9be2f11211824ac65dd91473748f9e94c87bde71ca315913d83`
+- `upstream/Source/ShaderLab/Billboard Directional.shader`: `7f9e3dd558a2bf9912fe246fda61365e564446c54ff6470e23d595593506a3a9`
+- `upstream/Source/Waterfall/Effects/WaterfallMaterial.cs`: `e099d15767c19288af57ce1e1ff3f6eb5fa77c3a045a21ad3f41fafc64517ade`
 - `upstream/GameData/Waterfall/Versioning/Waterfall.version`: `d6c4ae9b306d4d5bb918a42021787f5db43cb54147c9f66747e8f35eb9b49b06`
 - `upstream/GameData/Waterfall/FX/fx-cylinder.mu`: `10b474ddbbd1edbd7dc84cfe358ccc1514f0ef63d0e76c47a7d96ca1cf42a8c9`
 - `upstream/GameData/Waterfall/FX/fx-billboard-generic-1.mu`: `2a80a464b9f1befe772c6f289ee6d42e6fd734c8bd1c83725a1c7a0ff36cd744`
@@ -46,6 +46,10 @@
 - `upstream/GameData/Waterfall/FX/fx_flarelens01.dds`: `08caf1a9d276dd2374904df92797f267afcf1b7a1b2e6158e4cdb4948b352155`
 - `upstream/GameData/Waterfall/FX/fx_flarelens02.dds`: `9ed873e6d9fd708bbd9bdf1c432cadea2807270a9ddcf5e52dcfd7de66a207e9`
 - `upstream/GameData/WarpPlugin/Parts/Engines/Daedalus/Deadalus.cfg`: `715050892fe1c8f91a7a70c3bb1bedb3729372f5e4945714717a1de27c8ba5ae`
+
+Byte-fidelity correction (2026-10-16): the six repository-derived snapshot files above were originally preserved through Windows tooling, so they carried CRLF line endings and a UTF-8 BOM where upstream does not. They were re-fetched from `https://raw.githubusercontent.com/post-kerbin-mining-corporation/Waterfall/6be4f897ad86577c6ce2c17e6da0848b14d5250a/` and now match the pinned commit byte for byte; the hashes above are the upstream values. Two related defects were fixed at the same time: `upstream/README.md` had a one-character transcription error in its recorded hash, and `LICENSE.md`'s recorded hash described the converted copy rather than the upstream file.
+
+The `GameData/**` entries (the two `.mu` meshes, the DDS/PNG textures, the three engine configurations and `Waterfall.version`) still come from the user's local Kerbal Space Program installation rather than from that repository, so they cannot be re-verified against a public revision. They are binary or CRLF-native KSP configuration files, and their recorded hashes describe exactly the bytes preserved here.
 
 ## Verification
 

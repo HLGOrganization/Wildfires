@@ -1,3 +1,10 @@
+/*
+ * Adapted from TFCCaelum 1.2 `tfccaelum/Helpers`.
+ * SPDX-License-Identifier: LicenseRef-TFCCaelum-BSD (see third_party/tfc-caelum/1.2/PROVENANCE.md).
+ * Wildfires modifications: keeps the upstream eclipse-driven visual darkening contract, but
+ * derives it from the unified geometric disc coverage with a fixed 0.20 start threshold instead
+ * of the legacy empirical eclipse-brightness value.
+ */
 package first.wildfires.client.celestial;
 
 /** Converts local apparent day progress into the nonlinear angle expected by vanilla visual methods. */

@@ -1,3 +1,10 @@
+/*
+ * Adapted from TFCCaelum 1.2 `tfccaelum/mixin/MonsterMixin`.
+ * SPDX-License-Identifier: LicenseRef-TFCCaelum-BSD (see third_party/tfc-caelum/1.2/PROVENANCE.md).
+ * Wildfires modifications: keeps the upstream darkness-predicate relaxation, but gates it on the
+ * local *visible* blood-moon state of the unified celestial model rather than a global intensity
+ * value, and leaves TFC's own spawn rules untouched.
+ */
 package first.wildfires.mixin.minecraft;
 
 import first.wildfires.celestial.CelestialGameplay;

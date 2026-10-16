@@ -1,3 +1,12 @@
+/*
+ * Adapted from TFCCaelum 1.2 `tfccaelum/shaders/aurora/*`, `tfccaelum/util/AuroraHandler`
+ * and `tfccaelum/util/AuroraFactory`.
+ * SPDX-License-Identifier: LicenseRef-TFCCaelum-BSD (see third_party/tfc-caelum/1.2/PROVENANCE.md).
+ * Wildfires modifications: retains the 24 colour sets, 12 band geometries, 1-3 bands and the
+ * 512-tick fade design, but updates static VBO geometry only when the event or hemisphere changes,
+ * computes the wave in the vertex shader, and does not reproduce the upstream integer-division
+ * age-ratio defect.
+ */
 package first.wildfires.client.celestial;
 
 import com.mojang.blaze3d.platform.GlStateManager;

@@ -1,3 +1,11 @@
+/*
+ * Adapted in part from Caelum `1.20.1-2.0.0.0` (`client.SkyUtils`, `mixin.MixinLevelRenderer`).
+ * SPDX-License-Identifier: MIT (see third_party/caelum/1.20.1-2.0.0.0/PROVENANCE.md).
+ * Wildfires modifications: the star pass keeps the upstream custom-buffer switch and the
+ * latitude-driven celestial rotation, but latitude and year come from the unified model (TFE
+ * hemisphere scale plus the TFC calendar). The planets, moon, eclipse layers, aurora and rainbow
+ * around it are Wildfires' own rendering rather than the upstream sky rewrite.
+ */
 package first.wildfires.client.celestial;
 
 import com.mojang.blaze3d.platform.GlStateManager;

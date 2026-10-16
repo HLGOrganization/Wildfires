@@ -1,3 +1,11 @@
+/*
+ * Adapted from TFCCaelum 1.2 `tfccaelum/mixin/LocalMobCapCalculatorMixin` and
+ * `tfccaelum/mixin/accessor/ChunkMapAccessor`.
+ * SPDX-License-Identifier: LicenseRef-TFCCaelum-BSD (see third_party/tfc-caelum/1.2/PROVENANCE.md).
+ * Wildfires modifications: same redirect point on `MobCounts.canSpawn`, but the extended limit is
+ * finite and derived from the synchronized celestial state plus the configured multiplier instead
+ * of raw legacy intensity values.
+ */
 package first.wildfires.mixin.minecraft;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;

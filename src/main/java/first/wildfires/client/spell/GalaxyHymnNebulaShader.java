@@ -1,11 +1,15 @@
 package first.wildfires.client.spell;
 
 /*
- * The procedural cloud volume and tone mapping are adapted from the
- * user-supplied nebula shader set under project-specific authorization. The
- * supplied opaque backdrop and background star field are excluded at source.
- * The Shadertoy feedback buffers are intentionally replaced by a bounded
- * Forge core-shader pass. Evidence: third_party/nebula/user-supplied-2026-08-24/PROVENANCE.md
+ * The procedural cloud volume comes from the user-supplied 1.txt; the tone
+ * mapping is adapted from 5.txt, which attributes its Buffer B/C/D and image
+ * pass to sonicether's "Gargantua With HDR Bloom". The stars() routine credited to Shadertoy
+ * fl2Bzd is not compiled, and the supplied opaque backdrop and background star
+ * field are excluded at source. The Shadertoy feedback buffers are replaced by
+ * a bounded Forge core-shader pass.
+ * License: non-commercial, share-alike, attribution (Shadertoy platform
+ * default); not part of the Wildfires ARR partition.
+ * Evidence: third_party/nebula/user-supplied-2026-08-24/PROVENANCE.md
  */
 import com.mojang.blaze3d.shaders.AbstractUniform;
 import com.mojang.blaze3d.systems.RenderSystem;

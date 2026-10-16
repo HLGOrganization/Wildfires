@@ -1,3 +1,11 @@
+/*
+ * Adapted from NTM: Space TileEntityOrbitalStation's 5x5x2 docking-core volume.
+ * Copyright NTM: Space contributors.
+ * SPDX-License-Identifier: LGPL-3.0-only
+ * Wildfires modifications: materializes the upstream multi-block tile entity as one root block
+ * entity plus forty-nine proxy blocks carrying a fluid-port flag, with proxy ownership, teardown
+ * and recovery resolved only at placement, interaction, destruction and server-start boundaries.
+ */
 package first.wildfires.space.content;
 
 import net.minecraft.core.BlockPos;

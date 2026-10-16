@@ -1,3 +1,11 @@
+/*
+ * Adapted from Caelum `1.20.1-2.0.0.0` (`client.data.StarDataManager`,
+ * `client.event.ClientReloadListeners`).
+ * SPDX-License-Identifier: MIT (see third_party/caelum/1.20.1-2.0.0.0/PROVENANCE.md).
+ * Wildfires modifications: keeps the resource-reload registration and the merged star-table
+ * contract, but the buffer it builds is consumed by the unified sky renderer instead of
+ * replacing vanilla's star buffer through an ordinal injection.
+ */
 package first.wildfires.client.celestial;
 
 import com.google.gson.Gson;

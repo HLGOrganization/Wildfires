@@ -1,3 +1,9 @@
+/*
+ * Adapted from TFCCaelum 1.2 `tfccaelum/Config` and `tfccaelum/util/Planets`.
+ * SPDX-License-Identifier: LicenseRef-TFCCaelum-BSD (see third_party/tfc-caelum/1.2/PROVENANCE.md).
+ * Wildfires modifications: the retained Earth and Mercury-through-Pluto parameter set becomes
+ * server-authoritative and synchronized rather than static configuration fields.
+ */
 package first.wildfires.celestial;
 
 import java.util.ArrayList;
