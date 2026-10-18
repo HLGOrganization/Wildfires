@@ -42,6 +42,13 @@ public final class NetworkGuardTargets {
     /** The package the network guards live in; names outside it are never treated as guards. */
     public static final String GUARD_PACKAGE = "first.wildfires.mixin.network";
 
+    /**
+     * The package the Channel Casting guards live in. They use the same "drop the mixin when its mod is
+     * absent" machinery as the network guards, and are listed in the same table below, but they are a
+     * separate package so a name can never collide across the two groups.
+     */
+    public static final String CHANNEL_CASTING_PACKAGE = "first.wildfires.mixin.tfccc";
+
     private static final Map<String, String> MOD_BY_GUARD;
 
     /** Guards the plugin dropped, filled while Mixin prepares the config; read once for the log. */
@@ -61,6 +68,9 @@ public final class NetworkGuardTargets {
         guards.put("PlaceboWingsMixin", "placebo");
         guards.put("SteamRailsDevCapeMixin", "railways");
         guards.put("SupplementariesCreditsMixin", "supplementaries");
+        // Channel Casting: refuse piped fluid at a mould table. Listed here so an install without the
+        // mod drops the mixin instead of failing to find its target.
+        guards.put("MoldBlockInventoryMixin", "tfcchannelcasting");
         MOD_BY_GUARD = Collections.unmodifiableMap(guards);
     }
 
@@ -72,7 +82,11 @@ public final class NetworkGuardTargets {
      * when the class is not a known network guard.
      */
     public static String requiredMod(String mixinClassName) {
-        if (mixinClassName == null || !mixinClassName.startsWith(GUARD_PACKAGE + ".")) {
+        if (mixinClassName == null) {
+            return null;
+        }
+        if (!mixinClassName.startsWith(GUARD_PACKAGE + ".")
+                && !mixinClassName.startsWith(CHANNEL_CASTING_PACKAGE + ".")) {
             return null;
         }
         return MOD_BY_GUARD.get(simpleName(mixinClassName));

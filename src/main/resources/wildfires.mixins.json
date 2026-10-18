@@ -285,7 +285,22 @@
     "network.PlaceboTrailsMixin",
     "network.PlaceboWingsMixin",
     "network.SteamRailsDevCapeMixin",
-    "network.SupplementariesCreditsMixin"
+    "network.SupplementariesCreditsMixin",
+    /*
+     * Channel Casting 管道输入封锁，2026-10-18。
+     *
+     * 需求：mold_table（模具台）本应只由本模组的铸道（channel）供液，因为铸道会把坩埚
+     * 的温度随金属一起传进模具。而它同时在五个面暴露了一个普通 IFluidHandler，其 fill()
+     * 完全不看温度——任何模组的管道只要调 fill()，就能把冷金属灌进模具并瞬间铸出锭，
+     * 绕过铸道和温度要求。
+     *
+     *   tfccc.MoldBlockInventoryMixin - 让 fill() 一律返回 0。铸道不走这个方法
+     *       （它用 setSource + serverTick 自己 drain 坩埚并写入模具物品），所以铸道不受影响。
+     *
+     * 该 mixin 带 @Pseudo，并由 NetworkGuardTargets 绑定到 mod id tfcchannelcasting：
+     * 未安装该模组时整条 mixin 被丢弃，不会出现“找不到 target”的告警。
+     */
+    "tfccc.MoldBlockInventoryMixin"
   ],
   "client": [
     "create.AbstractRegistrateMixin",

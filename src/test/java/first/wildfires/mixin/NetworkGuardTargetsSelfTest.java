@@ -40,7 +40,11 @@ public final class NetworkGuardTargetsSelfTest {
 
     private static final Pattern CONFIG_PACKAGE = Pattern.compile("\"package\"\\s*:\\s*\"([^\"]+)\"");
     private static final Pattern CONFIG_PLUGIN = Pattern.compile("\"plugin\"\\s*:\\s*\"([^\"]+)\"");
-    private static final Pattern CONFIG_GUARD = Pattern.compile("\"network\\.([A-Za-z0-9_$]+)\"");
+    /**
+     * Matches a conditionally-applied mixin under either package the table covers: the network guards and
+     * the Channel Casting guards. The group is the simple name, which is what the table is keyed by.
+     */
+    private static final Pattern CONFIG_GUARD = Pattern.compile("\"(?:network|tfccc)\\.([A-Za-z0-9_$]+)\"");
     private static final Pattern MOD_ID = Pattern.compile("[a-z][a-z0-9_]*");
 
     private static final String PLUGIN_CLASS = "first.wildfires.mixin.WildfiresMixinPlugin";
@@ -58,6 +62,9 @@ public final class NetworkGuardTargetsSelfTest {
         EXPECTED.put("PlaceboWingsMixin", "placebo");
         EXPECTED.put("SteamRailsDevCapeMixin", "railways");
         EXPECTED.put("SupplementariesCreditsMixin", "supplementaries");
+        // Channel Casting is not a network guard; it uses the same conditional-application table, which
+        // is why its row lives here too. See the table's own note.
+        EXPECTED.put("MoldBlockInventoryMixin", "tfcchannelcasting");
     }
 
     private NetworkGuardTargetsSelfTest() {
@@ -118,8 +125,12 @@ public final class NetworkGuardTargetsSelfTest {
         assertTrue(resourceExists("/" + PLUGIN_CLASS.replace('.', '/') + ".class"),
                 "the class the config names as its plugin is in the jar");
         for (String guard : EXPECTED.keySet()) {
-            String path = "/" + NetworkGuardTargets.GUARD_PACKAGE.replace('.', '/') + "/" + guard + ".class";
-            assertTrue(resourceExists(path), "the guard " + guard + " is in the jar at " + path);
+            // A guard lives under one of the two packages the table covers. Which one is not this test's
+            // business - only that the class the row names exists.
+            String networkPath = "/" + NetworkGuardTargets.GUARD_PACKAGE.replace('.', '/') + "/" + guard + ".class";
+            String castingPath = "/" + NetworkGuardTargets.CHANNEL_CASTING_PACKAGE.replace('.', '/') + "/" + guard + ".class";
+            assertTrue(resourceExists(networkPath) || resourceExists(castingPath),
+                    "the guard " + guard + " is in the jar at " + networkPath + " or " + castingPath);
         }
     }
 
@@ -136,6 +147,15 @@ public final class NetworkGuardTargetsSelfTest {
                 "a mixin of another package is applied");
         assertEquals(null, NetworkGuardTargets.requiredMod("first.wildfires.mixin.networkish.CitadelPatreonMixin"),
                 "a package that only starts with the guard package name is not the guard package");
+
+        // The Channel Casting guards use the same machinery from their own package.
+        assertEquals("tfcchannelcasting",
+                NetworkGuardTargets.requiredMod(NetworkGuardTargets.CHANNEL_CASTING_PACKAGE + ".MoldBlockInventoryMixin"),
+                "a Channel Casting guard is gated on its mod");
+        assertEquals(null, NetworkGuardTargets.requiredMod(NetworkGuardTargets.CHANNEL_CASTING_PACKAGE + ".UnknownMixin"),
+                "an unknown name in the Channel Casting package is applied, not dropped");
+        assertEquals(null, NetworkGuardTargets.requiredMod("first.wildfires.mixin.tfcccish.MoldBlockInventoryMixin"),
+                "a package that only starts with the Channel Casting package name is not it");
     }
 
     private static void aDroppedGuardIsRecordedByItsSimpleName() {
