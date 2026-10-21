@@ -69,8 +69,8 @@ import java.util.UUID;
 @Mod.EventBusSubscriber(modid = Wildfires.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class PerfectForgeSequence {
 
-    /** How long 记忆锻造 leaves between two of the smith's blows: 3 ticks. */
-    public static final int MEMORY_TICKS = 3;
+    /** How long 记忆锻造 leaves between two of the smith's blows: 5 ticks. */
+    public static final int MEMORY_TICKS = 5;
 
     /** The runs in flight, at most one per anvil. */
     private static final Map<AnvilKey, Pending> PENDING = new HashMap<>();
