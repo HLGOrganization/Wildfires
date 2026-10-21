@@ -1,0 +1,378 @@
+/* Perfboard circuit editor page.
+ *
+ * Ore supplies the card/button/slot chrome; this file only lays out the editor and keeps ONE
+ * slot scale throughout: 48 px cells with --aui-slot-icon-scale: 2.6667 (48 * 16/18 / 16).
+ * There are no 40 px machine slots anymore, so slot size, item icon, floating item and the
+ * vanilla click box all share the same base.
+ *
+ * The 8x8 board is a <canvas>, not a grid of slot elements. It is deliberately not a menu slot,
+ * so vanilla's slot hit-testing never sees it.
+ */
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    overflow: hidden;
+}
+
+body.soldering-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Token override, not a redraw: accents use this copper/gold. */
+    --ore-gold: #f0a050;
+}
+
+/* Keep the hidden status line in the layout (visibility, not display). Mode changes only swap
+ * which line is visible; they must never change the panel's outer size. */
+.soldering-screen .hidden {
+    visibility: hidden;
+}
+
+.soldering-screen .soldering-panel {
+    width: 610px;
+    height: 730px;
+    max-height: calc(100vh - 8px);
+    display: flex;
+    flex-direction: column;
+}
+
+.soldering-screen .soldering-panel > .card-header {
+    min-height: 40px;
+    padding: 8px 14px;
+    font-size: 18px;
+    letter-spacing: 1px;
+}
+
+.soldering-screen .soldering-panel > .card-body {
+    padding: 10px 14px 12px;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.soldering-screen .editor-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    height: 420px;
+    overflow: hidden;
+}
+
+.soldering-screen .board-column {
+    width: 256px;
+    height: 420px;
+    flex: 0 0 256px;
+}
+
+.soldering-screen .board-head {
+    height: 20px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.soldering-screen .board-title {
+    font-size: 14px;
+    color: var(--ore-ink);
+}
+
+.soldering-screen .board-legend {
+    font-size: 11px;
+    color: var(--ore-ink-muted);
+}
+
+/* No CSS border here on purpose: the canvas buffer is 256x256 and the page's hit-testing uses
+ * event.offsetX/offsetY in those same coordinates. A border would make the content box 252x252
+ * under Ore's global border-box rule and introduce a 4 px scale mismatch. The drawn board already
+ * has its own dark margin/outline inside the bitmap. */
+.soldering-screen #circuitCanvas {
+    display: block;
+    width: 256px;
+    height: 256px;
+    border: 0;
+    background: #17251c;
+    cursor: crosshair;
+}
+
+.soldering-screen .board-hint {
+    margin-top: 5px;
+    height: 48px;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--ore-ink-muted);
+}
+
+.soldering-screen .diag-line {
+    margin-top: 4px;
+    height: 60px;
+    overflow: hidden;
+    padding: 3px 5px;
+    border-left: 2px solid #6b7078;
+    background: rgba(0, 0, 0, 0.18);
+    font-size: 10px;
+    line-height: 1.25;
+    color: #d0d4da;
+    white-space: normal;
+}
+
+.soldering-screen .side-column {
+    flex: 1;
+    min-width: 0;
+    height: 420px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.soldering-screen .side-title {
+    height: 12px;
+    overflow: hidden;
+    margin-top: 1px;
+    font-size: 10px;
+    line-height: 12px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--ore-ink-muted);
+}
+
+.soldering-screen .mode-row {
+    display: flex;
+    gap: 4px;
+    height: 28px;
+}
+
+.soldering-screen .mode-button {
+    flex: 1;
+    height: 28px;
+    min-height: 0;
+    padding: 2px 4px 5px;
+    font-size: 12px;
+    overflow: hidden;
+}
+
+.soldering-screen .mode-button.active {
+    background: var(--ore-gold);
+    border-color: #f4d27a;
+    color: #1a1208;
+}
+
+.soldering-screen .palette {
+    height: 192px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.soldering-screen .palette-item {
+    height: 36px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 5px 2px 2px;
+    border: 1px solid var(--ore-edge);
+    background: var(--ore-surface-deep);
+    cursor: pointer;
+}
+
+.soldering-screen .palette-item:hover {
+    border-color: var(--ore-gold);
+}
+
+.soldering-screen .palette-item.selected {
+    border-color: var(--ore-gold);
+    box-shadow: inset 0 0 0 1px var(--ore-gold);
+}
+
+.soldering-screen .palette-item.empty {
+    opacity: 0.55;
+}
+
+.soldering-screen .palette-icon {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #141416;
+    background: #1b2a20;
+    --aui-slot-icon-scale: 1.5;
+}
+
+.soldering-screen .palette-icon item {
+    width: 16px;
+    height: 16px;
+}
+
+.soldering-screen .palette-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.soldering-screen .palette-name {
+    font-size: 12px;
+    color: var(--ore-ink);
+}
+
+.soldering-screen .palette-size {
+    font-size: 10px;
+    color: var(--ore-ink-muted);
+}
+
+.soldering-screen .palette-count {
+    min-width: 20px;
+    text-align: right;
+    font-size: 12px;
+    color: var(--ore-gold);
+}
+
+.soldering-screen .orientation-row {
+    display: flex;
+    gap: 4px;
+    height: 26px;
+    margin-top: 1px;
+}
+
+.soldering-screen .orientation-row .button {
+    flex: 1;
+    height: 26px;
+    min-height: 0;
+    padding: 2px 4px 5px;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.soldering-screen .key-hint {
+    color: var(--ore-gold);
+    font-size: 10px;
+}
+
+.soldering-screen .stock-line {
+    display: flex;
+    gap: 14px;
+    height: 14px;
+    line-height: 14px;
+    overflow: hidden;
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--ore-ink-muted);
+}
+
+.soldering-screen .stock-line .stock-value {
+    color: var(--ore-gold);
+}
+
+.soldering-screen .status-stack {
+    position: relative;
+    height: 54px;
+    flex: 0 0 54px;
+    overflow: hidden;
+}
+
+.soldering-screen .status-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 54px;
+    overflow: hidden;
+    padding: 4px 6px;
+    border-left: 2px solid var(--ore-gold);
+    background: rgba(0, 0, 0, 0.14);
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--ore-ink);
+}
+
+.soldering-screen .button-row {
+    display: flex;
+    gap: 5px;
+    height: 30px;
+    margin-top: 2px;
+}
+
+.soldering-screen .button-row .button {
+    flex: 1;
+    height: 30px;
+    min-height: 0;
+    padding: 3px 6px 6px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.soldering-screen .button[disabled],
+.soldering-screen .button.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.soldering-screen .backpack-section {
+    margin-top: 8px;
+}
+
+.soldering-screen .inventory-label {
+    margin-bottom: 4px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--ore-ink-muted);
+}
+
+/* 9 x 4 backpack. 9*48 + 8*4 gap = 464; + 8 padding + 4 border = 476. */
+.soldering-screen .player-container {
+    width: 476px;
+    margin: 0 auto;
+    padding: 4px;
+    border: 2px solid var(--ore-edge);
+    background: var(--ore-surface-deep);
+    box-shadow: inset 2px 2px var(--ore-edge-light), inset -2px -2px #292a2b;
+    display: grid;
+    grid-template-columns: repeat(9, 48px);
+    gap: 4px;
+    justify-content: center;
+    /* Same 16/18 icon-to-slot ratio as vanilla: 48 * 16/18 / 16 = 2.6667. */
+    --aui-slot-icon-scale: 2.6667;
+}
+
+.soldering-screen .player-slot {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    border: 3px solid #1c1c1d;
+    border-top-color: #303133;
+    border-left-color: #303133;
+    background-color: #77787a;
+    box-shadow: inset 3px 3px #4d4e50, inset -3px -3px #b2b3b5;
+    --aui-slot-icon-scale: 2.6667;
+}
+
+/* Center the 16x16 item icon inside the 48 px cell. */
+.soldering-screen .player-slot > item {
+    left: calc(50% - 8px);
+    top: calc(50% - 8px);
+}
+
+/* --- 2026-10-20 feedback: the page used to select text, making drags feel like selection --- */
+html, body, body *, .ore-theme, .ore-theme * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+slot {
+    cursor: pointer;
+}

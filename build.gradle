@@ -170,6 +170,14 @@ repositories {
         name = "Local Create ecosystem"
         dirs ".wildfires-cache/local-mods"
     }
+    // ApricityUI (AUI) ships inside the target modpack and is not on Maven. Its jar is copied into
+    // the ignored local-mods cache under an ASCII name: the pack's own name contains non-ASCII
+    // characters, and ForgeGradle's deobf matcher cannot resolve that name (it logs "Matcher Failed"
+    // and then looks for a mangled artifact). Copy it from the pack's mods directory before building.
+    flatDir {
+        name = "Local ApricityUI"
+        dirs ".wildfires-cache/local-mods"
+    }
     maven {
         // location of the maven that hosts JEI files since January 2023
         name = "Jared's maven"
@@ -230,6 +238,8 @@ dependencies {
     implementation fg.deobf("curse.maven:jade-324717:6855440")
     //kjs
     implementation fg.deobf("curse.maven:kubejs-238086:5853326")
+    // ApricityUI is provided by the pack at runtime; only its API is needed at compile time.
+    compileOnly fg.deobf("local.aui:ApricityUI-forge-1.20.1:1.2.8")
     implementation fg.deobf("curse.maven:rhino-416294:6186971")
     implementation fg.deobf("curse.maven:architectury-api-419699:5137938")
     implementation fg.deobf("curse.maven:probejs-585406:5227399")
@@ -461,6 +471,14 @@ tasks.register('smolderingRulesSelfTest', JavaExec) {
     mainClass = 'first.wildfires.tfc.heat.SmolderingRulesSelfTest'
 }
 
+tasks.register('deviceHeatRateSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs plain-Java checks for the TFC device heat-up speed factors.'
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'first.wildfires.tfc.heat.DeviceHeatRateSelfTest'
+}
+
 tasks.register('ignitionInterruptRulesSelfTest', JavaExec) {
     group = 'verification'
     description = 'Runs plain-Java checks for the window that follows a burned out ignition item.'
@@ -538,6 +556,7 @@ tasks.named('check').configure {
     dependsOn tasks.named('forgeMemoryResumeSelfTest')
     dependsOn tasks.named('perfectForgeRulesSelfTest')
     dependsOn tasks.named('smolderingRulesSelfTest')
+    dependsOn tasks.named('deviceHeatRateSelfTest')
     dependsOn tasks.named('ignitionInterruptRulesSelfTest')
     dependsOn tasks.named('anvilInsertRulesSelfTest')
     dependsOn tasks.named('networkGuardTargetsSelfTest')

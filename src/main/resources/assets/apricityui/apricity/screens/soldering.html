@@ -1,0 +1,1271 @@
+<!doctype html>
+<html lang="zh_cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="aui-viewport" content="mode=browser">
+    <title>Perfboard Circuit Editor</title>
+    <link rel="stylesheet" href="/apricityui/theme/ore/ore.css">
+    <link rel="stylesheet" href="soldering.css">
+</head>
+<body class="ore-theme soldering-screen">
+
+<div class="card card-accent-green soldering-panel">
+    <div class="card-header font-display">
+        <translation>screen.wildfires.soldering.title</translation>
+    </div>
+
+    <div class="card-body">
+        <div class="editor-row">
+            <div class="board-column">
+                <div class="board-head">
+                    <span class="board-title"><translation>screen.wildfires.soldering.board</translation></span>
+                    <span class="board-legend">8 × 8</span>
+                </div>
+                <!-- The board is a canvas: holes, components and traces are drawn by the page script.
+                     It is not a menu slot, so it never participates in vanilla slot hit-testing. -->
+                <canvas id="circuitCanvas" width="256" height="256"></canvas>
+                <div class="board-hint" id="boardHint">
+                    <translation>screen.wildfires.soldering.board_hint</translation>
+                </div>
+                <!-- Temporary diagnostic line for the right-click investigation. It is not
+                     translated and does not participate in any edit decision. -->
+                <div class="diag-line" id="diagLine">diag: click left / right on the board</div>
+            </div>
+
+            <div class="side-column">
+                <div class="side-title"><translation>screen.wildfires.soldering.mode</translation></div>
+                <div class="mode-row">
+                    <button id="modeWire" class="button mode-button active" type="button">
+                        <translation>screen.wildfires.soldering.mode.wire</translation>
+                    </button>
+                    <button id="modePlace" class="button mode-button" type="button">
+                        <translation>screen.wildfires.soldering.mode.place</translation>
+                    </button>
+                    <button id="modeRemove" class="button mode-button" type="button">
+                        <translation>screen.wildfires.soldering.mode.remove</translation>
+                    </button>
+                </div>
+
+                <div class="side-title"><translation>screen.wildfires.soldering.palette</translation></div>
+                <div class="palette" id="palette">
+                    <div class="palette-item" data-type="1">
+                        <div class="palette-icon"><item>wildfires:resistor</item></div>
+                        <div class="palette-text">
+                            <span class="palette-name"><translation>item.wildfires.resistor</translation></span>
+                            <span class="palette-size">1×2</span>
+                        </div>
+                        <span class="palette-count" data-count="1">0</span>
+                    </div>
+                    <div class="palette-item" data-type="2">
+                        <div class="palette-icon"><item>wildfires:capacitor</item></div>
+                        <div class="palette-text">
+                            <span class="palette-name"><translation>item.wildfires.capacitor</translation></span>
+                            <span class="palette-size">2×2</span>
+                        </div>
+                        <span class="palette-count" data-count="2">0</span>
+                    </div>
+                    <div class="palette-item" data-type="3">
+                        <div class="palette-icon"><item>wildfires:switch</item></div>
+                        <div class="palette-text">
+                            <span class="palette-name"><translation>item.wildfires.switch</translation></span>
+                            <span class="palette-size">1×3</span>
+                        </div>
+                        <span class="palette-count" data-count="3">0</span>
+                    </div>
+                    <div class="palette-item" data-type="4">
+                        <div class="palette-icon"><item>wildfires:diode</item></div>
+                        <div class="palette-text">
+                            <span class="palette-name"><translation>item.wildfires.diode</translation></span>
+                            <span class="palette-size">1×2 · <translation>screen.wildfires.soldering.polarity</translation></span>
+                        </div>
+                        <span class="palette-count" data-count="4">0</span>
+                    </div>
+                    <div class="palette-item" data-type="5">
+                        <div class="palette-icon"><item>wildfires:ic_chip</item></div>
+                        <div class="palette-text">
+                            <span class="palette-name"><translation>item.wildfires.ic_chip</translation></span>
+                            <span class="palette-size">3×2 / 2×3</span>
+                        </div>
+                        <span class="palette-count" data-count="5">0</span>
+                    </div>
+                </div>
+
+                <div class="orientation-row">
+                    <button id="rotateButton" class="button" type="button">
+                        <translation>screen.wildfires.soldering.orientation</translation>:
+                        <span id="orientationValue"><translation>screen.wildfires.soldering.horizontal</translation></span>
+                        <span class="key-hint">R</span>
+                    </button>
+                    <button id="flipButton" class="button" type="button">
+                        <translation>screen.wildfires.soldering.polarity</translation>:
+                        <span id="polarityValue"><translation>screen.wildfires.soldering.polarity.normal</translation></span>
+                    </button>
+                </div>
+
+                <div class="stock-line">
+                    <span><translation>screen.wildfires.soldering.copper</translation> <span class="stock-value" id="copperCount">0</span></span>
+                    <span><translation>screen.wildfires.soldering.boards</translation> <span class="stock-value" id="boardCount">0</span></span>
+                </div>
+
+                <!-- Both status lines live in a fixed-height stack. Mode switches only toggle
+                     visibility, so the panel cannot grow or shrink when the hint text changes. -->
+                <div class="status-stack">
+                    <div class="status-line" id="statusText">
+                        <translation>screen.wildfires.soldering.wire_hint</translation>
+                    </div>
+                    <div class="status-line hidden" id="noScript">
+                        <translation>screen.wildfires.soldering.no_script</translation>
+                    </div>
+                </div>
+
+                <div class="button-row">
+                    <button id="completeButton" class="button button-primary" type="button">
+                        <translation>screen.wildfires.soldering.complete</translation>
+                    </button>
+                    <button id="clearButton" class="button" type="button">
+                        <translation>screen.wildfires.soldering.clear</translation>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="backpack-section">
+            <div class="inventory-label font-display"><translation>screen.wildfires.soldering.player</translation></div>
+            <!-- Handwritten 9x4 backpack: 9..35 are the main inventory cells, 0..8 the hotbar.
+                 This is the same slot-index order the previous page used and it matches
+                 ApricityContainerMenu.resolveGlobalSlotIndex("player", local) exactly: local here
+                 is the player-inventory index, not the visual row order. All 36 are 48 px so slot
+                 size, icon scale, floating item and vanilla click box share one base. -->
+            <container id="player" bind="player" class="player-container">
+                <slot slot-index="9" class="player-slot" size="48"></slot>
+                <slot slot-index="10" class="player-slot" size="48"></slot>
+                <slot slot-index="11" class="player-slot" size="48"></slot>
+                <slot slot-index="12" class="player-slot" size="48"></slot>
+                <slot slot-index="13" class="player-slot" size="48"></slot>
+                <slot slot-index="14" class="player-slot" size="48"></slot>
+                <slot slot-index="15" class="player-slot" size="48"></slot>
+                <slot slot-index="16" class="player-slot" size="48"></slot>
+                <slot slot-index="17" class="player-slot" size="48"></slot>
+                <slot slot-index="18" class="player-slot" size="48"></slot>
+                <slot slot-index="19" class="player-slot" size="48"></slot>
+                <slot slot-index="20" class="player-slot" size="48"></slot>
+                <slot slot-index="21" class="player-slot" size="48"></slot>
+                <slot slot-index="22" class="player-slot" size="48"></slot>
+                <slot slot-index="23" class="player-slot" size="48"></slot>
+                <slot slot-index="24" class="player-slot" size="48"></slot>
+                <slot slot-index="25" class="player-slot" size="48"></slot>
+                <slot slot-index="26" class="player-slot" size="48"></slot>
+                <slot slot-index="27" class="player-slot" size="48"></slot>
+                <slot slot-index="28" class="player-slot" size="48"></slot>
+                <slot slot-index="29" class="player-slot" size="48"></slot>
+                <slot slot-index="30" class="player-slot" size="48"></slot>
+                <slot slot-index="31" class="player-slot" size="48"></slot>
+                <slot slot-index="32" class="player-slot" size="48"></slot>
+                <slot slot-index="33" class="player-slot" size="48"></slot>
+                <slot slot-index="34" class="player-slot" size="48"></slot>
+                <slot slot-index="35" class="player-slot" size="48"></slot>
+                <slot slot-index="0" class="player-slot" size="48"></slot>
+                <slot slot-index="1" class="player-slot" size="48"></slot>
+                <slot slot-index="2" class="player-slot" size="48"></slot>
+                <slot slot-index="3" class="player-slot" size="48"></slot>
+                <slot slot-index="4" class="player-slot" size="48"></slot>
+                <slot slot-index="5" class="player-slot" size="48"></slot>
+                <slot slot-index="6" class="player-slot" size="48"></slot>
+                <slot slot-index="7" class="player-slot" size="48"></slot>
+                <slot slot-index="8" class="player-slot" size="48"></slot>
+            </container>
+        </div>
+    </div>
+</div>
+
+<script>
+    var BOARD_SIZE = 8;
+    var CELL = 28;
+    var MARGIN = 16;
+    var HOLE_R = 3;
+
+    var COMPONENTS = {
+        1: {nameKey: "item.wildfires.resistor", w: 2, h: 1, dir: true, pol: false, size: "1x2"},
+        2: {nameKey: "item.wildfires.capacitor", w: 2, h: 2, dir: false, pol: false, size: "2x2"},
+        3: {nameKey: "item.wildfires.switch", w: 3, h: 1, dir: true, pol: false, size: "1x3"},
+        4: {nameKey: "item.wildfires.diode", w: 2, h: 1, dir: true, pol: true, size: "1x2"},
+        5: {nameKey: "item.wildfires.ic_chip", w: 3, h: 2, dir: true, pol: false, size: "3x2"}
+    };
+
+    var canvas = null;
+    var ctx = null;
+    var cells = [];
+    var wires = [];
+    var revision = -1;
+    var lastState = "";
+    var mode = "wire";
+    var selectedType = 1;
+    var vertical = false;
+    var flipped = false;
+    var pending = null;
+    var hover = null;
+    var statusMessage = "";
+    var statusTicks = 0;
+    var initialized = false;
+
+    function byId(id) {
+        return document.getElementById(id);
+    }
+
+    function setText(element, text) {
+        if (element && element.innerText !== text) {
+            element.innerText = text;
+        }
+    }
+
+    function setClass(element, value) {
+        if (element && element.getAttribute("class") !== value) {
+            element.setAttribute("class", value);
+        }
+    }
+
+    function setDisabled(element, disabled) {
+        if (!element) return;
+        if (disabled) {
+            if (!element.hasAttribute("disabled")) element.setAttribute("disabled", "");
+        } else if (element.hasAttribute("disabled")) {
+            element.removeAttribute("disabled");
+        }
+        var base = element.getAttribute("data-base-class") || element.getAttribute("class") || "button";
+        if (!element.getAttribute("data-base-class")) {
+            element.setAttribute("data-base-class", base.replace(/ disabled/g, "").replace(/disabled/g, "").trim());
+            base = element.getAttribute("data-base-class");
+        }
+        setClass(element, disabled ? base + " disabled" : base);
+    }
+
+    function bindingReady() {
+        return typeof WildfiresSoldering !== "undefined";
+    }
+
+    function creativeMode() {
+        if (!bindingReady()) return false;
+        try {
+            return WildfiresSoldering.creative();
+        } catch (error) {
+            return false;
+        }
+    }
+
+    var TEXT_CACHE = {};
+
+    function tr(key) {
+        if (!bindingReady()) return key;
+        if (!(key in TEXT_CACHE)) {
+            try {
+                TEXT_CACHE[key] = WildfiresSoldering.text(key);
+            } catch (error) {
+                TEXT_CACHE[key] = key;
+            }
+        }
+        return TEXT_CACHE[key];
+    }
+
+    function fmt(template) {
+        var out = String(template);
+        for (var i = 1; i < arguments.length; i++) {
+            out = out.replace("%s", String(arguments[i]));
+        }
+        return out;
+    }
+
+    // ------------------------------------------------------------------
+    // Board state
+    // ------------------------------------------------------------------
+
+    function parseState(state) {
+        var parts = String(state).split("|");
+        if (parts.length < 3) return false;
+        var newRevision = parseInt(parts[0].substring(1), 10);
+        var cellText = parts[1].substring(1);
+        var wireCount = parseInt(parts[2].substring(1), 10);
+        var wireText = parts.length > 3 ? parts[3] : "";
+        if (isNaN(newRevision) || isNaN(wireCount) || cellText.length < 64) return false;
+        revision = newRevision;
+        for (var i = 0; i < 64; i++) {
+            var code = parseInt(cellText.charAt(i), 32);
+            cells[i] = isNaN(code) ? 0 : code;
+        }
+        wires = [];
+        for (var w = 0; w < wireCount; w++) {
+            var chunk = wireText.substring(w * 3, w * 3 + 3);
+            if (chunk.length < 3) break;
+            var packed = parseInt(chunk, 16);
+            if (isNaN(packed)) continue;
+            var wire = {
+                x1: packed & 7,
+                y1: (packed >> 3) & 7,
+                x2: (packed >> 6) & 7,
+                y2: (packed >> 9) & 7
+            };
+            if (wire.x1 === wire.x2 && wire.y1 === wire.y2) continue;
+            wires.push(wire);
+        }
+        return true;
+    }
+
+    function cellCode(x, y) {
+        return cells[y * BOARD_SIZE + x] || 0;
+    }
+
+    function componentAt(x, y) {
+        if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) return null;
+        for (var ay = 0; ay < BOARD_SIZE; ay++) {
+            for (var ax = 0; ax < BOARD_SIZE; ax++) {
+                var code = cells[ay * BOARD_SIZE + ax];
+                if (!code) continue;
+                var meta = COMPONENTS[code & 7];
+                if (!meta) continue;
+                var isVertical = (code & 8) !== 0;
+                var width = isVertical && meta.dir ? meta.h : meta.w;
+                var height = isVertical && meta.dir ? meta.w : meta.h;
+                if (x >= ax && x < ax + width && y >= ay && y < ay + height) {
+                    return {
+                        type: code & 7,
+                        x: ax,
+                        y: ay,
+                        vertical: isVertical,
+                        flipped: (code & 16) !== 0,
+                        width: width,
+                        height: height
+                    };
+                }
+            }
+        }
+        return null;
+    }
+
+    function hasWire(x1, y1, x2, y2) {
+        for (var i = 0; i < wires.length; i++) {
+            var wire = wires[i];
+            if ((wire.x1 === x1 && wire.y1 === y1 && wire.x2 === x2 && wire.y2 === y2)
+                || (wire.x1 === x2 && wire.y1 === y2 && wire.x2 === x1 && wire.y2 === y1)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns null when the footprint fits, otherwise a short machine-readable reason. The page
+     * uses the reason for the status line + diagnostic line; the server repeats the same checks.
+     */
+    function placeFailureReason(type, x, y, isVertical, isFlipped) {
+        var meta = COMPONENTS[type];
+        if (!meta) return "invalid_type";
+        if (isFlipped && !meta.pol) return "flipped_not_polarized";
+        var width = isVertical && meta.dir ? meta.h : meta.w;
+        var height = isVertical && meta.dir ? meta.w : meta.h;
+        if (x < 0 || y < 0 || x + width > BOARD_SIZE || y + height > BOARD_SIZE) {
+            return "out_of_bounds";
+        }
+        for (var dy = 0; dy < height; dy++) {
+            for (var dx = 0; dx < width; dx++) {
+                var cx = x + dx;
+                var cy = y + dy;
+                // A wire endpoint is a pin, not an obstacle: a component may cover it.
+                var other = componentAt(cx, cy);
+                if (other) {
+                    return "overlap:type" + other.type + "@" + other.x + "," + other.y
+                        + " cell=" + cx + "," + cy;
+                }
+            }
+        }
+        return null;
+    }
+
+    function canPlaceClient(type, x, y, isVertical, isFlipped) {
+        return placeFailureReason(type, x, y, isVertical, isFlipped) === null;
+    }
+
+    // ------------------------------------------------------------------
+    // Geometry / hit testing
+    // ------------------------------------------------------------------
+
+    function nodeX(x) {
+        return MARGIN + x * CELL + CELL / 2;
+    }
+
+    function nodeY(y) {
+        return MARGIN + y * CELL + CELL / 2;
+    }
+
+    function cellX(x) {
+        return MARGIN + x * CELL;
+    }
+
+    function cellY(y) {
+        return MARGIN + y * CELL;
+    }
+
+    function holeAt(px, py) {
+        var x = Math.floor((px - MARGIN) / CELL);
+        var y = Math.floor((py - MARGIN) / CELL);
+        if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) return null;
+        var dx = px - nodeX(x);
+        var dy = py - nodeY(y);
+        if (dx * dx + dy * dy > (CELL * 0.52) * (CELL * 0.52)) return null;
+        return {x: x, y: y};
+    }
+
+    function between(value, a, b) {
+        return value >= Math.min(a, b) - 6 && value <= Math.max(a, b) + 6;
+    }
+
+    function wireAt(px, py) {
+        for (var i = wires.length - 1; i >= 0; i--) {
+            var wire = wires[i];
+            var x1 = nodeX(wire.x1);
+            var y1 = nodeY(wire.y1);
+            var x2 = nodeX(wire.x2);
+            var y2 = nodeY(wire.y2);
+            if (wire.x1 === wire.x2) {
+                if (Math.abs(px - x1) <= 6 && between(py, y1, y2)) return i;
+            } else if (wire.y1 === wire.y2) {
+                if (Math.abs(py - y1) <= 6 && between(px, x1, x2)) return i;
+            } else {
+                if (Math.abs(py - y1) <= 6 && between(px, x1, x2)) return i;
+                if (Math.abs(px - x2) <= 6 && between(py, y1, y2)) return i;
+            }
+        }
+        return -1;
+    }
+
+    // ------------------------------------------------------------------
+    // Canvas drawing
+    // ------------------------------------------------------------------
+
+    function drawBoard() {
+        if (!ctx || !canvas) return;
+        var width = canvas.getWidth ? canvas.getWidth() : 256;
+        var height = canvas.getHeight ? canvas.getHeight() : 256;
+        ctx.globalAlpha = 1;
+        ctx.clearRect(0, 0, width, height);
+
+        // Board substrate.
+        ctx.fillStyle = "#17251c";
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = "#2f7d3a";
+        ctx.fillRect(7, 7, width - 14, height - 14);
+        ctx.fillStyle = "#3b8c47";
+        ctx.fillRect(7, 7, width - 14, 3);
+        ctx.fillStyle = "#256a30";
+        ctx.fillRect(7, height - 10, width - 14, 3);
+
+        // Grid.
+        ctx.strokeStyle = "#245f2d";
+        ctx.lineWidth = 1;
+        for (var grid = 0; grid <= BOARD_SIZE; grid++) {
+            var gx = MARGIN + grid * CELL;
+            var gy = MARGIN + grid * CELL;
+            ctx.beginPath();
+            ctx.moveTo(gx, MARGIN);
+            ctx.lineTo(gx, MARGIN + BOARD_SIZE * CELL);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(MARGIN, gy);
+            ctx.lineTo(MARGIN + BOARD_SIZE * CELL, gy);
+            ctx.stroke();
+        }
+
+        // Holes: dark bore with a thin gold ring.
+        for (var y = 0; y < BOARD_SIZE; y++) {
+            for (var x = 0; x < BOARD_SIZE; x++) {
+                var hx = nodeX(x);
+                var hy = nodeY(y);
+                ctx.beginPath();
+                ctx.arc(hx, hy, HOLE_R + 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = "#e0b34c";
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(hx, hy, HOLE_R, 0, Math.PI * 2);
+                ctx.fillStyle = "#0b0d0e";
+                ctx.fill();
+            }
+        }
+
+        // Traces: dark underlay, copper body, one-pixel highlight.
+        for (var pass = 0; pass < 3; pass++) {
+            for (var wi = 0; wi < wires.length; wi++) {
+                if (pass === 0) strokeWire(wires[wi], "#14341b", 6);
+                else if (pass === 1) strokeWire(wires[wi], "#f0a050", 3);
+                else strokeWire(wires[wi], "#f4d27a", 1);
+            }
+        }
+
+        // Components.
+        for (var cy = 0; cy < BOARD_SIZE; cy++) {
+            for (var cx = 0; cx < BOARD_SIZE; cx++) {
+                var code = cells[cy * BOARD_SIZE + cx];
+                if (!code) continue;
+                drawComponent(cx, cy, code);
+            }
+        }
+
+        // A trace that ends on a component cell is a pin; draw the pin above the component body
+        // so the connection stays visible even though the trace itself is under the body.
+        drawWirePins();
+
+        drawInteractionOverlay();
+    }
+
+    function drawWirePins() {
+        for (var i = 0; i < wires.length; i++) {
+            drawWirePin(wires[i].x1, wires[i].y1);
+            drawWirePin(wires[i].x2, wires[i].y2);
+        }
+    }
+
+    function drawWirePin(x, y) {
+        if (!componentAt(x, y)) return;
+        ctx.beginPath();
+        ctx.arc(nodeX(x), nodeY(y), 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = "#f4d27a";
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(nodeX(x), nodeY(y), 1.8, 0, Math.PI * 2);
+        ctx.fillStyle = "#141416";
+        ctx.fill();
+    }
+
+    function strokeWire(wire, color, width) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(nodeX(wire.x1), nodeY(wire.y1));
+        if (wire.x1 === wire.x2 || wire.y1 === wire.y2) {
+            ctx.lineTo(nodeX(wire.x2), nodeY(wire.y2));
+        } else {
+            ctx.lineTo(nodeX(wire.x2), nodeY(wire.y1));
+            ctx.lineTo(nodeX(wire.x2), nodeY(wire.y2));
+        }
+        ctx.stroke();
+    }
+
+    function drawComponent(anchorX, anchorY, code) {
+        var meta = COMPONENTS[code & 7];
+        if (!meta) return;
+        var isVertical = (code & 8) !== 0;
+        var isFlipped = (code & 16) !== 0;
+        var width = isVertical && meta.dir ? meta.h : meta.w;
+        var height = isVertical && meta.dir ? meta.w : meta.h;
+        var px = cellX(anchorX) + 3;
+        var py = cellY(anchorY) + 3;
+        var pw = width * CELL - 6;
+        var ph = height * CELL - 6;
+
+        ctx.globalAlpha = 0.25;
+        ctx.fillStyle = "#141416";
+        ctx.fillRect(px, py, pw, ph);
+        ctx.globalAlpha = 0.55;
+        ctx.strokeStyle = "#f4d27a";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(px + 0.5, py + 0.5, pw - 1, ph - 1);
+        ctx.globalAlpha = 1;
+
+        if (meta === COMPONENTS[1]) drawResistor(px, py, pw, ph, isVertical);
+        else if (meta === COMPONENTS[2]) drawCapacitor(px, py, pw, ph);
+        else if (meta === COMPONENTS[3]) drawSwitch(px, py, pw, ph, isVertical);
+        else if (meta === COMPONENTS[4]) drawDiode(px, py, pw, ph, isVertical, isFlipped);
+        else if (meta === COMPONENTS[5]) drawChip(px, py, pw, ph, isVertical);
+    }
+
+    function drawResistor(px, py, pw, ph, isVertical) {
+        var bodyX = isVertical ? px + pw * 0.28 : px + 5;
+        var bodyY = isVertical ? py + 5 : py + ph * 0.28;
+        var bodyW = isVertical ? pw * 0.44 : pw - 10;
+        var bodyH = isVertical ? ph - 10 : ph * 0.44;
+        ctx.fillStyle = "#b9bec6";
+        if (isVertical) {
+            ctx.fillRect(px + pw / 2 - 2, py, 4, 6);
+            ctx.fillRect(px + pw / 2 - 2, py + ph - 6, 4, 6);
+        } else {
+            ctx.fillRect(px, py + ph / 2 - 2, 6, 4);
+            ctx.fillRect(px + pw - 6, py + ph / 2 - 2, 6, 4);
+        }
+        ctx.fillStyle = "#141416";
+        ctx.fillRect(bodyX - 1, bodyY - 1, bodyW + 2, bodyH + 2);
+        ctx.fillStyle = "#d8c08a";
+        ctx.fillRect(bodyX, bodyY, bodyW, bodyH);
+        ctx.fillStyle = "#d24a4a";
+        if (isVertical) {
+            ctx.fillRect(bodyX, bodyY + bodyH * 0.22, bodyW, 3);
+            ctx.fillRect(bodyX, bodyY + bodyH * 0.62, bodyW, 3);
+        } else {
+            ctx.fillRect(bodyX + bodyW * 0.22, bodyY, 3, bodyH);
+            ctx.fillRect(bodyX + bodyW * 0.62, bodyY, 3, bodyH);
+        }
+        ctx.fillStyle = "#e0b34c";
+        if (isVertical) {
+            ctx.fillRect(bodyX, bodyY + bodyH * 0.42, bodyW, 3);
+        } else {
+            ctx.fillRect(bodyX + bodyW * 0.42, bodyY, 3, bodyH);
+        }
+    }
+
+    function drawCapacitor(px, py, pw, ph) {
+        var cx = px + pw / 2;
+        var cy = py + ph * 0.40;
+        var radius = Math.min(pw, ph) * 0.28;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius + 2, 0, Math.PI * 2);
+        ctx.fillStyle = "#141416";
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fillStyle = "#3a4e6e";
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius - 2, Math.PI, Math.PI * 2);
+        ctx.strokeStyle = "#b9bec6";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.fillStyle = "#d7dbe0";
+        ctx.fillRect(cx - radius + 2, cy - radius + 3, 3, radius * 2 - 6);
+        ctx.fillStyle = "#b9bec6";
+        ctx.fillRect(cx - radius * 0.45 - 1, cy + radius, 3, ph * 0.34);
+        ctx.fillRect(cx + radius * 0.45 - 1, cy + radius, 3, ph * 0.34);
+    }
+
+    function drawSwitch(px, py, pw, ph, isVertical) {
+        var bodyX = px + 3;
+        var bodyY = py + ph * 0.38;
+        var bodyW = pw - 6;
+        var bodyH = ph * 0.36;
+        ctx.fillStyle = "#141416";
+        ctx.fillRect(bodyX - 1, bodyY - 1, bodyW + 2, bodyH + 2);
+        ctx.fillStyle = "#6b7078";
+        ctx.fillRect(bodyX, bodyY, bodyW, bodyH);
+        ctx.fillStyle = "#9aa0a8";
+        ctx.fillRect(bodyX + 2, bodyY + 2, bodyW - 4, 3);
+        var leverX = isVertical ? bodyX + bodyW * 0.75 : bodyX + bodyW * 0.30;
+        var leverY = bodyY;
+        var tipX = isVertical ? leverX + 5 : leverX + 5;
+        var tipY = isVertical ? leverY - 8 : leverY - 8;
+        ctx.strokeStyle = "#141416";
+        ctx.lineWidth = 5;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(leverX, leverY);
+        ctx.lineTo(tipX, tipY);
+        ctx.stroke();
+        ctx.strokeStyle = "#d7dbe0";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(leverX, leverY);
+        ctx.lineTo(tipX, tipY);
+        ctx.stroke();
+        ctx.fillStyle = "#e0b34c";
+        ctx.fillRect(bodyX + 2, bodyY + bodyH, 4, 4);
+        ctx.fillRect(bodyX + bodyW - 6, bodyY + bodyH, 4, 4);
+    }
+
+    function drawDiode(px, py, pw, ph, isVertical, isFlipped) {
+        var bodyX = isVertical ? px + pw * 0.26 : px + 5;
+        var bodyY = isVertical ? py + 5 : py + ph * 0.26;
+        var bodyW = isVertical ? pw * 0.48 : pw - 10;
+        var bodyH = isVertical ? ph - 10 : ph * 0.48;
+        ctx.fillStyle = "#b9bec6";
+        if (isVertical) {
+            ctx.fillRect(px + pw / 2 - 2, py, 4, 6);
+            ctx.fillRect(px + pw / 2 - 2, py + ph - 6, 4, 6);
+        } else {
+            ctx.fillRect(px, py + ph / 2 - 2, 6, 4);
+            ctx.fillRect(px + pw - 6, py + ph / 2 - 2, 6, 4);
+        }
+        ctx.fillStyle = "#141416";
+        ctx.fillRect(bodyX - 1, bodyY - 1, bodyW + 2, bodyH + 2);
+        ctx.fillStyle = "#24262b";
+        ctx.fillRect(bodyX, bodyY, bodyW, bodyH);
+        ctx.fillStyle = "#b9bec6";
+        if (isVertical) {
+            ctx.fillRect(bodyX, isFlipped ? bodyY + 3 : bodyY + bodyH - 6, bodyW, 3);
+        } else {
+            ctx.fillRect(isFlipped ? bodyX + 3 : bodyX + bodyW - 6, bodyY, 3, bodyH);
+        }
+        ctx.fillStyle = "#e0b34c";
+        if (isVertical) {
+            var top = isFlipped ? bodyY + bodyH - 8 : bodyY + 4;
+            var bottom = isFlipped ? bodyY + bodyH - 4 : bodyY + 8;
+            ctx.beginPath();
+            ctx.moveTo(bodyX + bodyW / 2, top);
+            ctx.lineTo(bodyX + bodyW / 2, bottom);
+            ctx.lineTo(bodyX + bodyW / 2 - 5, bottom);
+            ctx.closePath();
+            ctx.fill();
+        } else {
+            var left = isFlipped ? bodyX + bodyW - 8 : bodyX + 4;
+            var right = isFlipped ? bodyX + bodyW - 4 : bodyX + 8;
+            ctx.beginPath();
+            ctx.moveTo(left, bodyY + bodyH / 2);
+            ctx.lineTo(right, bodyY + bodyH / 2);
+            ctx.lineTo(right, bodyY + bodyH / 2 + 5);
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+
+    function drawChip(px, py, pw, ph, isVertical) {
+        var bodyX = px + 4;
+        var bodyY = py + 4;
+        var bodyW = pw - 8;
+        var bodyH = ph - 8;
+        ctx.fillStyle = "#b9bec6";
+        if (isVertical) {
+            for (var row = 0; row < 3; row++) {
+                var py2 = bodyY + 5 + row * (bodyH - 10) / 2;
+                ctx.fillRect(bodyX - 4, py2, 4, 3);
+                ctx.fillRect(bodyX + bodyW, py2, 4, 3);
+            }
+        } else {
+            for (var col = 0; col < 3; col++) {
+                var px2 = bodyX + 5 + col * (bodyW - 10) / 2;
+                ctx.fillRect(px2, bodyY - 4, 3, 4);
+                ctx.fillRect(px2, bodyY + bodyH, 3, 4);
+            }
+        }
+        ctx.fillStyle = "#141416";
+        ctx.fillRect(bodyX - 1, bodyY - 1, bodyW + 2, bodyH + 2);
+        ctx.fillStyle = "#24262b";
+        ctx.fillRect(bodyX, bodyY, bodyW, bodyH);
+        ctx.fillStyle = "#b9bec6";
+        ctx.beginPath();
+        ctx.arc(bodyX + 5, bodyY + 5, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#3a3d45";
+        ctx.fillRect(bodyX + 4, bodyY + bodyH * 0.55, bodyW - 8, 2);
+    }
+
+    function drawInteractionOverlay() {
+        if (mode === "wire") {
+            if (pending) {
+                ctx.strokeStyle = "#f4d27a";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(nodeX(pending.x), nodeY(pending.y), 7, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            if (pending && hover && (pending.x !== hover.x || pending.y !== hover.y)) {
+                // Solid translucent preview rather than a dashed line: AUI exposes setLineDash,
+                // but the bundled canvas test never exercises it, so this path stays on APIs the
+                // test page proves.
+                ctx.globalAlpha = 0.55;
+                strokeWire({x1: pending.x, y1: pending.y, x2: hover.x, y2: hover.y}, "#f4d27a", 2);
+                ctx.globalAlpha = 1;
+            }
+            if (hover) {
+                ctx.strokeStyle = "#f4d27a";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(nodeX(hover.x), nodeY(hover.y), 6, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        } else if (mode === "place" && hover) {
+            var meta = COMPONENTS[selectedType];
+            if (!meta) return;
+            var width = vertical && meta.dir ? meta.h : meta.w;
+            var height = vertical && meta.dir ? meta.w : meta.h;
+            var valid = canPlaceClient(selectedType, hover.x, hover.y, vertical, flipped);
+            ctx.globalAlpha = 0.28;
+            ctx.fillStyle = valid ? "#8fe38f" : "#e06060";
+            ctx.fillRect(cellX(hover.x) + 1, cellY(hover.y) + 1, width * CELL - 2, height * CELL - 2);
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = valid ? "#8fe38f" : "#e06060";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(cellX(hover.x) + 1, cellY(hover.y) + 1, width * CELL - 2, height * CELL - 2);
+        } else if (mode === "remove" && hover) {
+            var component = componentAt(hover.x, hover.y);
+            if (component) {
+                ctx.globalAlpha = 0.30;
+                ctx.fillStyle = "#e06060";
+                ctx.fillRect(cellX(component.x) + 1, cellY(component.y) + 1,
+                    component.width * CELL - 2, component.height * CELL - 2);
+                ctx.globalAlpha = 1;
+            } else {
+                ctx.strokeStyle = "#e06060";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(nodeX(hover.x), nodeY(hover.y), 7, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Interaction
+    // ------------------------------------------------------------------
+
+    /**
+     * Shared delete action for the Remove mode and for right-click. Component wins over a trace at
+     * the same cell, which matches the visual stacking (components are drawn above traces).
+     */
+    function deleteAt(px, py) {
+        var hole = holeAt(px, py);
+        if (hole) {
+            var component = componentAt(hole.x, hole.y);
+            if (component) {
+                if (bindingReady()) WildfiresSoldering.removeComponent(hole.x, hole.y);
+                setStatus(tr("screen.wildfires.soldering.removed"));
+                return true;
+            }
+        }
+        var wireIndex = wireAt(px, py);
+        if (wireIndex >= 0) {
+            var wire = wires[wireIndex];
+            if (bindingReady() && wire) {
+                WildfiresSoldering.disconnect(wire.x1, wire.y1, wire.x2, wire.y2);
+            }
+            setStatus(tr("screen.wildfires.soldering.wire_removed"));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * AUI constructs MouseEvent from Forge's GLFW button code in Client.mouseButton, while the
+     * DOM convention is 0=left/1=middle/2=right. The GLFW mask for the right button is the same
+     * bit (2) as the DOM `buttons` mask, so prefer `buttons` when present and accept either
+     * button code as a fallback. This keeps right-click working under both conventions without
+     * treating middle-click (mask 4) as delete.
+     */
+    function isRightClick(event) {
+        if (event.buttons !== undefined && event.buttons !== null && event.buttons !== 0) {
+            return (event.buttons & 2) === 2;
+        }
+        return event.button === 2 || event.button === 1;
+    }
+
+    /**
+     * Temporary diagnostics for the "sometimes deletes on left click" report. The line is shown
+     * in the page and mirrored to console.log; it deliberately does not change any decision.
+     */
+    var DIAG_LINES = [];
+
+    function setDiag(text) {
+        DIAG_LINES.push(text);
+        if (DIAG_LINES.length > 2) DIAG_LINES.shift();
+        var line = byId("diagLine");
+        if (line) setText(line, DIAG_LINES.join("  ||  "));
+        if (typeof console !== "undefined" && console.log) {
+            console.log("[soldering-diag] " + text);
+        }
+    }
+
+    function describeMouse(event) {
+        if (!event) return "null";
+        return "btn=" + (event.button === undefined ? "n/a" : event.button)
+            + " btns=" + (event.buttons === undefined ? "n/a" : event.buttons)
+            + " type=" + (event.type === undefined ? "?" : event.type)
+            + " which=" + (event.which === undefined ? "n/a" : event.which);
+    }
+
+    function diagMouse(event, right) {
+        setDiag("diag: " + describeMouse(event) + " right=" + right);
+    }
+
+    function onContextMenu(event) {
+        if (!event) return;
+        setDiag("diag: ctxmenu " + describeMouse(event));
+        if (event.preventDefault) event.preventDefault();
+    }
+
+    function onCanvasDown(event) {
+        if (!event) return;
+        var right = isRightClick(event);
+        // Diagnostic only: same predicate as the old branch, printed before any action.
+        diagMouse(event, right);
+        // Right-click is always delete, independent of the current mode.
+        if (right) {
+            deleteAt(event.offsetX, event.offsetY);
+            if (event.preventDefault) event.preventDefault();
+            return;
+        }
+        if (event.button !== undefined && event.button !== 0) return;
+        var hole = holeAt(event.offsetX, event.offsetY);
+        if (mode === "remove") {
+            if (!deleteAt(event.offsetX, event.offsetY)) {
+                setStatus(tr("message.wildfires.soldering.error.nothing_there"));
+            }
+            return;
+        }
+        if (!hole) {
+            setDiag("click: no hole " + describeMouse(event));
+            return;
+        }
+        if (mode === "place") {
+            var meta = COMPONENTS[selectedType];
+            var where = " type=" + selectedType + " x=" + hole.x + " y=" + hole.y
+                + " v=" + (vertical ? 1 : 0) + " f=" + (flipped ? 1 : 0);
+            if (!meta) {
+                setDiag("place rejected: invalid_type" + where);
+                setStatus(tr("message.wildfires.soldering.error.invalid_component"));
+                return;
+            }
+            if (!creativeMode() && bindingReady() && WildfiresSoldering.stock(selectedType) <= 0) {
+                setDiag("place rejected: no_stock" + where);
+                setStatus(tr("message.wildfires.soldering.error.not_in_inventory"));
+                return;
+            }
+            var reason = placeFailureReason(selectedType, hole.x, hole.y, vertical, flipped);
+            if (reason !== null) {
+                setDiag("place rejected: " + reason + where);
+                if (reason === "out_of_bounds") {
+                    setStatus(tr("message.wildfires.soldering.error.out_of_bounds"));
+                } else if (reason === "invalid_type" || reason === "flipped_not_polarized") {
+                    setStatus(tr("message.wildfires.soldering.error.invalid_component"));
+                } else {
+                    setStatus(tr("message.wildfires.soldering.error.occupied"));
+                }
+                return;
+            }
+            if (bindingReady()) {
+                setDiag("place sent:" + where);
+                WildfiresSoldering.place(selectedType, hole.x, hole.y, vertical ? 1 : 0, flipped ? 1 : 0);
+                setStatus(fmt(tr("screen.wildfires.soldering.placed"), tr(meta.nameKey)));
+            } else {
+                setDiag("place not sent: no binding" + where);
+            }
+            return;
+        }
+
+        // Wire mode. Endpoints may be empty holes or component cells (the cell becomes the pin).
+        if (!pending) {
+            pending = hole;
+            setStatus(fmt(tr("screen.wildfires.soldering.pending"), hole.x, hole.y));
+            drawBoard();
+            return;
+        }
+        if (pending.x === hole.x && pending.y === hole.y) {
+            pending = null;
+            setStatus("");
+            drawBoard();
+            return;
+        }
+        var cost = bindingReady()
+            ? WildfiresSoldering.wireCost(pending.x, pending.y, hole.x, hole.y)
+            : Math.abs(pending.x - hole.x) + Math.abs(pending.y - hole.y);
+        if (hasWire(pending.x, pending.y, hole.x, hole.y)) {
+            setStatus(tr("message.wildfires.soldering.error.duplicate_wire"));
+            return;
+        }
+        if (wires.length >= 64) {
+            setStatus(tr("message.wildfires.soldering.error.too_many_wires"));
+            return;
+        }
+        if (!creativeMode() && bindingReady() && WildfiresSoldering.copperWire() < cost) {
+            setStatus(fmt(tr("screen.wildfires.soldering.cost"), cost) + " / " + tr("message.wildfires.soldering.error.not_enough_wire"));
+            return;
+        }
+        var from = pending;
+        pending = null;
+        if (bindingReady()) {
+            WildfiresSoldering.connect(from.x, from.y, hole.x, hole.y);
+            var doneKey = creativeMode()
+                ? "screen.wildfires.soldering.wire_done_creative"
+                : "screen.wildfires.soldering.wire_done";
+            setStatus(fmt(tr(doneKey), from.x, from.y, hole.x, hole.y, cost));
+        }
+        drawBoard();
+    }
+
+    function onCanvasMove(event) {
+        if (!event) return;
+        var hole = holeAt(event.offsetX, event.offsetY);
+        if (!hole) {
+            if (hover) {
+                hover = null;
+                drawBoard();
+            }
+            return;
+        }
+        if (!hover || hover.x !== hole.x || hover.y !== hole.y) {
+            hover = hole;
+            drawBoard();
+        }
+    }
+
+    function onCanvasLeave() {
+        if (hover) {
+            hover = null;
+            drawBoard();
+        }
+    }
+
+    /**
+     * R rotates the component that would be placed next. Polarity is intentionally a separate
+     * control (the flip button): R only swaps the horizontal/vertical footprint.
+     * AUI delivers page keydown through Operation.handleKeyInput -> KeyEvent.triggerEvent(document),
+     * and its own richtext test page uses a document-level keydown listener.
+     */
+    function onKeyDown(event) {
+        if (!event || event.repeat) return;
+        var key = event.key;
+        if (key === undefined && event.keyCode) {
+            key = String.fromCharCode(event.keyCode);
+        }
+        if (!key || String(key).toLowerCase() !== "r") return;
+        toggleRotate();
+        if (event.preventDefault) event.preventDefault();
+    }
+
+    // ------------------------------------------------------------------
+    // UI
+    // ------------------------------------------------------------------
+
+    function setMode(next) {
+        mode = next;
+        pending = null;
+        updateModeUi();
+        drawBoard();
+        refreshStatus();
+    }
+
+    function selectPalette(type) {
+        if (!COMPONENTS[type]) return;
+        selectedType = type;
+        mode = "place";
+        pending = null;
+        if (!COMPONENTS[type].dir) vertical = false;
+        if (!COMPONENTS[type].pol) flipped = false;
+        updateModeUi();
+        drawBoard();
+        refreshStatus();
+    }
+
+    function toggleRotate() {
+        var meta = COMPONENTS[selectedType];
+        if (!meta || !meta.dir) return;
+        vertical = !vertical;
+        updateModeUi();
+        drawBoard();
+        refreshStatus();
+    }
+
+    function toggleFlip() {
+        var meta = COMPONENTS[selectedType];
+        if (!meta || !meta.pol) return;
+        flipped = !flipped;
+        updateModeUi();
+        drawBoard();
+        refreshStatus();
+    }
+
+    function setStatus(message) {
+        statusMessage = message || "";
+        statusTicks = 28;
+        refreshStatus();
+    }
+
+    function refreshStatus() {
+        if (!bindingReady()) return;
+        var text = statusMessage;
+        if (!text) {
+            if (mode === "wire") {
+                text = pending
+                    ? fmt(tr("screen.wildfires.soldering.pending"), pending.x, pending.y)
+                    : tr("screen.wildfires.soldering.wire_hint");
+            } else if (mode === "place") {
+                var meta = COMPONENTS[selectedType];
+                var suffix = meta
+                    ? " [" + tr(meta.nameKey) + " · "
+                        + (vertical ? tr("screen.wildfires.soldering.vertical") : tr("screen.wildfires.soldering.horizontal"))
+                        + (meta.pol ? " · " + (flipped ? tr("screen.wildfires.soldering.polarity.reversed") : tr("screen.wildfires.soldering.polarity.normal")) : "")
+                        + "]"
+                    : "";
+                text = tr("screen.wildfires.soldering.place_hint") + suffix;
+            } else {
+                text = tr("screen.wildfires.soldering.remove_hint");
+            }
+        }
+        setText(byId("statusText"), text);
+    }
+
+    function updateModeUi() {
+        setClass(byId("modeWire"), mode === "wire" ? "button mode-button active" : "button mode-button");
+        setClass(byId("modePlace"), mode === "place" ? "button mode-button active" : "button mode-button");
+        setClass(byId("modeRemove"), mode === "remove" ? "button mode-button active" : "button mode-button");
+
+        var infinite = creativeMode();
+        var palette = byId("palette");
+        if (palette) {
+            var items = palette.querySelectorAll(".palette-item");
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                var type = parseInt(item.getAttribute("data-type"), 10);
+                var selected = type === selectedType && mode === "place";
+                var count = 0;
+                if (!infinite && bindingReady()) {
+                    try {
+                        count = WildfiresSoldering.stock(type);
+                    } catch (error) {
+                        count = 0;
+                    }
+                }
+                var cls = "palette-item";
+                if (selected) cls += " selected";
+                if (!infinite && count <= 0) cls += " empty";
+                setClass(item, cls);
+                var countElement = item.querySelector("[data-count]");
+                setText(countElement, infinite ? "∞" : String(count));
+            }
+        }
+
+        var meta = COMPONENTS[selectedType];
+        setText(byId("orientationValue"), vertical
+            ? tr("screen.wildfires.soldering.vertical")
+            : tr("screen.wildfires.soldering.horizontal"));
+        setText(byId("polarityValue"), flipped
+            ? tr("screen.wildfires.soldering.polarity.reversed")
+            : tr("screen.wildfires.soldering.polarity.normal"));
+        setDisabled(byId("rotateButton"), !meta || !meta.dir);
+        setDisabled(byId("flipButton"), !meta || !meta.pol);
+        if (canvas) {
+            var cursor = mode === "remove" ? "cursor: pointer;" : "cursor: crosshair;";
+            if (canvas.getAttribute("style") !== cursor) {
+                canvas.setAttribute("style", cursor);
+            }
+        }
+    }
+
+    function updateStock() {
+        if (!bindingReady()) return;
+        try {
+            var infinite = creativeMode();
+            setText(byId("copperCount"), infinite ? "∞" : String(WildfiresSoldering.copperWire()));
+            setText(byId("boardCount"), String(WildfiresSoldering.boards()));
+            setDisabled(byId("completeButton"), WildfiresSoldering.boards() <= 0);
+        } catch (error) {
+            // The menu can close between the poll and the call; the next tick will recover.
+        }
+    }
+
+    function refresh() {
+        var status = byId("statusText");
+        var noScript = byId("noScript");
+        if (!bindingReady()) {
+            if (status) status.classList.add("hidden");
+            if (noScript) noScript.classList.remove("hidden");
+            return;
+        }
+        if (status) status.classList.remove("hidden");
+        if (noScript) noScript.classList.add("hidden");
+
+        var state = "";
+        try {
+            state = WildfiresSoldering.state();
+        } catch (error) {
+            state = "";
+        }
+        if (state && state !== lastState && parseState(state)) {
+            lastState = state;
+            drawBoard();
+        }
+        updateStock();
+        updateModeUi();
+        if (statusTicks > 0) {
+            statusTicks--;
+            if (statusTicks === 0) statusMessage = "";
+        }
+        refreshStatus();
+    }
+
+    // ------------------------------------------------------------------
+    // Wiring
+    // ------------------------------------------------------------------
+
+    function onPress(element, action) {
+        if (!element) return;
+        element.addEventListener("mousedown", function (event) {
+            if (event && event.button !== undefined && event.button !== 0) return;
+            action(event);
+        });
+    }
+
+    function init() {
+        if (initialized) return;
+        initialized = true;
+
+        canvas = byId("circuitCanvas");
+        ctx = canvas ? canvas.getContext("2d") : null;
+        for (var i = 0; i < 64; i++) cells[i] = 0;
+
+        onPress(byId("modeWire"), function () {
+            setMode("wire");
+        });
+        onPress(byId("modePlace"), function () {
+            setMode("place");
+        });
+        onPress(byId("modeRemove"), function () {
+            setMode("remove");
+        });
+
+        var palette = byId("palette");
+        if (palette) {
+            var items = palette.querySelectorAll(".palette-item");
+            for (var p = 0; p < items.length; p++) {
+                (function (item) {
+                    onPress(item, function () {
+                        selectPalette(parseInt(item.getAttribute("data-type"), 10));
+                    });
+                })(items[p]);
+            }
+        }
+
+        onPress(byId("rotateButton"), toggleRotate);
+        onPress(byId("flipButton"), toggleFlip);
+        onPress(byId("completeButton"), function () {
+            if (!bindingReady()) return;
+            if (WildfiresSoldering.boards() <= 0) {
+                setStatus(tr("screen.wildfires.soldering.need_board"));
+                return;
+            }
+            WildfiresSoldering.complete();
+            setStatus(tr("screen.wildfires.soldering.completed"));
+        });
+        onPress(byId("clearButton"), function () {
+            if (!bindingReady()) return;
+            WildfiresSoldering.clear();
+            setStatus(tr("screen.wildfires.soldering.cleared"));
+        });
+
+        if (canvas) {
+            canvas.addEventListener("mousedown", onCanvasDown);
+            canvas.addEventListener("mousemove", onCanvasMove);
+            canvas.addEventListener("mouseleave", onCanvasLeave);
+            // Diagnostic only: tells us whether AUI delivers contextmenu at all.
+            canvas.addEventListener("contextmenu", onContextMenu);
+        }
+        document.addEventListener("keydown", onKeyDown);
+
+        updateModeUi();
+        refresh();
+        SOLDERING_TIMER = setInterval(refresh, 100);
+        if (document.body) {
+            document.body.addEventListener("unload", function () {
+                if (SOLDERING_TIMER) {
+                    clearInterval(SOLDERING_TIMER);
+                    SOLDERING_TIMER = null;
+                }
+            });
+        }
+    }
+
+    var SOLDERING_TIMER = null;
+
+    document.addEventListener("DOMContentLoaded", init);
+    if (document.readyState !== "loading") {
+        // The script sits at the end of the body, so the editor DOM already exists. Calling init
+        // directly avoids depending on setTimeout, which the page otherwise never needs.
+        init();
+    }
+</script>
+
+</body>
+</html>

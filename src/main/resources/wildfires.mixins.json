@@ -89,6 +89,25 @@
     "legendarysurvivaloverhaul.WetnessCapabilityMixin",
     "minecraft.ChunkGeneratorMixin",
     "minecraft.BlockEntityTypeAccessor",
+    /*
+     * 石英芽滴水 + 有条件生长，追加 2026-10-20（老大原话：给这几个石英芽加滴水石锥同样的滴水效果、
+     * 上方石英块 + 再上方水时以母岩 4 倍的概率升一级）。
+     *
+     *   tfcieaddon.QuartzBudRandomTicksMixin - tfc_ie_addon 四个石英芽注册时追加 Properties#randomTicks()。
+     *       它们是原版 AmethystClusterBlock，注册时没开随机刻，ServerLevel#tickChunk 永远不会调它们。
+     *       @Pseudo + 目标类名字符串 + remap=false，tfc_ie_addon 缺席时整个 mixin 跳过；require=4 让
+     *       lambda 编号一变就启动报错。
+     *   minecraft.BlockRandomTickMixin   - BlockBehaviour#randomTick 的 HEAD：炼药锅滴水 + 生长。
+     *   minecraft.BlockAnimateTickMixin  - Block#animateTick 的 HEAD：往下滴水的粒子。
+     *   minecraft.CauldronDripAccess     - @Invoker 暴露 AbstractCauldronBlock 的两个 protected 接水口。
+     *
+     * 两个 minecraft.* 的判定第一行都是注册 id 白名单（只认 tfc_ie_addon:mineral/* 那四个），
+     * 原版紫水晶既不会被开随机刻、也不会进入任何逻辑。
+     */
+    "tfcieaddon.QuartzBudRandomTicksMixin",
+    "minecraft.BlockRandomTickMixin",
+    "minecraft.BlockAnimateTickMixin",
+    "minecraft.CauldronDripAccess",
     "minecraft.SlotPositionAccessor",
     "minecraft.LeonJacketArmorMixin",
     "minecraft.DiggerItemMixin",
@@ -97,6 +116,7 @@
     "minecraft.WaterFluidMixin",
     "minecraft.ItemEntityMixin",
     "minecraft.ItemStackMixin",
+    "minecraft.ItemArmorValueMixin",
     "minecraft.AbstractContainerMenuMixin",
     "minecraft.LevelThermalMixin",
     "minecraft.LivingEntityMixin",
@@ -149,6 +169,30 @@
     "tfc.BarrelBlockEntityMixin",
     "tfc.BarrelRecipeMixin",
     "tfc.CalendarAccessor",
+    /*
+     * Collapse rework, added 2026-10-20 (three requests confirmed by 老大 that day).
+     *
+     *   tfc.CollapseRecipeLoadCheckMixin - the isAreaLoaded(pos, 32) guard at the head of
+     *       CollapseRecipe.tryTriggerCollapse is answered from a tick-scoped cache
+     *       (first.wildfires.compat.tfc.CollapseLoadCache) instead of scanning the 5x5 chunks around the
+     *       position again for every block break / chisel use. The predicate is unchanged: an unloaded area
+     *       still answers "not loaded", and only the centre-chunk key keeps the cached answer identical to
+     *       the real one inside the tick.
+     *   tfc.WorldTrackerCollapseMixin    - WorldTracker.tick() hands TFC at most
+     *       CollapseTicker.MAX_QUEUED_POSITIONS_PER_TICK (32) queued positions per collapse per invocation
+     *       and puts the remainder back afterwards in order, and WorldTracker.addCollapseData folds a new
+     *       collapse into the one this tick already created in the same 32 block cell instead of opening a
+     *       second one and posting a second CollapseEvent.
+     *   tfc.CollapseAccess               - accessor for Collapse's package private centerPos / nextPositions /
+     *       radiusSquared, which neither of the other two can work without.
+     *
+     * All three are @Pseudo, name their TFC target as a string and use remap = false, so the mixin config
+     * still loads without TFC; require = 1 makes a renamed method fail at start-up instead of dropping the
+     * change silently.
+     */
+    "tfc.CollapseAccess",
+    "tfc.CollapseRecipeLoadCheckMixin",
+    "tfc.WorldTrackerCollapseMixin",
     "sacombat.BackpackSlotMixin",
     "sacombat.BackpackMenuGeometryAccessor",
     "sacombat.BackpackPanelMenuMixin",
@@ -156,6 +200,20 @@
     "sacombat.DynamicBackpackItemHandlerMixin",
     "tfc.CharcoalForgeBlockEntityMixin",
     "tfc.CharcoalForgeFireSpreadMixin",
+    /*
+     * TFC 设备升温加速，2026-10-15。
+     *
+     * 需求：只加快「到顶」的速度、不动温度上限；木炭灶 +50%、坩埚 +100%、刚玉坩埚 +150%。
+     * 两个设备各自的方块共用同一个方块实体，所以注入点落在 TFC 自己的 serverTick 里，
+     * 由 blockstate 判定方块：
+     *   CharcoalForgeBlockEntity#serverTick 的 addTemp(IHeat, float)（2 参版内部 b = 3.0）
+     *   CrucibleBlockEntity#serverTick      的 addTemp(IHeat, float, float)（第三参 = 2 + 0.0025T）
+     * 倍率、反算公式与「绝不改上限」的说明见 first.wildfires.compat.tfc.DeviceHeatRate
+     * 与 TfcDeviceHeatConfig（配置文件 wildfires-tfc-heat.toml）。
+     * tfc:charcoal_forge 与 createmetallurgy 的工业坩埚都不经过这两处，天然零影响。
+     */
+    "tfc.CharcoalForgeHeatSpeedMixin",
+    "tfc.CrucibleHeatSpeedMixin",
     "tfc.FirepitFireSpreadMixin",
     "tfc.TFCChestBlockEntityMixin",
     /*
@@ -185,6 +243,15 @@
     "tfc.ForgeEventHandlerCelestialMixin",
     "tfc.ServerCalendarRateMixin",
     "tfc.PanItemMixin",
+    /*
+     * 抗性改成线性百分比，2026-10-18。
+     *
+     * 老大要求：抗性值直接当百分比用（8 ⇒ 减 8%），而不是 TFC 的 e^(-R/100)
+     * （8 只减 7.7%、100 也才 63%）。改法见 first.wildfires.mixin.tfc.PhysicalDamageTypeMixin：
+     * 重定向 calculateMultiplier 里唯一那次 Math.pow(E, -0.01R)，反解 R 后返回 1 - R/100。
+     * 免伤标签（tfc:bypasses_damage_resistance）走的不是这条路径，不受影响。
+     */
+    "tfc.PhysicalDamageTypeMixin",
     "tfc.PotRecipeAccessor",
     "tfc.PredatorMixin",
     "tfc.SluiceBlockEntityMixin",
@@ -304,6 +371,7 @@
   ],
   "client": [
     "create.AbstractRegistrateMixin",
+    "apricityui.ApricityFloatingItemScaleMixin",
     "sacombat.client.BackpackCurioRendererMixin",
     "sacombat.client.BackpackGuiTintMixin",
     "sacombat.client.BackpackScreenMixin",

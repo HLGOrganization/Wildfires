@@ -12,16 +12,21 @@ import first.wildfires.compat.create.FanHeatConfig;
 import first.wildfires.compat.minecraft.MapChunkLoadConfig;
 import first.wildfires.compat.net.NetworkGuardTargets;
 import first.wildfires.compat.sophisticateditemactions.SophisticatedItemActionsConfig;
+import first.wildfires.compat.tfc.TfcDeviceHeatConfig;
 import first.wildfires.jei.FoodTraitDisplayConfig;
 import first.wildfires.client.spawnegg.SpawnEggPreviewConfig;
 import first.wildfires.diagnostics.StartupDiagnostics;
 import first.wildfires.register.*;
+import first.wildfires.soldering.SolderingAuiClient;
+import first.wildfires.soldering.SolderingRegister;
 import first.wildfires.space.SpaceBootstrap;
 import first.wildfires.space.SpaceDimensions;
 import first.wildfires.space.celestial.StationCelestialProvider;
 import first.wildfires.thermal.ThermalConfig;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -45,6 +50,7 @@ public class Wildfires {
 		CelestialApi.register(net.minecraft.world.level.Level.OVERWORLD, OverworldCelestialProvider.INSTANCE);
 		CelestialApi.register(SpaceDimensions.ORBIT, StationCelestialProvider.INSTANCE);
 		ThermalConfig.register();
+		TfcDeviceHeatConfig.register();
 		// FanHeatConfig.register(); // Moved into woodencog_wildfire: the fan ceilings now live in woodencog-common.toml under [woodencog.fan]
 		SophisticatedItemActionsConfig.register();
 		MapChunkLoadConfig.register();
@@ -64,6 +70,15 @@ public class Wildfires {
 		NetworkPacketRegister.register();
 		CreativeModeTabRegister.register(eventBus);
 		ItemRegister.register(eventBus);
+		SolderingRegister.register(eventBus);
+		// The soldering station's menu and page bridge only make sense with ApricityUI installed.
+		// Guarding the binding scan here also keeps the AUI menu class off a pack without it.
+		if (ModList.get().isLoaded("apricityui")) {
+			// Page scripts need KubeJS; the screen itself works without it, so only skip the binding scan.
+			if (ModList.get().isLoaded("kubejs")) {
+				DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> SolderingAuiClient::registerBindings);
+			}
+		}
 		SoundRegister.register(eventBus);
 		EntityRegister.register(eventBus);
 		WeavingRecipeRegister.register(eventBus);
