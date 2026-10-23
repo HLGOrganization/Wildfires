@@ -82,6 +82,15 @@ public class Wildfires {
 		SoundRegister.register(eventBus);
 		EntityRegister.register(eventBus);
 		WeavingRecipeRegister.register(eventBus);
+		// Textile 作物方块实体（棉花/亚麻用）。放在 BlockRegister 之后，
+		// 因为它的 Builder.of(...) 需要引用已经注册好的作物方块。
+		first.wildfires.textile.crop.TextileBlockEntities.register(eventBus);
+		// Textile 野生作物的世界生成 feature（ID 是 textile:tall_wild_crop）
+		first.wildfires.textile.crop.TextileFeatureRegister.register(eventBus);
+		// Textile 的全局战利品修饰器（textile:add_item / textile:remove_item，34 个 json 依赖）
+		first.wildfires.textile.loot.ModLootModifiers.register(eventBus);
+		// Textile 的战利品数字提供器（textile:crop_yield_uniform，作物产量按 yield 插值）
+		first.wildfires.textile.loot.TextileLoot.register(eventBus);
 	}
 
 	public static ResourceLocation rl(String path) {

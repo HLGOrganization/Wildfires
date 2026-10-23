@@ -308,6 +308,77 @@ public class BlockRegister {
                     .sound(SoundType.WOOL)
                     .noCollission()));
 
+    // ==========================================================================
+    // Textile 作物（棉花 / 亚麻）—— 从 textile-2.2.3 搬过来，2026-10-22
+    // --------------------------------------------------------------------------
+    // 每种作物 3 个方块：可种植 / 枯死 / 野生，共 6 个。
+    // 只有"可种植"用本模组的 TextileCropBlock（继承 TFC CropBlock，补 age 属性和生长刷新）；
+    // 枯死和野生直接复用 TFC 的 DeadCropBlock / WildCropBlock，不需要另写类。
+    //
+    // ID 沿用原模组的 blockstate/model 路径（textile/crop/cotton 等），
+    // 所以 kubejs/assets 里那批 blockstates/models 不用改，能直接对上。
+    //
+    // ★ 方块 ID 必须是 textile:xxx（不是 wildfires:xxx），因为：
+    //   ① kubejs/assets/textile/blockstates/crop/cotton.json 里的模型路径是按 textile 命名空间写的
+    //   ② 原整合包里已有大量数据文件引用 textile:crop/cotton
+    //   ③ 原模组删掉后这些 ID 空出来，正好由我们接管
+    //   ⇒ 所以这里另开一个 textile 命名空间的 DeferredRegister，不能复用上面的 Register（那是 wildfires）。
+    // ==========================================================================
+    public static final DeferredRegister<Block> TextileRegister =
+            DeferredRegister.create(Registries.BLOCK, "textile");
+
+    /**
+     * textile 命名空间的物品注册器。
+     *
+     * <p>★ 2026-10-23 实测必需：原模组给 2 个野生方块注册了 {@code BlockItem}
+     * （{@code textile:wild_crop/cotton}、{@code textile:wild_crop/flax}），
+     * 不补的话世界加载会失败：
+     * <pre>
+     * Unidentified mapping from registry minecraft:item
+     *   textile:wild_crop/cotton: 2728
+     *   textile:wild_crop/flax: 2729
+     * </pre>
+     * 其余 4 个方块（crop ×2、dead_crop ×2）原模组<b>没有</b>物品形态，这里也不注册。
+     */
+    public static final DeferredRegister<net.minecraft.world.item.Item> TextileItemRegister =
+            DeferredRegister.create(Registries.ITEM, "textile");
+
+    static {
+        for (first.wildfires.textile.crop.TextileCrop crop : first.wildfires.textile.crop.TextileCrop.values())
+        {
+            final String name = crop.getSerializedName();
+
+            // 可种植：双高作物（棉花 maxSingleAge=2/maxAge=4，亚麻 maxSingleAge=2/maxAge=3）
+            first.wildfires.textile.crop.TextileBlocks.CROPS.put(crop,
+                    TextileRegister.register("crop/" + name,
+                            () -> first.wildfires.textile.crop.TextileDoubleCropBlock.create(
+                                    first.wildfires.textile.crop.TextileCrop.doubleCrop(),
+                                    crop.getMaxSingleAge(),
+                                    crop.getMaxAge(),
+                                    crop)));
+
+            // 枯死：TFC 现成类
+            first.wildfires.textile.crop.TextileBlocks.DEAD_CROPS.put(crop,
+                    TextileRegister.register("dead_crop/" + name,
+                            () -> new net.dries007.tfc.common.blocks.crop.DeadCropBlock(
+                                    first.wildfires.textile.crop.TextileCrop.dead(),
+                                    first.wildfires.textile.crop.TextileClimateRanges.supplier(crop))));
+
+            // 野生：TFC 现成类
+            final net.minecraftforge.registries.RegistryObject<Block> wild =
+                    TextileRegister.register("wild_crop/" + name,
+                            () -> new first.wildfires.textile.crop.TextileWildDoubleCropBlock(
+                            first.wildfires.textile.crop.TextileCrop.wild()));
+            first.wildfires.textile.crop.TextileBlocks.WILD_CROPS.put(crop, wild);
+
+            // ★ 野生方块的 BlockItem —— 原模组有，缺了会导致世界加载失败
+            //   （Unidentified mapping from registry minecraft:item）
+            TextileItemRegister.register("wild_crop/" + name,
+                    () -> new net.minecraft.world.item.BlockItem(wild.get(),
+                            new net.minecraft.world.item.Item.Properties()));
+        }
+    }
+
     // 水下涡轮
     public static final RegistryObject<Block> UnderwaterTurbine = Register.register("underwater_turbine",
             () -> {
@@ -534,7 +605,13 @@ public class BlockRegister {
     });
 
     public static void register(IEventBus eventBus) {
+        // Textile 作物的气候区间要在方块真正被使用前登记好
+        first.wildfires.textile.crop.TextileClimateRanges.init();
         Register.register(eventBus);
+        // 作物方块注册在 textile 命名空间下（见上方注释）
+        TextileRegister.register(eventBus);
+        // 野生方块的 BlockItem
+        TextileItemRegister.register(eventBus);
     }
 
 }
