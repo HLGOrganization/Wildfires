@@ -7,7 +7,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,9 +45,10 @@ public final class ThermalSourceRegistry {
         THERMAL_SOURCES.clear();
         STATE_THERMAL_SOURCES.clear();
         TAG_THERMAL_SOURCES = List.of();
-        register(Blocks.BLACK_TERRACOTTA, new ThermalSourceDefinition(100.0F, 10.0F, 10.0F, 0.5F));
-        register(Blocks.WHITE_TERRACOTTA, new ThermalSourceDefinition(100.0F, 10.0F, 10.0F, 0.5F));
-        register(Blocks.RED_TERRACOTTA, new ThermalSourceDefinition(500.0F, 50.0F, 50.0F, 2.5F));
+        // 陶瓦热源：当初是为了方便测试热传导加的，正式版不需要（老大 2026-10-23 要求注释掉）
+        // register(Blocks.BLACK_TERRACOTTA, new ThermalSourceDefinition(100.0F, 10.0F, 10.0F, 0.5F));
+        // register(Blocks.WHITE_TERRACOTTA, new ThermalSourceDefinition(100.0F, 10.0F, 10.0F, 0.5F));
+        // register(Blocks.RED_TERRACOTTA, new ThermalSourceDefinition(500.0F, 50.0F, 50.0F, 2.5F));
     }
 
     public static synchronized void register(Block block, ThermalSourceDefinition definition) {
