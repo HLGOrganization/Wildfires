@@ -302,6 +302,7 @@
      */
     "vintageimprovements.CurvingPressGuardMixin",
     "vintageimprovements.HelveBlockEntitySpeedMixin",
+    "vintageimprovements.HammeringRecipeHeatMixin",
     /*
      * Simply Tents cellar preservation guard, added 2026-10-07.
      *
