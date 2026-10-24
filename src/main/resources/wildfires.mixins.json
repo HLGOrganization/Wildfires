@@ -14,6 +14,12 @@
     "create.AttributeFilterMenuAccessor",
     "create.AttributeFilterScreenAccessor",
     "create.BasketBeltInputMixin",
+    "create.ChainConveyorBlockEntityChainTypeMixin",
+    "create.ChainConveyorConnectionPacketMixin",
+    "create.ChainConveyorIsChainMixin",
+    "create.ChainConveyorGetChainsMixin",
+    "create.ChainConveyorReturnChainMixin",
+    "create.ChainConveyorChainDestroyedMixin",
     "create.CrushingWheelBlockMixin",
     "create.CrushingWheelControllerBlockEntityMixin",
     "create.CrushingWheelControllerBlockMixin",
@@ -370,6 +376,7 @@
     "tfccc.MoldBlockInventoryMixin"
   ],
   "client": [
+    "create.StellarChainMaterialMixin",
     "create.AbstractRegistrateMixin",
     "apricityui.ApricityFloatingItemScaleMixin",
     "sacombat.client.BackpackCurioRendererMixin",
