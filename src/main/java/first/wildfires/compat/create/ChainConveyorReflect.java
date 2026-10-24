@@ -3,6 +3,7 @@ package first.wildfires.compat.create;
 import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
@@ -85,6 +86,23 @@ public final class ChainConveyorReflect
             catch (ReflectiveOperationException ignored) { }
         }
         return ItemStack.EMPTY;
+    }
+
+    /** 在木齿轮采样掉落材质前补回旧连接的缺失记录；保留其他模组的非原版材质。 */
+    @SuppressWarnings("unchecked")
+    public static void restoreNativeChainType(ChainConveyorBlockEntity be, BlockPos relative, ItemStack recorded)
+    {
+        if (!ChainConveyorChains.isChain(recorded) || recorded.is(Items.CHAIN)) return;
+        final Method method = find(be.getClass(), "getConnectionsChain");
+        if (method == null) return;
+        try
+        {
+            final Map<BlockPos, Object> chains = (Map<BlockPos, Object>) method.invoke(be);
+            final Object current = chains.get(relative);
+            if (current == null || current == Items.CHAIN)
+                chains.put(relative.immutable(), recorded.getItem());
+        }
+        catch (ReflectiveOperationException ignored) { }
     }
 
     /** 取一条连接记录，没记录返回 {@link ItemStack#EMPTY} */

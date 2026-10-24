@@ -20,6 +20,7 @@
     "create.ChainConveyorGetChainsMixin",
     "create.ChainConveyorReturnChainMixin",
     "create.ChainConveyorChainDestroyedMixin",
+    "create.ChainConveyorBlockWrenchMixin",
     "create.CrushingWheelBlockMixin",
     "create.CrushingWheelControllerBlockEntityMixin",
     "create.CrushingWheelControllerBlockMixin",
