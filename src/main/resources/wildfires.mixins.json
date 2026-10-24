@@ -300,6 +300,7 @@
      * start-up.
      */
     "vintageimprovements.CurvingPressGuardMixin",
+    "vintageimprovements.HelveBlockEntitySpeedMixin",
     /*
      * Simply Tents cellar preservation guard, added 2026-10-07.
      *
@@ -376,6 +377,7 @@
     "tfccc.MoldBlockInventoryMixin"
   ],
   "client": [
+    "vintageimprovements.HelveAnimationMixin",
     "create.StellarChainMaterialMixin",
     "create.AbstractRegistrateMixin",
     "apricityui.ApricityFloatingItemScaleMixin",
