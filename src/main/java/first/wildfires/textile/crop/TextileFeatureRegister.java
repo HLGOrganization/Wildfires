@@ -1,6 +1,5 @@
 package first.wildfires.textile.crop;
 
-import first.wildfires.Wildfires;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraftforge.eventbus.api.IEventBus;

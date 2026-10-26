@@ -2,7 +2,6 @@ package first.wildfires.textile.crop;
 
 import net.dries007.tfc.util.climate.ClimateRange;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.RegistryObject;
 
 import java.util.function.Supplier;
 

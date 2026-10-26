@@ -2,8 +2,6 @@ package first.wildfires.textile.crop;
 
 import com.mojang.serialization.Codec;
 import net.dries007.tfc.world.feature.BlockConfig;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 

@@ -25,6 +25,7 @@
     "create.CrushingWheelControllerBlockEntityMixin",
     "create.CrushingWheelControllerBlockMixin",
     "create.DieselGeneratorBurnerTemperatureMixin",
+    "create.EncasedFanBellowsMixin",
     /*
      * Disabled 2026-10-01 - the fan overheat guard moved into the rebuilt
      * woodencog_wildfire mod itself:
@@ -221,6 +222,10 @@
      */
     "tfc.CharcoalForgeHeatSpeedMixin",
     "tfc.CrucibleHeatSpeedMixin",
+
+    "tfc.CrucibleFanBoostMixin",
+    "tfc.DeviceInnerItemHeatBoostMixin",
+    "tfc.DeviceSelfHeatBoostMixin",
     "tfc.FirepitFireSpreadMixin",
     "tfc.TFCChestBlockEntityMixin",
     /*
@@ -301,6 +306,7 @@
      * start-up.
      */
     "vintageimprovements.CurvingPressGuardMixin",
+    "vintageimprovements.HelveBlockEntityMixin",
     "vintageimprovements.HelveBlockEntitySpeedMixin",
     "vintageimprovements.HammeringRecipeHeatMixin",
     /*
