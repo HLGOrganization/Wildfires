@@ -206,6 +206,7 @@
     "sacombat.BackpackPanelMenuMixin",
     "sacombat.DynamicClothingItemHandlerMixin",
     "sacombat.DynamicBackpackItemHandlerMixin",
+    "sacombat.BackpackFallbackMixin",
     "tfc.CharcoalForgeBlockEntityMixin",
     "tfc.CharcoalForgeFireSpreadMixin",
     /*
@@ -266,6 +267,7 @@
     "tfc.PhysicalDamageTypeMixin",
     "tfc.PotRecipeAccessor",
     "tfc.PredatorMixin",
+    "tfc.PoultryStepHeightMixin",
     "tfc.SluiceBlockEntityMixin",
     "tfc.ToolItemMixin",
     /*

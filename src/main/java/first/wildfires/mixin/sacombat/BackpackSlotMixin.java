@@ -1,5 +1,6 @@
 package first.wildfires.mixin.sacombat;
 
+import first.wildfires.compat.sacombat.BackpackResolverFallback;
 import first.wildfires.compat.sacombat.SatchelSizeRules;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,6 +53,14 @@ public abstract class BackpackSlotMixin {
     private void wildfires$applyBackpackSizeFilter(ItemStack stack,
                                                    CallbackInfoReturnable<Boolean> cir) {
         if (stack == null || stack.isEmpty()) {
+            return;
+        }
+        // ★ 先问「这一格现在真的能存吗」。
+        // 上游 DynamicBackpackItemHandler.setStackInSlot 在 createInventoryForSlot 返回 null 时
+        // 静默什么都不做，而原版点击流程已经把物品从光标拿走了 ⇒ 物品凭空消失。
+        // 这里挡住，物品留在光标上。
+        if (!BackpackResolverFallback.slotUsable(this)) {
+            cir.setReturnValue(false);
             return;
         }
         if (SatchelSizeRules.blocks(SatchelSizeRules.containerOf(this), stack)) {
